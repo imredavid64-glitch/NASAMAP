@@ -20,7 +20,7 @@ published reference.
 
 | Act | Route | What it does |
 | --- | --- | --- |
-| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. The design is encoded in the URL, so a mission is a shareable, bookmarkable link. |
+| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. The design is encoded in the URL, so a mission is a shareable, bookmarkable link. A **3D surface-ops view** spins one Martian sol to show the array and battery earning their place. |
 | **II · Fly** | `/fly` | Three trajectory modes: replay **Apollo 11** event-by-event from an interpolated historical timeline; fly a **patched-conic Hohmann transfer** to the Moon (`?mode=hohmann`); or coast Earth→Mars on a Sun-centred **Kepler solve** of the minimum-energy ellipse (`?mode=mars`). Any mode exports its full path to **CSV**. |
 | **III · Live** | `/live` | Real-time ISS ground track, Voyager 1 & 2 range (JPL Horizons), the day's APOD, near-Earth objects and NOAA space weather — with a committed snapshot fallback so the demo never dies on stage. |
 | **IV · Share** | `/library`, `/search`, `/commons`, `/challenges` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, the Mission Passport & Patch you can download and print, and a live **Challenge Aligner** mapping all 86 official 2026 challenges to the platform. |
@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**153 tests**, `vitest`).
+  (**169 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -52,11 +52,13 @@ published reference.
 | `src/lib/rocket.ts` | Rocket equation, Hohmann transfers, Δv | Tsiolkovsky; documented vehicle specs (`launch-vehicles.json`) |
 | `src/lib/comm.ts` | Light-time, DSN-class link budgets | Speed of light (CODATA), mean Earth–Mars distance |
 | `src/lib/life.ts` | Consumables, radiation dose, **closed-loop ECLSS budget** | NASA ISS ECLSS fact sheets, MSL RAD, NASA OGS draw |
+| `src/lib/surface.ts` | **Surface ops** — Mars solar geometry, array output, battery state over a sol | Standard solar-elevation formula, Mars obliquity 25.19° |
 | `src/lib/mission.ts` | Composes the above into a mission design | Apollo-class TLI, Hohmann synodic windows |
 | `src/lib/score.ts` | **Mission rating** — seven weighted objectives, S–D grade with feasibility caps | NASA-STD-3001 (600 mSv career limit), ISS ECLSS, Apollo-class Δv |
 | `src/lib/orbit.ts` | SGP4 satellite propagation, pass prediction | `satellite.js` |
 | `src/lib/trajectory.ts` | Apollo 11 interpolation, patched-conic Moon transfer, Sun-centred Earth→Mars Kepler solve | Committed historical timeline |
 | `src/lib/export.ts` | CSV serialisation of trajectories (Earth-Moon scene units / Mars au) | RFC-4180 quoting |
+| `src/lib/design-link.ts` | Validated encode/decode of a mission design into a permalink | Enum + range validation |
 | `src/lib/passport.ts` · `src/lib/patch.ts` | Deterministic SVG artifacts | Everything drawn from the shared engine |
 | `src/lib/commons.ts` · `src/lib/search.ts` | Persona advice + MiniSearch index | Curated datasets |
 
@@ -83,7 +85,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 153 tests
+npm test             # vitest — 169 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
