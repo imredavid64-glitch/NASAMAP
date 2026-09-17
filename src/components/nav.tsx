@@ -1,14 +1,7 @@
 import Link from "next/link";
-import { Rocket, Compass, Radio, Library, Search, Orbit } from "lucide-react";
-
-const links = [
-  { href: "/mission", label: "Mission", icon: Rocket },
-  { href: "/fly", label: "Fly", icon: Orbit },
-  { href: "/commons", label: "Data Commons", icon: Compass },
-  { href: "/live", label: "Live", icon: Radio },
-  { href: "/library", label: "Library", icon: Library },
-  { href: "/search", label: "Search", icon: Search },
-] as const;
+import { Rocket } from "lucide-react";
+import { NAV_LINKS } from "@/lib/nav-links";
+import { MobileNav } from "./mobile-nav";
 
 export function Nav() {
   return (
@@ -23,7 +16,7 @@ export function Nav() {
           </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
-          {links.map((l) => (
+          {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -34,12 +27,15 @@ export function Nav() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/mission"
-          className="rounded-lg bg-space-cyan px-4 py-2 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80"
-        >
-          Start a mission
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/mission"
+            className="hidden rounded-lg bg-space-cyan px-4 py-2 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80 sm:inline-block"
+          >
+            Start a mission
+          </Link>
+          <MobileNav />
+        </div>
       </div>
     </header>
   );
