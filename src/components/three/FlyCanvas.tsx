@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useMemo, Suspense } from "react";
+import { useRef, useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -8,15 +8,18 @@ import { Globe, type Marker } from "./Globe";
 import {
   interpolateApollo11,
   getApollo11Samples,
+  getHohmannSamples,
+  metToSeconds,
   formatMet,
   MOON_POSITION,
   EARTH_POSITION,
-  MOON_ORBIT_RADIUS,
   type InterpolatedState,
 } from "@/lib/trajectory";
 
+type FlyMode = "apollo11" | "hohmann";
+
 interface FlyCanvasProps {
-  mode: "apollo11" | "hohmann";
+  mode: FlyMode;
   initialSpeed?: number;
 }
 
@@ -91,11 +94,6 @@ function Spacecraft({ state, samples, index }: { state: InterpolatedState; sampl
       </group>
     </group>
   );
-}
-
-function metToSeconds(met: string): number {
-  const [h, m, s] = met.split(":").map(Number);
-  return h * 3600 + m * 60 + s;
 }
 
 function CameraRig({ state, mode, follow }: { state: InterpolatedState; mode: string; follow: "craft" | "earth" | "moon" | "free" }) {
@@ -210,8 +208,12 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
   );
 }
 
-export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasProps) {
-  const samples = useMemo(() => getApollo11Samples(500), []);
+export function FlyCanvas({ mode: initialMode = "apollo11", initialSpeed = 10 }: FlyCanvasProps) {
+  const [mode, setMode] = useState<FlyMode>(initialMode);
+  const samples = useMemo(
+    () => (mode === "apollo11" ? getApollo11Samples(500) : getHohmannSamples(500)),
+    [mode],
+  );
   const totalSec = samples[samples.length - 1].met;
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(initialSpeed);
@@ -225,6 +227,15 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
     timeRef.current = time;
   }, [time]);
 
+  const stateAt = useCallback(
+    (t: number): InterpolatedState => {
+      if (mode === "apollo11") return interpolateApollo11(t);
+      const i = Math.min(samples.length - 1, Math.max(0, Math.round((t / totalSec) * (samples.length - 1))));
+      return samples[i];
+    },
+    [mode, samples, totalSec],
+  );
+
   useEffect(() => {
     let raf: number;
     let last = performance.now();
@@ -234,7 +245,7 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
         const newTime = Math.min(totalSec, timeRef.current + dt);
         timeRef.current = newTime;
         setTime(newTime);
-        setState(interpolateApollo11(newTime));
+        setState(stateAt(newTime));
         setIndex(Math.min(samples.length - 1, Math.floor((newTime / totalSec) * (samples.length - 1))));
         if (newTime >= totalSec) setPaused(true);
       }
@@ -243,12 +254,20 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [paused, speed, totalSec, samples.length]);
+  }, [paused, speed, totalSec, samples.length, stateAt]);
+
+  useEffect(() => {
+    timeRef.current = 0;
+    setTime(0);
+    setState(samples[0]);
+    setIndex(0);
+    setPaused(false);
+  }, [samples]);
 
   const handleScrub = (t: number) => {
     timeRef.current = t;
     setTime(t);
-    setState(interpolateApollo11(t));
+    setState(stateAt(t));
     setIndex(Math.floor((t / totalSec) * (samples.length - 1)));
   };
 
@@ -296,7 +315,7 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
         onScrub={handleScrub}
       />
 
-      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10">
+      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10">
         <button
           onClick={() => setPaused(!paused)}
           className="px-4 py-2 rounded-lg bg-space-cyan/20 border border-space-cyan/40 text-space-cyan text-sm font-medium hover:bg-space-cyan/30"
@@ -304,11 +323,26 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
           {paused ? "▶ Play" : "⏸ Pause"}
         </button>
         <button
-          onClick={() => { setTime(0); setState(samples[0]); setIndex(0); setPaused(false); }}
+          onClick={() => { timeRef.current = 0; setTime(0); setState(samples[0]); setIndex(0); setPaused(false); }}
           className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
         >
           ⟲ Reset
         </button>
+
+        <div className="flex items-center gap-1 rounded-lg border border-white/15 bg-black/40 p-1">
+          {(["apollo11", "hohmann"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                mode === m ? "bg-space-cyan/20 text-space-cyan" : "text-slate-300 hover:bg-white/10"
+              }`}
+            >
+              {m === "apollo11" ? "Apollo 11" : "Hohmann"}
+            </button>
+          ))}
+        </div>
+
         <span className="text-xs text-slate-400 px-2">
           {paused ? "Paused" : `T+${formatMet(time)} / T+${formatMet(totalSec)}`}
         </span>

@@ -6,6 +6,8 @@ import {
   hohmannEarthMoon,
   interpolateApollo11,
   getApollo11Samples,
+  getHohmannSamples,
+  hohmannTransferSeconds,
   MOON_ORBIT_RADIUS,
 } from "@/lib/trajectory";
 import trajectory from "@/data/apollo11-trajectory.json";
@@ -56,6 +58,30 @@ describe("Hohmann Earth→Moon transfer", () => {
     const speedKmS = (speedScenePerHour * 6371) / 3600;
     expect(speedKmS).toBeGreaterThan(9);
     expect(speedKmS).toBeLessThan(12);
+  });
+
+  it("takes about 5 days one-way", () => {
+    const days = hohmannTransferSeconds() / 86400;
+    expect(days).toBeGreaterThan(4.5);
+    expect(days).toBeLessThan(5.5);
+  });
+});
+
+describe("Hohmann timeline samples", () => {
+  it("starts in LEO and ends near the Moon", () => {
+    const s = getHohmannSamples(120);
+    expect(s).toHaveLength(120);
+    const startR = Math.sqrt(s[0].position.x ** 2 + s[0].position.y ** 2);
+    const endR = Math.sqrt(s[119].position.x ** 2 + s[119].position.y ** 2);
+    expect(startR).toBeLessThan(1.1);
+    expect(endR).toBeGreaterThan(55);
+    expect(endR).toBeLessThan(65);
+  });
+
+  it("labels the start and end events", () => {
+    const s = getHohmannSamples(120);
+    expect(s[0].event).toBe("TLI Cutoff");
+    expect(s[119].event).toBe("Lunar Orbit Insertion");
   });
 });
 

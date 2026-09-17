@@ -143,6 +143,38 @@ export function interpolateApollo11(metSec: number): InterpolatedState {
   };
 }
 
+/** One-way Hohmann transfer duration (seconds) Earth parking orbit → Moon. */
+export function hohmannTransferSeconds(): number {
+  const r1 = R_EARTH_KM + 185;
+  const r2 = D_EARTH_MOON_KM;
+  const a = (r1 + r2) / 2;
+  return Math.PI * Math.sqrt(a ** 3 / MU_EARTH_KM3S2);
+}
+
+/** Sample the generic Earth→Moon Hohmann transfer as a timeline. */
+export function getHohmannSamples(sampleCount = 500): InterpolatedState[] {
+  const halfPeriodSec = hohmannTransferSeconds();
+  const ref = Date.UTC(2026, 0, 1);
+  return Array.from({ length: sampleCount }, (_, i) => {
+    const t = (i / (sampleCount - 1)) * halfPeriodSec;
+    const { position, velocity } = hohmannEarthMoon(t);
+    const frac = t / halfPeriodSec;
+    let event = "Translunar Coast";
+    if (frac < 0.01) event = "TLI Cutoff";
+    else if (frac > 0.97) event = "Lunar Orbit Insertion";
+    else if (frac > 0.6) event = "Approaching Moon";
+    const body: "earth" | "moon" = frac < 0.5 ? "earth" : "moon";
+    return {
+      met: t,
+      utc: new Date(ref + t * 1000),
+      event,
+      body,
+      position,
+      velocity,
+    };
+  });
+}
+
 /** Get the full Apollo 11 trajectory as a smooth sampled array. */
 export function getApollo11Samples(sampleCount = 300): InterpolatedState[] {
   const totalSec = metToSeconds((apolloRaw as TrajectoryPoint[]).slice(-1)[0].met);
