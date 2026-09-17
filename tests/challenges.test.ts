@@ -9,6 +9,7 @@ import {
   laneById,
   LANES,
   LANE_ORDER,
+  PLAYBOOK,
 } from "@/lib/challenges";
 
 describe("2026 challenge dataset", () => {
@@ -103,5 +104,26 @@ describe("challenge ranking", () => {
     expect(stats).toHaveLength(LANES.length);
     const laneMatchTotal = matches.reduce((s, m) => s + m.lanes.length, 0);
     expect(stats.reduce((s, l) => s + l.count, 0)).toBe(laneMatchTotal);
+  });
+});
+
+describe("submission playbook", () => {
+  it("is an ordered, non-trivial walkthrough", () => {
+    expect(PLAYBOOK.length).toBeGreaterThanOrEqual(5);
+    expect(PLAYBOOK.map((s) => s.n)).toEqual(PLAYBOOK.map((_, i) => i + 1));
+  });
+
+  it("gives every step real copy and a route", () => {
+    for (const step of PLAYBOOK) {
+      expect(step.title.length).toBeGreaterThan(4);
+      expect(step.body.length).toBeGreaterThan(40);
+      expect(step.cta.length).toBeGreaterThan(0);
+      expect(step.href.startsWith("/")).toBe(true);
+    }
+  });
+
+  it("points at shipped routes, not placeholders", () => {
+    const hrefs = PLAYBOOK.map((s) => s.href);
+    expect(hrefs).toEqual(expect.arrayContaining(["/mission", "/fly", "/mission#scorecard", "/mission#ops"]));
   });
 });

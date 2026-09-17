@@ -128,3 +128,62 @@ export function coveragePct(matches: ChallengeMatch[] = annotateChallenges()): n
   if (matches.length === 0) return 0;
   return (servedCount(matches) / matches.length) * 100;
 }
+
+export interface PlaybookStep {
+  n: number;
+  title: string;
+  body: string;
+  href: string;
+  /** Short label for the linked route. */
+  cta: string;
+}
+
+/**
+ * A recommended route from "we picked a challenge" to "we have a submission":
+ * each step points at the shipped feature that produces the evidence.
+ */
+export const PLAYBOOK: PlaybookStep[] = [
+  {
+    n: 1,
+    title: "Match your challenge to a lane",
+    body: "Find your challenge in the list below. Its lanes tell you which capabilities a credible answer needs — the aligner matches platform features, not buzzwords.",
+    href: "/challenges",
+    cta: "Lanes above",
+  },
+  {
+    n: 2,
+    title: "Design a mission and force an S",
+    body: "Open the planner, then tune destination, vehicle, crew and surface time until the seven objectives clear. Feasibility caps mean an unliftable stack or an over-limit dose can never rate S.",
+    href: "/mission",
+    cta: "Plan a mission",
+  },
+  {
+    n: 3,
+    title: "Capture the permalink and best score",
+    body: "Every design is encoded in the URL, so your exact stack is a shareable, reproducible citation. Your best grade per destination is saved on the device as the bar to beat.",
+    href: "/mission#scorecard",
+    cta: "Scorecard",
+  },
+  {
+    n: 4,
+    title: "Fly it and export the trajectory",
+    body: "Replay Apollo 11, fly a patched-conic Moon transfer, or coast Earth→Mars on the Kepler ellipse — then export the full path as CSV (and the ISS ground track as KML).",
+    href: "/fly",
+    cta: "Open the flight",
+  },
+  {
+    n: 5,
+    title: "Prove the crew survives",
+    body: "Show the closed-loop ECLSS budget and the solar array sized from the actual load, all cited against NASA references — the life-support lane in one artifact.",
+    href: "/mission#ops",
+    cta: "Ops budget",
+  },
+  {
+    n: 6,
+    title: "Package the story",
+    body: "Download the Mission Passport and Patch generated from the same design — print-ready artifacts that make the submission feel like a real program, not a slide deck.",
+    href: "/mission#patch",
+    cta: "Passport & patch",
+  },
+];
+

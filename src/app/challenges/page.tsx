@@ -8,6 +8,7 @@ import {
   laneStats,
   servedCount,
   coveragePct,
+  PLAYBOOK,
   type ChallengeMatch,
 } from "@/lib/challenges";
 
@@ -83,6 +84,33 @@ export default function ChallengesPage() {
               </Link>
             );
           })}
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-lg font-semibold text-white">Recommended submission playbook</h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-400">
+            A worked path from &ldquo;we picked a challenge&rdquo; to &ldquo;we have a submission&rdquo;. Every step links to the
+            shipped feature that produces the evidence — no placeholder screens.
+          </p>
+          <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {PLAYBOOK.map((step) => (
+              <li key={step.n} className="glass-panel p-5">
+                <div className="flex items-start gap-2">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-space-cyan/40 bg-space-cyan/10 font-mono text-xs text-space-cyan">
+                    {step.n}
+                  </span>
+                  <p className="text-sm font-semibold text-white">{step.title}</p>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-slate-400">{step.body}</p>
+                <Link
+                  href={step.href}
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-space-cyan hover:underline"
+                >
+                  {step.cta} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
 
