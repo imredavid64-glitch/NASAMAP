@@ -124,6 +124,7 @@ export default async function FlyPage({ searchParams }: FlyPageProps) {
                 <li>• Earth & Moon rendered at correct scale (Earth radius = 1 scene unit, Moon at ~60 R⊕)</li>
                 <li>• Camera modes: follow craft (smooth chase), track Earth/Moon, or free orbit</li>
                 <li>• Speed slider: 0–100× real time — watch 4 days in seconds</li>
+                <li>• Export the full trajectory to CSV for analysis in any spreadsheet</li>
                 <li>• All math runs in the browser; zero server calls after load</li>
               </ul>
             </div>
@@ -135,7 +136,7 @@ export default async function FlyPage({ searchParams }: FlyPageProps) {
                 <li>• Generic Hohmann Earth→Moon transfer (patched-conic) via ?mode=hohmann</li>
                 <li>• Earth→Mars Hohmann with a Sun-centred Kepler solve via ?mode=mars</li>
                 <li>• Delta-V budget on the Mission page's design engine</li>
-                <li>• Export trajectory as CSV / KML for analysis (roadmap)</li>
+                <li>• Export trajectory as CSV for analysis; KML export on the roadmap</li>
               </ul>
             </div>
           </div>

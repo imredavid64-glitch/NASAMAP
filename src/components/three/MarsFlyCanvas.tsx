@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html, Line } from "@react-three/drei";
+import { Download } from "lucide-react";
 import * as THREE from "three";
 import { Globe } from "./Globe";
 import {
@@ -13,6 +14,7 @@ import {
   formatMet,
   type MarsTransferState,
 } from "@/lib/trajectory";
+import { marsTrajectoryCsv, downloadCsv } from "@/lib/export";
 
 /** Scene units per astronomical unit (Earth orbit = 12 units). */
 const SCENE_AU = 12;
@@ -292,6 +294,12 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
           className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
         >
           ⟲ Reset
+        </button>
+        <button
+          onClick={() => downloadCsv("nasamap-mars-transfer.csv", marsTrajectoryCsv(samples))}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
+        >
+          <Download className="h-4 w-4" /> CSV
         </button>
         <span className="text-xs text-slate-400 px-2">
           {paused ? "Paused" : `T+${(time / 86_400).toFixed(1)} / ${(totalSec / 86_400).toFixed(0)} days`}

@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
+import { Download } from "lucide-react";
 import * as THREE from "three";
 import { Globe, type Marker } from "./Globe";
 import {
@@ -15,6 +16,7 @@ import {
   EARTH_POSITION,
   type InterpolatedState,
 } from "@/lib/trajectory";
+import { earthMoonTrajectoryCsv, downloadCsv } from "@/lib/export";
 
 type FlyMode = "apollo11" | "hohmann";
 
@@ -326,6 +328,18 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
           className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
         >
           ⟲ Reset
+        </button>
+
+        <button
+          onClick={() =>
+            downloadCsv(
+              mode === "apollo11" ? "nasamap-apollo11.csv" : "nasamap-moon-hohmann.csv",
+              earthMoonTrajectoryCsv(samples),
+            )
+          }
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
+        >
+          <Download className="h-4 w-4" /> CSV
         </button>
 
         <span className="text-xs text-slate-400 px-2">
