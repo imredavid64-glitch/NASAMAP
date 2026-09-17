@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle } from "lucide-react";
+import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { TransferDiagram } from "@/components/mission/transfer-diagram";
 import { MissionPassport } from "./MissionPassport";
 
 type Destination = "moon" | "mars";
@@ -242,7 +243,24 @@ export function MissionPlanner() {
             </CardBody>
           </Card>
 
-          <MissionPassport design={design} />
+          {destination === "mars" && (
+            <Card>
+              <CardBody>
+                <CardTitle className="flex items-center gap-2">
+                  <Orbit className="h-4 w-4 text-space-cyan" /> Heliocentric transfer geometry
+                </CardTitle>
+                <div id="mars-transfer" className="mt-4">
+                  <TransferDiagram />
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  Transfer ellipse from the Hohmann solution in astronomical units; orbit radii are to scale,
+                  body sizes are not. Mars must lead Earth by the marked phase angle at departure.
+                </p>
+              </CardBody>
+            </Card>
+          )}
+
+          <MissionPassport design={design} flyHref={destination === "moon" ? "/fly?mode=hohmann" : undefined} />
         </div>
       </div>
     </section>

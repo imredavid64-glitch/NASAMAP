@@ -20,9 +20,9 @@ const TIMEOUT_MS = 6000;
 
 export const SNAPSHOT_FETCHED_AT = snapshots.fetchedAt;
 
-async function getText(url: string): Promise<string> {
+async function getText(url: string, timeoutMs = TIMEOUT_MS): Promise<string> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, { signal: controller.signal, cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -34,6 +34,10 @@ async function getText(url: string): Promise<string> {
 
 async function getJson<T>(url: string): Promise<T> {
   return JSON.parse(await getText(url)) as T;
+}
+
+function isoDay(offsetDays = 0): string {
+  return new Date(Date.now() + offsetDays * 86_400_000).toISOString().slice(0, 10);
 }
 
 function live<T>(data: T): LiveResult<T> {
@@ -86,26 +90,27 @@ export interface VoyagerData {
 const HORIZONS = "https://ssd.jpl.nasa.gov/api/horizons.api";
 
 async function horizonsRangeAu(objectId: string): Promise<number> {
+  // Horizons rejects relative 'now'/'+1d' in the SOE/SOE block, so use explicit ISO days.
   const params = new URLSearchParams({
     format: "text",
     COMMAND: `'${objectId}'`,
     EPHEM_TYPE: "OBSERVER",
     CENTER: "'500@399'",
-    START_TIME: "'now'",
-    STOP_TIME: "'+1d'",
+    START_TIME: `'${isoDay(0)}'`,
+    STOP_TIME: `'${isoDay(1)}'`,
     STEP_SIZE: "'1d'",
     QUANTITIES: "'20'",
   });
-  const text = await getText(`${HORIZONS}?${params.toString()}`);
+  const text = await getText(`${HORIZONS}?${params.toString()}`, 12_000);
   const soe = text.indexOf("SOE");
   const eoe = text.indexOf("$$EOE");
   if (soe < 0 || eoe < 0) throw new Error("Horizons block missing");
   const block = text.slice(soe + 3, eoe).trim();
   const firstLine = block.split(/\r?\n/).find((l) => l.trim().length > 0);
   const cols = firstLine?.trim().split(/\s+/) ?? [];
-  // DATE is two tokens (yyyy-Mon-dd hh:mm); range (AU) is the next numeric 2-token group.
+  // First data row: "yyyy-Mon-dd hh:mm  <range AU>  <range-rate km/s>".
   const numeric = cols.filter((c) => /^-?\d+(\.\d+)?$/.test(c));
-  const au = Number(numeric[numeric.length - 2] ?? numeric[0]);
+  const au = Number(numeric[0]);
   if (!Number.isFinite(au) || au <= 0) throw new Error("no range value");
   return au;
 }

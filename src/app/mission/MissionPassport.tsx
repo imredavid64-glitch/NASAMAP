@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Download, Printer } from "lucide-react";
+import Link from "next/link";
+import { Download, Printer, Orbit } from "lucide-react";
 import { type MissionDesign } from "@/lib/mission";
 import { passportSvg, passportMissionId, passportIssued } from "@/lib/passport";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
-export function MissionPassport({ design }: { design: MissionDesign }) {
+export function MissionPassport({ design, flyHref }: { design: MissionDesign; flyHref?: string }) {
   const issuedUTC = passportIssued();
   const missionId = useMemo(() => passportMissionId(design, issuedUTC), [design, issuedUTC]);
   const svg = useMemo(() => passportSvg({ design, missionId, issuedUTC }), [design, missionId, issuedUTC]);
@@ -35,7 +36,15 @@ export function MissionPassport({ design }: { design: MissionDesign }) {
       <CardBody>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle>Mission Passport</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {flyHref && (
+              <Link
+                href={flyHref}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-space-cyan px-3 py-1.5 text-xs font-semibold text-space-950 transition hover:bg-space-cyan/80"
+              >
+                <Orbit className="h-3.5 w-3.5" /> Fly this trajectory
+              </Link>
+            )}
             <button
               type="button"
               onClick={download}

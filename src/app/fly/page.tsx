@@ -4,6 +4,10 @@ import { Rocket, RotateCcw, Info, Clock } from "lucide-react";
 
 export const metadata = { title: "Fly — Apollo 11 Replay & Trajectory Simulator" };
 
+interface FlyPageProps {
+  searchParams: Promise<{ mode?: string }>;
+}
+
 const milestones = [
   { met: "00:00:00", label: "Launch (KSC LC-39A)", body: "earth" },
   { met: "02:44:16", label: "TLI Ignition", body: "earth" },
@@ -20,7 +24,10 @@ const milestones = [
   { met: "102:45:40", label: "Touchdown — Tranquility Base", body: "moon" },
 ];
 
-export default function FlyPage() {
+export default async function FlyPage({ searchParams }: FlyPageProps) {
+  const { mode: modeParam } = await searchParams;
+  const initialMode = modeParam === "hohmann" ? "hohmann" : "apollo11";
+
   return (
     <div className="pt-28">
       <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
@@ -45,7 +52,7 @@ export default function FlyPage() {
 
       <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
         <div className="h-[600px] rounded-2xl border border-white/10 bg-black/30 overflow-hidden">
-          <FlyStage mode="apollo11" />
+          <FlyStage mode={initialMode} />
         </div>
       </div>
 

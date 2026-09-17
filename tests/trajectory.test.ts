@@ -8,6 +8,7 @@ import {
   getApollo11Samples,
   getHohmannSamples,
   hohmannTransferSeconds,
+  marsTransferDiagram,
   MOON_ORBIT_RADIUS,
 } from "@/lib/trajectory";
 import trajectory from "@/data/apollo11-trajectory.json";
@@ -82,6 +83,40 @@ describe("Hohmann timeline samples", () => {
     const s = getHohmannSamples(120);
     expect(s[0].event).toBe("TLI Cutoff");
     expect(s[119].event).toBe("Lunar Orbit Insertion");
+  });
+});
+
+describe("Earth→Mars Hohmann diagram", () => {
+  const d = marsTransferDiagram(16);
+
+  it("uses documented orbital radii", () => {
+    expect(d.earthOrbitAu).toBe(1);
+    expect(d.marsOrbitAu).toBeCloseTo(1.524, 3);
+  });
+
+  it("takes ~259 days and needs a ~44° phase lead", () => {
+    expect(d.transferDays).toBeGreaterThan(250);
+    expect(d.transferDays).toBeLessThan(268);
+    expect(d.phaseAngleDeg).toBeGreaterThan(40);
+    expect(d.phaseAngleDeg).toBeLessThan(48);
+  });
+
+  it("has the correct transfer-ellipse geometry", () => {
+    expect(d.semiMajorAu).toBeCloseTo((1 + 1.523679) / 2, 6);
+    expect(d.eccentricity).toBeCloseTo(0.2075, 3);
+  });
+
+  it("recurs on the ~780-day synodic period", () => {
+    expect(d.synodicDays).toBeGreaterThan(775);
+    expect(d.synodicDays).toBeLessThan(785);
+  });
+
+  it("starts at Earth's orbit and ends at Mars' orbit", () => {
+    const start = d.points[0];
+    const end = d.points[d.points.length - 1];
+    expect(Math.hypot(start.x, start.y)).toBeCloseTo(1, 2);
+    expect(Math.hypot(end.x, end.y)).toBeCloseTo(1.523679, 2);
+    expect(end.y).toBeCloseTo(0, 6);
   });
 });
 

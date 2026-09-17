@@ -208,3 +208,61 @@ export const MOON_POSITION: Vec3 = { x: -kmToScene(D_EARTH_MOON_KM), y: 0, z: 0 
 
 /** Moon orbital radius in scene units. */
 export const MOON_ORBIT_RADIUS = kmToScene(D_EARTH_MOON_KM); // ~ 60.3
+
+/* ----------------------------------------------------------------------------
+ * Heliocentric Earth→Mars Hohmann transfer (2D schematic, units of AU/years).
+ * Using the astronomical system G·M☉ = 4π² AU³/yr² keeps the math exact.
+ * -------------------------------------------------------------------------- */
+
+export const EARTH_ORBIT_AU = 1.0;
+export const MARS_ORBIT_AU = 1.523679; // NASA Planetary Fact Sheet mean semi-major axis
+export const EARTH_PERIOD_DAYS = 365.256;
+export const MARS_PERIOD_DAYS = 686.98;
+
+export interface MarsTransferDiagram {
+  earthOrbitAu: number;
+  marsOrbitAu: number;
+  semiMajorAu: number;
+  eccentricity: number;
+  transferDays: number;
+  phaseAngleDeg: number;
+  synodicDays: number;
+  points: { x: number; y: number }[];
+}
+
+/**
+ * Mars transfer geometry: the transfer ellipse (Hohmann half-ellipse) plus the
+ * departure phase angle Mars must lead Earth by: 180° − n_mars · t_transfer.
+ */
+export function marsTransferDiagram(samples = 128): MarsTransferDiagram {
+  const r1 = EARTH_ORBIT_AU;
+  const r2 = MARS_ORBIT_AU;
+  const a = (r1 + r2) / 2;
+  const e = (r2 - r1) / (r2 + r1);
+
+  // Transfer half-period: T = ½ · √(a³) years (with G·M☉ = 4π²).
+  const transferYears = 0.5 * Math.sqrt(a ** 3);
+  const transferDays = transferYears * EARTH_PERIOD_DAYS;
+
+  const marsMeanMotionDegPerDay = 360 / MARS_PERIOD_DAYS;
+  const phaseAngleDeg = 180 - marsMeanMotionDegPerDay * transferDays;
+
+  const synodicDays = 1 / (1 / EARTH_PERIOD_DAYS - 1 / MARS_PERIOD_DAYS);
+
+  const points = Array.from({ length: samples + 1 }, (_, i) => {
+    const nu = (i / samples) * Math.PI; // perihelion (+x) → aphelion (−x)
+    const r = (a * (1 - e * e)) / (1 + e * Math.cos(nu));
+    return { x: r * Math.cos(nu), y: r * Math.sin(nu) };
+  });
+
+  return {
+    earthOrbitAu: r1,
+    marsOrbitAu: r2,
+    semiMajorAu: a,
+    eccentricity: e,
+    transferDays,
+    phaseAngleDeg,
+    synodicDays,
+    points,
+  };
+}
