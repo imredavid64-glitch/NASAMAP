@@ -10,10 +10,12 @@ import {
   Zap,
   ExternalLink,
   LocateFixed,
+  Download,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { groundTrackKml, downloadFile, type KmlTrackPoint } from "@/lib/export";
 
 interface Feed {
   source: "live" | "snapshot";
@@ -24,6 +26,7 @@ interface IssResponse extends Feed {
   tle: { name: string };
   subpoint: { latDeg: number; lonDeg: number; altitudeKm: number } | null;
   passes: { startUtc: string; peakUtc: string; maxElevationDeg: number; durationMin: number }[];
+  track?: KmlTrackPoint[];
 }
 interface VoyagerResponse extends Feed {
   bodies: { name: string; distanceAu: number; oneWayLabel: string; roundTripLabel: string }[];
@@ -95,7 +98,22 @@ function Skeleton() {
 export function LiveRibbon() {
   const [lat, setLat] = useState(29.56);
   const [lon, setLon] = useState(-95.09);
+  const [kmlBusy, setKmlBusy] = useState(false);
   const { iss, voyager, apod, neo, sw, loading, at, reload } = useFeeds(lat, lon);
+
+  async function downloadKml() {
+    setKmlBusy(true);
+    try {
+      const res = await fetch("/api/live/iss?track=1");
+      if (!res.ok) return;
+      const data = (await res.json()) as IssResponse;
+      if (data.track && data.track.length > 1) {
+        downloadFile("iss-ground-track.kml", groundTrackKml("ISS ground track", data.track), "application/vnd.google-earth.kml+xml");
+      }
+    } finally {
+      setKmlBusy(false);
+    }
+  }
 
   function locate() {
     navigator.geolocation?.getCurrentPosition(
@@ -180,9 +198,17 @@ export function LiveRibbon() {
                     <li key={p.startUtc} className="font-mono">
                       {fmtUtc(p.peakUtc)} UTC · max {p.maxElevationDeg.toFixed(0)}° · {p.durationMin.toFixed(0)} min
                     </li>
-                  ))}
+                  )                  )}
                 </ul>
               )}
+              <button
+                type="button"
+                onClick={() => void downloadKml()}
+                disabled={kmlBusy}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20 disabled:opacity-50"
+              >
+                <Download className="h-3.5 w-3.5" /> {kmlBusy ? "Building…" : "Ground track (KML)"}
+              </button>
             </CardBody>
           </Card>
         ) : (

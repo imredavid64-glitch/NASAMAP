@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCsv, earthMoonTrajectoryCsv, marsTrajectoryCsv } from "@/lib/export";
+import { toCsv, earthMoonTrajectoryCsv, marsTrajectoryCsv, groundTrackKml, downloadCsv } from "@/lib/export";
 import {
   getApollo11Samples,
   getMarsTransferSamples,
@@ -60,5 +60,49 @@ describe("CSV export", () => {
   it("uses the event label from the transfer state", () => {
     const row = marsTrajectoryCsv([marsAtTime(0)]).trimEnd().split("\r\n")[1];
     expect(row).toContain("Trans-Mars Injection");
+  });
+});
+
+describe("KML export", () => {
+  const track = [
+    { latDeg: 29.56, lonDeg: -95.09, altitudeKm: 420.1 },
+    { latDeg: 30.12, lonDeg: -94.2, altitudeKm: 421.3 },
+    { latDeg: 31.0, lonDeg: -93.0, altitudeKm: 422.0 },
+  ];
+
+  it("emits a valid KML document with a LineString", () => {
+    const kml = groundTrackKml("ISS ground track", track);
+    expect(kml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+    expect(kml).toContain('xmlns="http://www.opengis.net/kml/2.2"');
+    expect(kml).toContain("<LineString>");
+    expect(kml).toContain("</kml>");
+  });
+
+  it("writes coordinates as lon,lat,alt in metres", () => {
+    const kml = groundTrackKml("ISS", track);
+    expect(kml).toContain("-95.09000,29.56000,420100.0");
+    expect(kml).toContain("-93.00000,31.00000,422000.0");
+  });
+
+  it("marks the latest point with a placemark", () => {
+    const kml = groundTrackKml("ISS", track);
+    expect(kml).toContain("(latest)");
+    expect(kml.match(/<Placemark>/g)).toHaveLength(2);
+  });
+
+  it("escapes XML special characters in the name", () => {
+    const kml = groundTrackKml('ISS <A&B> "test"', track);
+    expect(kml).toContain("ISS &lt;A&amp;B&gt; &quot;test&quot;");
+    expect(kml).not.toContain("<A&B>");
+  });
+
+  it("handles an empty track without a placemark", () => {
+    const kml = groundTrackKml("ISS", []);
+    expect(kml).toContain("<LineString>");
+    expect(kml).not.toContain("(latest)");
+  });
+
+  it("downloadCsv is a safe no-op outside the browser", () => {
+    expect(() => downloadCsv("x.csv", "a,b\r\n")).not.toThrow();
   });
 });
