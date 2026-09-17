@@ -266,3 +266,93 @@ export function marsTransferDiagram(samples = 128): MarsTransferDiagram {
     points,
   };
 }
+
+/* ----------------------------------------------------------------------------
+ * Time-parameterised Earth→Mars Hohmann transfer for the 3D Fly view.
+ * Positions in au (heliocentric ecliptic plane), time in seconds since TMI.
+ * -------------------------------------------------------------------------- */
+
+const DEG = Math.PI / 180;
+
+/** Solve Kepler's equation E − e·sin E = M (Newton, converges in ~5 iters). */
+function keplerE(M: number, e: number): number {
+  let E = M;
+  for (let i = 0; i < 20; i += 1) {
+    const f = E - e * Math.sin(E) - M;
+    const fp = 1 - e * Math.cos(E);
+    E -= f / fp;
+  }
+  return E;
+}
+
+/** Heliocentric position on the transfer ellipse at mean anomaly M (au). */
+function craftAuAt(M: number, e: number, a: number): { x: number; y: number } {
+  const E = keplerE(M, e);
+  const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+  const r = a * (1 - e * Math.cos(E));
+  return { x: r * Math.cos(nu), y: r * Math.sin(nu) };
+}
+
+export interface MarsTransferState {
+  met: number;
+  utc: Date;
+  event: string;
+  auFromSun: number;
+  earthAu: { x: number; y: number };
+  marsAu: { x: number; y: number };
+  craftAu: { x: number; y: number };
+  velocityAuPerDay: { x: number; y: number };
+}
+
+/** One-way Hohmann transfer duration (seconds) Earth → Mars. */
+export function marsTransferSeconds(): number {
+  return marsTransferDiagram(1).transferDays * 86_400;
+}
+
+/** State of the Earth→Mars transfer at a given elapsed time (seconds). */
+export function marsAtTime(metSec: number): MarsTransferState {
+  const geo = marsTransferDiagram(1);
+  const a = geo.semiMajorAu;
+  const e = geo.eccentricity;
+  const halfDays = geo.transferDays;
+  const days = Math.max(0, Math.min(halfDays, metSec / 86_400));
+  const M = Math.PI * (days / halfDays);
+
+  const craftAu = craftAuAt(M, e, a);
+  const dM = 0.0005;
+  const before = craftAuAt(Math.max(0, M - dM), e, a);
+  const after = craftAuAt(Math.min(Math.PI, M + dM), e, a);
+  const dtDays = (dM / Math.PI) * halfDays;
+
+  const frac = days / halfDays;
+  const marsAngle = (geo.phaseAngleDeg + (360 / MARS_PERIOD_DAYS) * days) * DEG;
+  const marsAu = { x: MARS_ORBIT_AU * Math.cos(marsAngle), y: MARS_ORBIT_AU * Math.sin(marsAngle) };
+
+  let event = "Heliocentric Cruise";
+  if (frac < 0.02) event = "Trans-Mars Injection";
+  else if (frac < 0.25) event = "Departure Coast";
+  else if (frac > 0.98) event = "Mars Orbit Insertion";
+  else if (frac > 0.6) event = "Approaching Mars";
+
+  return {
+    met: metSec,
+    utc: new Date(Date.UTC(2026, 8, 17) + metSec * 1000),
+    event,
+    auFromSun: Math.sqrt(craftAu.x ** 2 + craftAu.y ** 2),
+    earthAu: { x: EARTH_ORBIT_AU, y: 0 },
+    marsAu,
+    craftAu,
+    velocityAuPerDay: {
+      x: (after.x - before.x) / (2 * dtDays),
+      y: (after.y - before.y) / (2 * dtDays),
+    },
+  };
+}
+
+/** Sample the Earth→Mars Hohmann transfer as a timeline for the Fly view. */
+export function getMarsTransferSamples(sampleCount = 500): MarsTransferState[] {
+  const total = marsTransferSeconds();
+  return Array.from({ length: sampleCount }, (_, i) =>
+    marsAtTime((i / (sampleCount - 1)) * total),
+  );
+}

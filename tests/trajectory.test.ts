@@ -9,7 +9,12 @@ import {
   getHohmannSamples,
   hohmannTransferSeconds,
   marsTransferDiagram,
+  marsTransferSeconds,
+  marsAtTime,
+  getMarsTransferSamples,
   MOON_ORBIT_RADIUS,
+  EARTH_ORBIT_AU,
+  MARS_ORBIT_AU,
 } from "@/lib/trajectory";
 import trajectory from "@/data/apollo11-trajectory.json";
 
@@ -157,5 +162,59 @@ describe("Apollo 11 interpolation", () => {
     for (let i = 1; i < samples.length; i++) {
       expect(samples[i].met).toBeGreaterThan(samples[i - 1].met);
     }
+  });
+});
+
+describe("Earth→Mars transfer (3D fly)", () => {
+  const total = marsTransferSeconds();
+
+  it("coasts for ~259 days", () => {
+    expect(total / 86_400).toBeGreaterThan(255);
+    expect(total / 86_400).toBeLessThan(262);
+  });
+
+  it("departs from Earth's orbit at perihelion", () => {
+    const s = marsAtTime(0);
+    expect(s.craftAu.x).toBeCloseTo(EARTH_ORBIT_AU, 4);
+    expect(s.craftAu.y).toBeCloseTo(0, 6);
+    expect(s.auFromSun).toBeCloseTo(EARTH_ORBIT_AU, 4);
+    expect(s.event).toBe("Trans-Mars Injection");
+  });
+
+  it("arrives at Mars' orbit at aphelion", () => {
+    const s = marsAtTime(total);
+    expect(s.craftAu.x).toBeCloseTo(-MARS_ORBIT_AU, 3);
+    expect(s.craftAu.y).toBeCloseTo(0, 3);
+    expect(s.auFromSun).toBeCloseTo(MARS_ORBIT_AU, 3);
+    expect(s.event).toBe("Mars Orbit Insertion");
+  });
+
+  it("holds Earth fixed and marches Mars from the phase angle to 180°", () => {
+    const geo = marsTransferDiagram(1);
+    const start = marsAtTime(0);
+    const end = marsAtTime(total);
+    expect(start.earthAu).toEqual({ x: EARTH_ORBIT_AU, y: 0 });
+    expect(end.earthAu).toEqual(start.earthAu);
+    expect((Math.atan2(start.marsAu.y, start.marsAu.x) * 180) / Math.PI).toBeCloseTo(geo.phaseAngleDeg, 1);
+    expect((Math.atan2(end.marsAu.y, end.marsAu.x) * 180) / Math.PI).toBeCloseTo(180, 1);
+    expect(Math.sqrt(start.marsAu.x ** 2 + start.marsAu.y ** 2)).toBeCloseTo(MARS_ORBIT_AU, 6);
+  });
+
+  it("increases heliocentric distance monotonically across the coast", () => {
+    const samples = getMarsTransferSamples(120);
+    expect(samples).toHaveLength(120);
+    for (let i = 1; i < samples.length; i++) {
+      expect(samples[i].auFromSun).toBeGreaterThanOrEqual(samples[i - 1].auFromSun - 1e-9);
+      expect(samples[i].met).toBeGreaterThan(samples[i - 1].met);
+    }
+    expect(samples[samples.length - 1].met).toBeCloseTo(total, 6);
+  });
+
+  it("clamps time outside the transfer window", () => {
+    const before = marsAtTime(-5000);
+    const after = marsAtTime(total * 2);
+    expect(before.met).toBe(-5000);
+    expect(before.craftAu.x).toBeCloseTo(EARTH_ORBIT_AU, 4);
+    expect(after.auFromSun).toBeCloseTo(MARS_ORBIT_AU, 3);
   });
 });

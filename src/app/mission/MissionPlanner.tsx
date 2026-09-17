@@ -275,7 +275,10 @@ export function MissionPlanner() {
             <OpsBudget design={design} />
           </div>
 
-          <MissionPassport design={design} flyHref={destination === "moon" ? "/fly?mode=hohmann" : undefined} />
+          <MissionPassport
+            design={design}
+            flyHref={destination === "moon" ? "/fly?mode=hohmann" : "/fly?mode=mars"}
+          />
 
           <div id="patch" className="scroll-mt-20">
             <MissionPatch design={design} />
