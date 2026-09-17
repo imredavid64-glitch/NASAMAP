@@ -208,8 +208,7 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
   );
 }
 
-export function FlyCanvas({ mode: initialMode = "apollo11", initialSpeed = 10 }: FlyCanvasProps) {
-  const [mode, setMode] = useState<FlyMode>(initialMode);
+export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasProps) {
   const samples = useMemo(
     () => (mode === "apollo11" ? getApollo11Samples(500) : getHohmannSamples(500)),
     [mode],
@@ -328,20 +327,6 @@ export function FlyCanvas({ mode: initialMode = "apollo11", initialSpeed = 10 }:
         >
           ⟲ Reset
         </button>
-
-        <div className="flex items-center gap-1 rounded-lg border border-white/15 bg-black/40 p-1">
-          {(["apollo11", "hohmann"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                mode === m ? "bg-space-cyan/20 text-space-cyan" : "text-slate-300 hover:bg-white/10"
-              }`}
-            >
-              {m === "apollo11" ? "Apollo 11" : "Hohmann"}
-            </button>
-          ))}
-        </div>
 
         <span className="text-xs text-slate-400 px-2">
           {paused ? "Paused" : `T+${formatMet(time)} / T+${formatMet(totalSec)}`}

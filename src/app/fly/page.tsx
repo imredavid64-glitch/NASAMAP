@@ -1,5 +1,6 @@
 import { SectionHeading } from "@/components/ui/section-heading";
 import { FlyStage, type FlyMode } from "@/components/fly-stage";
+import { FlyModeTabs } from "@/components/fly-mode-tabs";
 import { Rocket, RotateCcw, Info, Clock, Sun } from "lucide-react";
 
 export const metadata = { title: "Fly — Apollo 11 Replay & Trajectory Theater" };
@@ -43,10 +44,7 @@ export default async function FlyPage({ searchParams }: FlyPageProps) {
         />
 
         <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-slate-400">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10">
-            {isMars ? <Sun className="h-4 w-4 text-space-amber" /> : <Rocket className="h-4 w-4 text-space-cyan" />}
-            Mode: {isMars ? "Earth → Mars Hohmann" : initialMode === "hohmann" ? "Earth → Moon Hohmann" : "Apollo 11 Replay"}
-          </span>
+          <FlyModeTabs active={initialMode} />
           <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10">
             <Clock className="h-4 w-4" /> Total {isMars ? "transfer" : "MET"}: {isMars ? "258 days 23 h" : "102:45:40"}
           </span>
