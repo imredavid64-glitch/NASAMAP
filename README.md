@@ -20,7 +20,7 @@ published reference.
 
 | Act | Route | What it does |
 | --- | --- | --- |
-| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then stamps **GO / NO-GO**. |
+| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. |
 | **II · Fly** | `/fly` | Replay **Apollo 11** event-by-event from an interpolated historical timeline, or fly a **patched-conic Hohmann transfer** (Earth→Moon, or Earth→Mars via `?mode=`). |
 | **III · Live** | `/live` | Real-time ISS ground track, Voyager 1 & 2 range (JPL Horizons), the day's APOD, near-Earth objects and NOAA space weather — with a committed snapshot fallback so the demo never dies on stage. |
 | **IV · Share** | `/library`, `/search`, `/commons`, `/challenges` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, the Mission Passport & Patch you can download and print, and a live **Challenge Aligner** mapping all 86 official 2026 challenges to the platform. |
@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**124 tests**, `vitest`).
+  (**133 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -53,6 +53,7 @@ published reference.
 | `src/lib/comm.ts` | Light-time, DSN-class link budgets | Speed of light (CODATA), mean Earth–Mars distance |
 | `src/lib/life.ts` | Consumables, radiation dose, **closed-loop ECLSS budget** | NASA ISS ECLSS fact sheets, MSL RAD, NASA OGS draw |
 | `src/lib/mission.ts` | Composes the above into a mission design | Apollo-class TLI, Hohmann synodic windows |
+| `src/lib/score.ts` | **Mission rating** — seven weighted objectives, S–D grade with feasibility caps | NASA-STD-3001 (600 mSv career limit), ISS ECLSS, Apollo-class Δv |
 | `src/lib/orbit.ts` | SGP4 satellite propagation, pass prediction | `satellite.js` |
 | `src/lib/trajectory.ts` | Apollo 11 interpolation, transfer-diagram geometry | Committed historical timeline |
 | `src/lib/passport.ts` · `src/lib/patch.ts` | Deterministic SVG artifacts | Everything drawn from the shared engine |
@@ -81,7 +82,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 124 tests
+npm test             # vitest — 133 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
@@ -127,7 +128,7 @@ node scripts/check-challenges.mjs     # human-readable listing
 The result is a live `/challenges` page — **37 of 86 challenges (43%)** are served by a shipped capability,
 each badge deep-linking to the feature that does the work. The lanes NASAMAP is purpose-built for include:
 
-- **Space Mission Design Game** — rocket selection, Δv, mass budget, GO / NO-GO (`/mission`)
+- **Space Mission Design Game** — rocket selection, Δv, mass budget, a live **S–D mission rating** across seven objectives, and a GO / NO-GO gate (`/mission`)
 - **Interplanetary Survival Guide: Martian Map** — radiation, consumables, ECLSS, transfer geometry (`/mission#ops`)
 - **SpaceTrash Hack: Revolutionizing Recycling on Mars** — closed-loop recycling and array sizing (`/mission#ops`)
 - **Your Home in Space: The Habitat Layout Creator** — habitat mass budgets and surface stay (`/mission`)

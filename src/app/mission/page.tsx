@@ -11,7 +11,7 @@ const acts = [
     n: "01",
     label: "Plan",
     title: "Design the stack",
-    body: "Choose a rocket, crew and surface stay. The engine sums Δv, mass, radiation and consumables from cited NASA datasets.",
+    body: "Choose a rocket, crew and surface stay. The engine sums Δv, mass, radiation and consumables, then rates the design S–D against cited NASA limits.",
     href: "#design",
     icon: Rocket,
   },

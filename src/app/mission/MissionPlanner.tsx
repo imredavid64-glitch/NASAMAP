@@ -9,6 +9,8 @@ import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TransferDiagram } from "@/components/mission/transfer-diagram";
 import { OpsBudget } from "@/components/mission/ops-budget";
+import { Scorecard } from "@/components/mission/scorecard";
+import { RADIATION_LIMIT_MSV } from "@/lib/score";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
 
@@ -63,7 +65,10 @@ export function MissionPlanner() {
     [destination, vehicleId, crew, surfaceDays],
   );
 
-  const careerLimitNote = design.radiationMsvTotal > 100 ? "exceeds NASA career reference (~100 mSv)" : "within NASA career reference (~100 mSv)";
+  const careerLimitNote =
+    design.radiationMsvTotal > RADIATION_LIMIT_MSV
+      ? `exceeds NASA career limit (${RADIATION_LIMIT_MSV} mSv)`
+      : `within NASA career limit (${RADIATION_LIMIT_MSV} mSv)`;
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -178,6 +183,10 @@ export function MissionPlanner() {
             <GateBadge gate={design.launchGate} />
           </div>
 
+          <div id="scorecard" className="scroll-mt-20">
+            <Scorecard design={design} />
+          </div>
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <StatTile
               label="Transit time"
@@ -214,7 +223,7 @@ export function MissionPlanner() {
           <Card>
             <CardBody>
               <CardTitle className="flex items-center gap-2">
-                {design.radiationMsvTotal > 100 ? (
+                {design.radiationMsvTotal > RADIATION_LIMIT_MSV ? (
                   <ShieldAlert className="h-4 w-4 text-red-400" />
                 ) : (
                   <Radio className="h-4 w-4 text-space-cyan" />
