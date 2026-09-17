@@ -1,0 +1,707 @@
+{
+  "source": "NASA Space Apps Challenge 2026 official GraphQL API (api.spaceappschallenge.org)",
+  "indexUrl": "https://www.spaceappschallenge.org/2026/challenges/",
+  "retrieved": "2026-09-17",
+  "challengeYear": 2026,
+  "count": 86,
+  "challenges": [
+    {
+      "id": "aWQ6NjE1",
+      "title": "A Marketplace for Open Science Projects",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTI=",
+      "title": "A World Away: Hunting for Exoplanets with AI",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjU=",
+      "title": "Abandoned but not Forgotten: Storytelling about NASA's Discarded Equipment on the Moon and Mars",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTk=",
+      "title": "Animation Celebration of Terra Data!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjMy",
+      "title": "Artemis II and You!",
+      "categories": [
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjIx",
+      "title": "Be a Space Geologist",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjg=",
+      "title": "Be An Earth System Trend Detective!",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTA=",
+      "title": "Beyond Sunlight: An Aquatic Chemosynthetic World",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjY=",
+      "title": "BloomWatch: An Earth Observation Application for Global Flowering Phenology",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjQ=",
+      "title": "Build a Junior Astronaut Mission Trainer",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTM=",
+      "title": "Build a Space Biology Knowledge Engine",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjMx",
+      "title": "Building the Space Biology “Model Zoo”",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTM=",
+      "title": "Challenge",
+      "categories": []
+    },
+    {
+      "id": "aWQ6MTI1MDU=",
+      "title": "Chronicles of Exoplanet Exploration",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjc=",
+      "title": "CLPS Lunar Mission Browser",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjA=",
+      "title": "Commercializing Low Earth Orbit (LEO)",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTM=",
+      "title": "Community Mapping",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjEx",
+      "title": "Create a Work of SARt (Synthetic Aperture Radar Art)",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDg=",
+      "title": "Create an Orrery Web App that Displays Near-Earth Objects",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMzA=",
+      "title": "Create Health Monitoring Software for Astronauts on Space Missions",
+      "categories": [
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMzA=",
+      "title": "Create Your Own Challenge",
+      "categories": [
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjM3",
+      "title": "Create Your Own Challenge",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI0OTE=",
+      "title": "Create Your Own Challenge",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMTk=",
+      "title": "Dancing with the SARs",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTc=",
+      "title": "Data Pathways to Healthy Cities and Human Settlements",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjU=",
+      "title": "Deep Dive: Immersive Data Stories from Ocean to Sky",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjIy",
+      "title": "Develop the Oracle of DSCOVR",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6NjA4",
+      "title": "Eclipses: Perspective is Everything",
+      "categories": [
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTQ=",
+      "title": "Embiggen Your Eyes!",
+      "categories": [
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjIw",
+      "title": "EMIT for the Future!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjEy",
+      "title": "Everything Starts with Water",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDA=",
+      "title": "Exosky!",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjA5",
+      "title": "Explore a Biodiversity Hotspot with Imaging Spectroscopy",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjY=",
+      "title": "Field Shift: Adapting Farms with NASA Data",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjE=",
+      "title": "Flame in Freefall: AI-Powered Fire Safety Insights from Microgravity Combustion Data",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjQ=",
+      "title": "From EarthData to Action: Cloud Computing with Earth Observation Data for Predicting Cleaner, Safer Skies",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDQ=",
+      "title": "Galactic Games: Fun in a Microgravity Environment!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjE3",
+      "title": "GeoAI Reimagined: Transformative and Diverse Earth Science Applications Using Foundation Models",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDM=",
+      "title": "GLOBE Protocol Games",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjM0",
+      "title": "Habitable Exoplanets: Creating Worlds Beyond Our Own",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMzI=",
+      "title": "Harmonization of MODIS and VIIRS Hot Spots",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTQ=",
+      "title": "Human Development & the Environment",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjk=",
+      "title": "Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTE=",
+      "title": "Imagine our Connected Earth",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjMz",
+      "title": "Immersed in the Sounds of Space",
+      "categories": [
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTY=",
+      "title": "International Space Station 25th Anniversary Apps",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjEw",
+      "title": "International Space Station Earth-Observing Data VISION-aries wanted!",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMTg=",
+      "title": "Interplanetary Survival Guide: Martian Map",
+      "categories": [
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTI0OTg=",
+      "title": "Landsat Reflectance Data: On the Fly and at Your Fingertips",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTI=",
+      "title": "Leveraging Earth Observation Data for Informed Agricultural Decision-Making",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI1",
+      "title": "Magnetic Reconnection",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI0",
+      "title": "Make a Moonquake Map 2.0!",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjA1",
+      "title": "Managing Fire: Increasing Community-based Fire Management Opportunities",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjE2",
+      "title": "Mapping Data for Societal Benefit",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTE=",
+      "title": "Meteor Madness",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjc=",
+      "title": "NASA Farm Navigators: Using NASA Data Exploration in Agriculture",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjE5",
+      "title": "NASA in Your Neighborhood",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDE=",
+      "title": "Navigator for the Habitable Worlds Observatory (HWO): Mapping the Characterizable Exoplanets in our Galaxy",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI3",
+      "title": "Ocean Gardens",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjEz",
+      "title": "Open Science Odyssey: Can you Determine the Impacts of Open Science?",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjE0",
+      "title": "Open Science Storytelling!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDk=",
+      "title": "PACE in the Classroom",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjA3",
+      "title": "Plan a Party to Celebrate NASA's Journey to a Metal World",
+      "categories": [
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMjA=",
+      "title": "Planet X and SPHEREx",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6NjIz",
+      "title": "Planetary Tourism Office",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI0OTk=",
+      "title": "SDGs in the Classroom",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDI=",
+      "title": "Seismic Detection Across the Solar System",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjI=",
+      "title": "Sharks from Space",
+      "categories": [
+        "Advanced"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTg=",
+      "title": "Show Us What the May 2024 Geomagnetic Storms Looked Like",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NjMw",
+      "title": "Space Biology Digital Twins: Modeling Worms in Space!",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMzE=",
+      "title": "Space Mission Design Game",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTg=",
+      "title": "SpaceTrash Hack: Revolutionizing Recycling on Mars",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjA2",
+      "title": "STAR: Revolutionizing Technical Standards with AI",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjM=",
+      "title": "Stellar Stories: Space Weather Through the Eyes of Earthlings",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDc=",
+      "title": "Symphony of the Stars: Harmonizing the James Webb Space Telescope in Music and Images",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTY=",
+      "title": "Tell Us a Climate Story!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6NTUxMTc=",
+      "title": "The Earth Information Jukebox",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjE=",
+      "title": "Through the Radar Looking Glass: Revealing Earth Processes with SAR",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI4",
+      "title": "Titan City, 3023",
+      "categories": [
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MTU=",
+      "title": "Uncover the Role of Greenhouse Gases in Your Neighborhood!",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjE4",
+      "title": "Visualize a Space Mission Using Virtual Reality",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MTI1MDY=",
+      "title": "Visualize Space Science",
+      "categories": [
+        "Advanced",
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI2",
+      "title": "What’s Up With This Water?",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMjg=",
+      "title": "Will It Rain On My Parade?",
+      "categories": [
+        "Intermediate"
+      ]
+    },
+    {
+      "id": "aWQ6NjI5",
+      "title": "Winning the Helio Big Year with Joy, Curiosity, and Science!",
+      "categories": [
+        "Advanced",
+        "Intermediate",
+        "Beginner/Youth"
+      ]
+    },
+    {
+      "id": "aWQ6MzEzMTU=",
+      "title": "Your Home in Space: The Habitat Layout Creator",
+      "categories": [
+        "Intermediate"
+      ]
+    }
+  ]
+}

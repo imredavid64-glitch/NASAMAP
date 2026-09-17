@@ -23,7 +23,7 @@ published reference.
 | **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then stamps **GO / NO-GO**. |
 | **II · Fly** | `/fly` | Replay **Apollo 11** event-by-event from an interpolated historical timeline, or fly a **patched-conic Hohmann transfer** (Earth→Moon, or Earth→Mars via `?mode=`). |
 | **III · Live** | `/live` | Real-time ISS ground track, Voyager 1 & 2 range (JPL Horizons), the day's APOD, near-Earth objects and NOAA space weather — with a committed snapshot fallback so the demo never dies on stage. |
-| **IV · Share** | `/library`, `/search`, `/commons` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, plus the Mission Passport & Patch you can download and print. |
+| **IV · Share** | `/library`, `/search`, `/commons`, `/challenges` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, the Mission Passport & Patch you can download and print, and a live **Challenge Aligner** mapping all 86 official 2026 challenges to the platform. |
 
 ---
 
@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**111 tests**, `vitest`).
+  (**124 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -81,7 +81,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 111 tests
+npm test             # vitest — 124 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
@@ -89,7 +89,7 @@ npm run build
 ```
 
 Runtime smoke test (after `npm run build && npm start`): `/`, `/mission`, `/fly`, `/fly?mode=hohmann`,
-`/live`, `/library`, `/library/apollo-11-replay`, `/search`, `/commons`, and every `/api/live/*` route.
+`/live`, `/library`, `/library/apollo-11-replay`, `/search`, `/commons`, `/challenges`, and every `/api/live/*` route.
 
 ---
 
@@ -116,9 +116,27 @@ scripts/      # validate-data, check-challenges
 
 ## Challenge alignment
 
-Built for the **2026 "The Next Frontier"** challenge. Challenge titles are fetched from the official
-Space Apps API by `scripts/check-challenges.mjs`; when the full statements publish, each one is mapped to a
-relevance lane in the Data Commons.
+The official Space Apps 2026 catalogue is **extracted, not typed in**:
+
+```bash
+node scripts/extract-challenges.mjs   # writes src/data/challenges-2026.json from the public GraphQL API
+node scripts/check-challenges.mjs     # human-readable listing
+```
+
+`src/lib/challenges.ts` matches every title against six **relevance lanes** that mirror the four acts.
+The result is a live `/challenges` page — **37 of 86 challenges (43%)** are served by a shipped capability,
+each badge deep-linking to the feature that does the work. The lanes NASAMAP is purpose-built for include:
+
+- **Space Mission Design Game** — rocket selection, Δv, mass budget, GO / NO-GO (`/mission`)
+- **Interplanetary Survival Guide: Martian Map** — radiation, consumables, ECLSS, transfer geometry (`/mission#ops`)
+- **SpaceTrash Hack: Revolutionizing Recycling on Mars** — closed-loop recycling and array sizing (`/mission#ops`)
+- **Your Home in Space: The Habitat Layout Creator** — habitat mass budgets and surface stay (`/mission`)
+- **Create an Orrery Web App that Displays Near-Earth Objects** — 3D transfer flight + live NEO feed (`/fly`, `/live`)
+- **International Space Station 25th Anniversary Apps** — live ISS ground track and snapshot fallback (`/live`)
+
+> The API disables GraphQL introspection and `viewer.challenges` returns `null` for anonymous callers; the
+> working query is `challenges(first: N) { edges { node { id title categories { name } } } }`. The original
+> checker queried a non-existent `slug` field, which made a published catalogue look empty — now fixed.
 
 ---
 
