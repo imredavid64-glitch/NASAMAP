@@ -1,0 +1,65 @@
+[
+  {
+    "id": "quadrantids",
+    "name": "Quadrantids",
+    "peakMonth": 1,
+    "dateRange": ["2026-01-03", "2026-01-04"],
+    "zhPerHour": 120,
+    "parentBody": "2003 EH1",
+    "notes": "Sharp peak, lasts only hours."
+  },
+  {
+    "id": "lyrids",
+    "name": "Lyrids",
+    "peakMonth": 4,
+    "dateRange": ["2026-04-21", "2026-04-22"],
+    "zhPerHour": 18,
+    "parentBody": "C/1861 G1 (Thatcher)",
+    "notes": "One of the oldest recorded showers (687 BC)."
+  },
+  {
+    "id": "eta-aquariids",
+    "name": "Eta Aquariids",
+    "peakMonth": 5,
+    "dateRange": ["2026-05-05", "2026-05-06"],
+    "zhPerHour": 50,
+    "parentBody": "1P/Halley",
+    "notes": "Best from the southern hemisphere."
+  },
+  {
+    "id": "perseids",
+    "name": "Perseids",
+    "peakMonth": 8,
+    "dateRange": ["2026-08-12", "2026-08-13"],
+    "zhPerHour": 100,
+    "parentBody": "109P/Swift-Tuttle",
+    "notes": "The classic summer shower."
+  },
+  {
+    "id": "orionids",
+    "name": "Orionids",
+    "peakMonth": 10,
+    "dateRange": ["2026-10-21", "2026-10-22"],
+    "zhPerHour": 20,
+    "parentBody": "1P/Halley",
+    "notes": "Fast meteors from Halley's debris."
+  },
+  {
+    "id": "leonids",
+    "name": "Leonids",
+    "peakMonth": 11,
+    "dateRange": ["2026-11-17", "2026-11-18"],
+    "zhPerHour": 15,
+    "parentBody": "55P/Tempel-Tuttle",
+    "notes": "Produces famous meteor storms every ~33 years."
+  },
+  {
+    "id": "geminids",
+    "name": "Geminids",
+    "peakMonth": 12,
+    "dateRange": ["2026-12-13", "2026-12-14"],
+    "zhPerHour": 150,
+    "parentBody": "3200 Phaethon",
+    "notes": "The best shower of the year, often colorful."
+  }
+]

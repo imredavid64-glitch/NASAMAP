@@ -1,0 +1,74 @@
+[
+  {
+    "id": "soybean",
+    "name": "Soybean",
+    "photoperiod": "short-day",
+    "criticalDayLengthHours": { "min": 12, "max": 14 },
+    "daysToMaturity": { "min": 90, "max": 160 },
+    "notes": "Flowering triggered by shortening days; maturity group drives window.",
+    "sourceNote": "Agronomic literature (USDA plant physiology); varies by cultivar."
+  },
+  {
+    "id": "rice",
+    "name": "Rice",
+    "photoperiod": "short-day",
+    "criticalDayLengthHours": { "min": 12, "max": 13 },
+    "daysToMaturity": { "min": 105, "max": 150 },
+    "notes": "Many varieties flower when days shorten toward 12-13h.",
+    "sourceNote": "IRRI photoperiod notes; varies by subspecies."
+  },
+  {
+    "id": "corn",
+    "name": "Corn (Maize)",
+    "photoperiod": "day-neutral",
+    "criticalDayLengthHours": { "min": null, "max": null },
+    "daysToMaturity": { "min": 60, "max": 140 },
+    "notes": "Day-neutral; temperature and moisture set the clock.",
+    "sourceNote": "USDA/agronomy references."
+  },
+  {
+    "id": "wheat-spring",
+    "name": "Spring Wheat",
+    "photoperiod": "long-day",
+    "criticalDayLengthHours": { "min": 13, "max": 15 },
+    "daysToMaturity": { "min": 80, "max": 120 },
+    "notes": "Long days accelerate heading; vernalization not required for spring types.",
+    "sourceNote": "Agronomic literature; varies by variety."
+  },
+  {
+    "id": "onion",
+    "name": "Onion (Bulbing)",
+    "photoperiod": "long-day",
+    "criticalDayLengthHours": { "min": 11, "max": 16 },
+    "daysToMaturity": { "min": 90, "max": 200 },
+    "notes": "Bulbing induced once day length passes a cultivar-specific threshold (short-day ~11-12h, long-day ~15-16h).",
+    "sourceNote": "Allium physiology references."
+  },
+  {
+    "id": "tomato",
+    "name": "Tomato",
+    "photoperiod": "day-neutral",
+    "criticalDayLengthHours": { "min": null, "max": null },
+    "daysToMaturity": { "min": 60, "max": 100 },
+    "notes": "Day-neutral; fruit set gated by temperature.",
+    "sourceNote": "Solanaceae agronomy references."
+  },
+  {
+    "id": "potato",
+    "name": "Potato",
+    "photoperiod": "long-day",
+    "criticalDayLengthHours": { "min": 13, "max": 15 },
+    "daysToMaturity": { "min": 70, "max": 120 },
+    "notes": "Tuberization varies with day length by cultivar.",
+    "sourceNote": "Potato physiology references."
+  },
+  {
+    "id": "hemp",
+    "name": "Hemp / Cannabis",
+    "photoperiod": "short-day",
+    "criticalDayLengthHours": { "min": 12, "max": 12 },
+    "daysToMaturity": { "min": 90, "max": 160 },
+    "notes": "Flowering unlocks when day length drops to ~12h.",
+    "sourceNote": "Cannabis photoperiod literature."
+  }
+]

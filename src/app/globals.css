@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  border-color: theme("colors.space.700 / 50%");
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-space-950 text-slate-200 antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 240, 255, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(255, 43, 109, 0.05), transparent);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+::selection {
+  background: theme("colors.space.cyan / 30%");
+  color: theme("colors.white");
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: theme("colors.space.950");
+}
+::-webkit-scrollbar-thumb {
+  background: theme("colors.space.700");
+  border-radius: 9999px;
+  border: 2px solid theme("colors.space.950");
+}
+::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.space.cyan / 60%");
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm;
+  }
+  .kicker {
+    @apply font-mono text-xs uppercase tracking-[0.25em] text-space-cyan;
+  }
+  .prose-space h2 {
+    @apply mt-10 mb-4 text-xl font-semibold text-white;
+  }
+  .prose-space p {
+    @apply mb-4 text-slate-300;
+  }
+}

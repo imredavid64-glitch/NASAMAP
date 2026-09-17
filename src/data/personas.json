@@ -1,0 +1,83 @@
+[
+  {
+    "id": "farmer",
+    "name": "Farmer / Grower",
+    "icon": "Wheat",
+    "tagline": "When to plant, when to worry — from the Sun, Moon and solar wind.",
+    "signals": ["dayLength", "sunPath", "frostWindow", "gnssRisk", "moonPhase"],
+    "action": "Photoperiod windows + GPS-risk alerts for field work.",
+    "description": "Day length drives flowering and hardening; solar storms degrade the GPS that steers your tractor. We turn both into one planting card."
+  },
+  {
+    "id": "fisher",
+    "name": "Fisher",
+    "icon": "Fish",
+    "tagline": "Tides and moonlight decide the catch.",
+    "signals": ["moonPhase", "tides", "solunar"],
+    "action": "Tonight's tide rating + solunar windows.",
+    "description": "Moon phase drives tides and feeding behavior; we rate tonight 0-100 for casting off."
+  },
+  {
+    "id": "beekeeper",
+    "name": "Beekeeper",
+    "icon": "Heart",
+    "tagline": "Bloom windows driven by changing daylight.",
+    "signals": ["dayLength", "sunPath", "temperature"],
+    "action": "Spring bloom + nectar-flow windows.",
+    "description": "Colonies pace their forage to photoperiod-driven flowering; know when the flow starts."
+  },
+  {
+    "id": "solar",
+    "name": "Solar Owner",
+    "icon": "Sun",
+    "tagline": "Your panels' best tilt and today's sun.",
+    "signals": ["sunPath", "insolation", "dayLength"],
+    "action": "Today's solar potential + optimum tilt by season.",
+    "description": "Sun elevation and day length compute your generation window; we suggest the ideal panel angle."
+  },
+  {
+    "id": "ham-radio",
+    "name": "Ham Operator",
+    "icon": "Radio",
+    "tagline": "Solar activity opens or kills the bands.",
+    "signals": ["solarActivity", "hfPropagation", "aurora"],
+    "action": "Today's HF propagation rating.",
+    "description": "Sunspot number and solar flux predict the ionosphere; check before you key the mic."
+  },
+  {
+    "id": "pilot",
+    "name": "Pilot / Operations",
+    "icon": "Plane",
+    "tagline": "Space weather can blackout radio and degrade GPS.",
+    "signals": ["solarActivity", "gnssRisk", "hfPropagation"],
+    "action": "GNSS/HF status brief for flight ops.",
+    "description": "Solar flares can scramble precision approaches; a pre-flight space-weather brief keeps ops safe."
+  },
+  {
+    "id": "astrophotographer",
+    "name": "Astrophotographer",
+    "icon": "Telescope",
+    "tagline": "The Moon and satellites will ruin your frame.",
+    "signals": ["moonPhase", "issPass", "aurora", "meteorShowers"],
+    "action": "Tonight's dark-sky + pass + aurora planner.",
+    "description": "New Moon = dark skies. Know when the ISS or a flare crosses your target."
+  },
+  {
+    "id": "family",
+    "name": "Family / Dreamer",
+    "icon": "Sparkles",
+    "tagline": "This week in the sky, explained.",
+    "signals": ["moonPhase", "meteorShowers", "issPass", "planetEvents"],
+    "action": "A weekly skywatching digest.",
+    "description": "What to look up at tonight, tomorrow, and this season — no telescope needed."
+  },
+  {
+    "id": "student",
+    "name": "Student / Teacher",
+    "icon": "GraduationCap",
+    "tagline": "Real math behind real sky.",
+    "signals": ["dayLength", "sunPath", "moonPhase", "planetEvents"],
+    "action": "Lesson cards + printable mission worksheets.",
+    "description": "Every card links to the formula behind it, with classroom-ready explainers."
+  }
+]
