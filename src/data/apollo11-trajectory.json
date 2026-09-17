@@ -1,0 +1,122 @@
+[
+  {
+    "met": "00:00:00",
+    "utc": "1969-07-16T13:32:00Z",
+    "event": "Launch",
+    "body": "earth",
+    "position": { "x": 1.0, "y": 0.0, "z": 0.0 },
+    "velocity": { "x": 0.0, "y": 0.0, "z": 0.0 }
+  },
+  {
+    "met": "02:44:16",
+    "utc": "1969-07-16T16:16:16Z",
+    "event": "TLI Ignition",
+    "body": "earth",
+    "position": { "x": 0.95, "y": 0.1, "z": -0.15 },
+    "velocity": { "x": -0.3, "y": 0.05, "z": 0.85 }
+  },
+  {
+    "met": "02:50:03",
+    "utc": "1969-07-16T16:22:03Z",
+    "event": "TLI Cutoff",
+    "body": "earth",
+    "position": { "x": 0.88, "y": 0.12, "z": -0.22 },
+    "velocity": { "x": -0.25, "y": 0.04, "z": 1.1 }
+  },
+  {
+    "met": "03:17:04",
+    "utc": "1969-07-16T16:49:04Z",
+    "event": "CSM/LM Separation",
+    "body": "earth",
+    "position": { "x": 0.75, "y": 0.15, "z": -0.35 },
+    "velocity": { "x": -0.2, "y": 0.03, "z": 1.15 }
+  },
+  {
+    "met": "12:00:00",
+    "utc": "1969-07-17T01:32:00Z",
+    "event": "Coast - 12h GET",
+    "body": "earth",
+    "position": { "x": 0.1, "y": 0.25, "z": -0.8 },
+    "velocity": { "x": 0.15, "y": 0.02, "z": 0.9 }
+  },
+  {
+    "met": "26:44:58",
+    "utc": "1969-07-17T16:16:58Z",
+    "event": "MCC-1",
+    "body": "earth",
+    "position": { "x": -0.45, "y": 0.3, "z": -0.65 },
+    "velocity": { "x": 0.35, "y": 0.02, "z": 0.75 }
+  },
+  {
+    "met": "48:00:00",
+    "utc": "1969-07-18T13:32:00Z",
+    "event": "Coast - 2d GET",
+    "body": "earth",
+    "position": { "x": -0.85, "y": 0.2, "z": -0.1 },
+    "velocity": { "x": 0.5, "y": 0.01, "z": 0.35 }
+  },
+  {
+    "met": "61:40:00",
+    "utc": "1969-07-19T01:12:00Z",
+    "event": "MCC-2",
+    "body": "earth",
+    "position": { "x": -0.95, "y": 0.1, "z": 0.15 },
+    "velocity": { "x": 0.55, "y": 0.0, "z": 0.1 }
+  },
+  {
+    "met": "72:00:00",
+    "utc": "1969-07-19T13:32:00Z",
+    "event": "Lunar SOI Entry",
+    "body": "moon",
+    "position": { "x": -0.98, "y": 0.02, "z": 0.18 },
+    "velocity": { "x": 0.58, "y": 0.0, "z": 0.05 }
+  },
+  {
+    "met": "75:49:50",
+    "utc": "1969-07-19T15:21:50Z",
+    "event": "LOI-1 Ignition",
+    "body": "moon",
+    "position": { "x": -0.9, "y": 0.05, "z": 0.22 },
+    "velocity": { "x": 0.4, "y": 0.02, "z": 0.2 }
+  },
+  {
+    "met": "76:00:00",
+    "utc": "1969-07-19T15:32:00Z",
+    "event": "LOI-1 Cutoff / Lunar Orbit",
+    "body": "moon",
+    "position": { "x": -0.75, "y": 0.1, "z": 0.3 },
+    "velocity": { "x": 0.15, "y": 0.02, "z": 0.45 }
+  },
+  {
+    "met": "80:11:36",
+    "utc": "1969-07-19T19:43:36Z",
+    "event": "LOI-2 Circularization",
+    "body": "moon",
+    "position": { "x": -0.55, "y": 0.15, "z": 0.4 },
+    "velocity": { "x": 0.05, "y": 0.02, "z": 0.5 }
+  },
+  {
+    "met": "100:12:00",
+    "utc": "1969-07-20T17:44:00Z",
+    "event": "LM Undocking",
+    "body": "moon",
+    "position": { "x": -0.2, "y": 0.2, "z": 0.5 },
+    "velocity": { "x": -0.05, "y": 0.02, "z": 0.5 }
+  },
+  {
+    "met": "102:33:05",
+    "utc": "1969-07-20T20:05:05Z",
+    "event": "Powered Descent Initiation",
+    "body": "moon",
+    "position": { "x": 0.1, "y": 0.22, "z": 0.45 },
+    "velocity": { "x": -0.15, "y": 0.01, "z": 0.3 }
+  },
+  {
+    "met": "102:45:40",
+    "utc": "1969-07-20T20:17:40Z",
+    "event": "Touchdown (Tranquility Base)",
+    "body": "moon",
+    "position": { "x": 0.3, "y": 0.24, "z": 0.35 },
+    "velocity": { "x": 0.0, "y": 0.0, "z": 0.0 }
+  }
+]

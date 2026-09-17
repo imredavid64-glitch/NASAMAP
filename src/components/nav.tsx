@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Rocket, Compass, Radio, Library, Search } from "lucide-react";
+import { Rocket, Compass, Radio, Library, Search, Orbit } from "lucide-react";
 
 const links = [
   { href: "/mission", label: "Mission", icon: Rocket },
+  { href: "/fly", label: "Fly", icon: Orbit },
   { href: "/commons", label: "Data Commons", icon: Compass },
   { href: "/live", label: "Live", icon: Radio },
   { href: "/library", label: "Library", icon: Library },
