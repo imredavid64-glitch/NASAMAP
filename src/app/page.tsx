@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Rocket, Compass, Radio, ArrowRight, Database, Ear, Users } from "lucide-react";
+import { Rocket, Compass, Radio, ArrowRight, Database, Ear, Users, Orbit, Library, Search } from "lucide-react";
 import { SpaceCanvas } from "@/components/space-canvas";
 import { SkyNow } from "@/components/SkyNow";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -7,15 +7,31 @@ import { Badge } from "@/components/ui/badge";
 
 const pillars = [
   {
-    kicker: "Pillar A · the journey",
-    title: "Plan. Fly. Live. The Next Frontier.",
+    kicker: "Act I · plan",
+    title: "Design a mission that actually closes.",
     href: "/mission",
     icon: Rocket,
     body:
-      "Launch a real mission to the Moon or Mars: pick a rocket, fly the Hohmann transfer, survive the radiation and the life-support budget, and take home your Mission Passport.",
+      "Pick a rocket and a target, then watch the Δv, mass, radiation and life-support budgets add up. Take home a printable Mission Passport with a GO/NO-GO stamp.",
   },
   {
-    kicker: "Pillar B · the commons",
+    kicker: "Act II · fly",
+    title: "Relive Apollo 11, or fly the transfer yourself.",
+    href: "/fly",
+    icon: Orbit,
+    body:
+      "Scrub the real Apollo 11 timeline from launch to Tranquility Base, follow the spacecraft, or simulate a patched-conic Hohmann transfer to the Moon.",
+  },
+  {
+    kicker: "Act III · live",
+    title: "What is happening in space, right now.",
+    href: "/live",
+    icon: Radio,
+    body:
+      "ISS passes overhead, Voyager's light-lag, today's APOD, near-Earth objects and the current solar-storm level — live feeds with dated offline snapshots.",
+  },
+  {
+    kicker: "Act IV · share",
     title: "Cosmic data for every human.",
     href: "/commons",
     icon: Compass,
@@ -95,6 +111,22 @@ export default function Home() {
               <CardBody className="mt-4 leading-relaxed">{p.body}</CardBody>
             </Card>
           ))}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-slate-500">Also in the app:</span>
+          <Link
+            href="/library"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            <Library className="h-4 w-4 text-space-cyan" /> Mission Library
+          </Link>
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            <Search className="h-4 w-4 text-space-cyan" /> Search everything
+          </Link>
         </div>
       </section>
 
