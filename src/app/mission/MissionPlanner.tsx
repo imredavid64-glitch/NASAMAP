@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TransferDiagram } from "@/components/mission/transfer-diagram";
+import { OpsBudget } from "@/components/mission/ops-budget";
 import { MissionPassport } from "./MissionPassport";
+import { MissionPatch } from "./MissionPatch";
 
 type Destination = "moon" | "mars";
 
@@ -260,7 +262,15 @@ export function MissionPlanner() {
             </Card>
           )}
 
+          <div id="ops" className="scroll-mt-20">
+            <OpsBudget design={design} />
+          </div>
+
           <MissionPassport design={design} flyHref={destination === "moon" ? "/fly?mode=hohmann" : undefined} />
+
+          <div id="patch" className="scroll-mt-20">
+            <MissionPatch design={design} />
+          </div>
         </div>
       </div>
     </section>

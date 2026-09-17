@@ -26,9 +26,9 @@ const acts = [
   {
     n: "03",
     label: "Prove",
-    title: "Take the passport",
-    body: "Every design issues a printable Mission Passport with a GO / NO-GO stamp you can hand to the judges.",
-    href: "#design",
+    title: "Close the loop",
+    body: "See how ISS-class recycling cuts the launch stack, then take a printable Mission Passport and patch.",
+    href: "#ops",
     icon: FileBadge,
   },
 ] as const;
@@ -43,7 +43,8 @@ export default function MissionPage() {
         </h1>
         <p className="mt-4 max-w-2xl text-slate-400">
           Build a real mission to the Moon or Mars. Choose your rocket, watch the transfer play out, check the crew&apos;s
-          radiation dose and light-lag to home, then take home a printable Mission Passport.
+          radiation dose and light-lag to home, close the life-support loop, then take home a printable Mission Passport
+          and patch.
         </p>
       </div>
 

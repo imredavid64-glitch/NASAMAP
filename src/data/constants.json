@@ -4,6 +4,11 @@
   "G": 6.6743e-11,
   "speedOfLightKmPerSec": 299792.458,
   "astronomicalUnitKm": 149597870.7,
+  "solarConstantKwPerM2": 1.361,
+  "orbitAu": {
+    "earth": 1.0,
+    "mars": 1.523679
+  },
   "mu": {
     "sun": 1.32712440018e11,
     "earth": 398600.4418,
