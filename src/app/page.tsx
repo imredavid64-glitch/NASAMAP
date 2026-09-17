@@ -12,7 +12,7 @@ const pillars = [
     href: "/mission",
     icon: Rocket,
     body:
-      "Pick a rocket and a target, then watch the Δv, mass, radiation and life-support budgets add up. Take home a printable Mission Passport with a GO/NO-GO stamp.",
+      "Pick a rocket and a target, then watch the Δv, mass, radiation and life-support budgets add up. Get an S–D rating against cited NASA limits, a printable Mission Passport, and a mission link you can share.",
   },
   {
     kicker: "Act II · fly",
@@ -20,7 +20,7 @@ const pillars = [
     href: "/fly",
     icon: Orbit,
     body:
-      "Scrub the real Apollo 11 timeline from launch to Tranquility Base, follow the spacecraft, or simulate a patched-conic Hohmann transfer to the Moon.",
+      "Scrub the real Apollo 11 timeline from launch to Tranquility Base, fly a patched-conic Hohmann transfer to the Moon, or coast Earth→Mars on a Sun-centred Kepler solve.",
   },
   {
     kicker: "Act III · live",
