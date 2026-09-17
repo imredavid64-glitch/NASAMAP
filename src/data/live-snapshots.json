@@ -1,0 +1,42 @@
+{
+  "note": "Offline fallback snapshots for the live frontier ribbon. Every value is real and sourced; when the live feed is unreachable the UI labels the card as 'snapshot'.",
+  "fetchedAt": "2026-09-17T00:00:00Z",
+  "iss": {
+    "name": "ISS (ZARYA)",
+    "line1": "1 25544U 98067A   26259.85263506  .00007068  00000+0  13566-3 0  9993",
+    "line2": "2 25544  51.6307 206.4210 0004838 147.2470 212.8820 15.49143506585961",
+    "epochUTC": "2026-09-16T20:27:47Z",
+    "source": "CelesTrak NORAD GP element set 25544"
+  },
+  "voyager": {
+    "voyager1": { "name": "Voyager 1", "objectId": "-31", "distanceAu": 171.873966746212 },
+    "voyager2": { "name": "Voyager 2", "objectId": "-32", "distanceAu": 143.603204297089 },
+    "observer": "Earth geocenter (Horizons @399)",
+    "source": "JPL Horizons observer table, quantity 20 (range)"
+  },
+  "apod": {
+    "date": "2026-09-17",
+    "title": "A Treasure Chest in the Carina Nebula",
+    "media_type": "image",
+    "url": "https://apod.nasa.gov/apod/image/2609/JWST_Treasure_Chest_800.jpg",
+    "hdurl": "https://apod.nasa.gov/apod/image/2609/JWST_Treasure_Chest.jpg",
+    "copyright": "ESA/Webb, NASA & CSA, M. Reiter",
+    "source": "NASA APOD API"
+  },
+  "neo": {
+    "date": "2026-09-17",
+    "elementCount": 4,
+    "sample": [
+      { "name": "(2006 SB142)", "hazardous": false, "diameterKm": 0.2594, "missKm": 74149448.0, "velocityKps": 3.84 },
+      { "name": "(2013 ST)", "hazardous": false, "diameterKm": 0.0682, "missKm": 38638849.4, "velocityKps": 14.26 },
+      { "name": "(2016 VH2)", "hazardous": false, "diameterKm": 0.056, "missKm": 36432856.3, "velocityKps": 9.93 }
+    ],
+    "source": "NASA NeoWs feed API"
+  },
+  "spaceWeather": {
+    "kp": 3.0,
+    "observedAt": "2026-09-17T00:00:00Z",
+    "level": "unsettled",
+    "source": "NOAA SWPC planetary K-index"
+  }
+}
