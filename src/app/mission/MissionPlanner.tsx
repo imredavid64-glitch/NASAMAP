@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
+import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -54,16 +55,42 @@ function GateBadge({ gate }: { gate: "pass" | "fail" | "unknown" }) {
   );
 }
 
-export function MissionPlanner() {
-  const [destination, setDestination] = useState<Destination>("mars");
-  const [vehicleId, setVehicleId] = useState<string>("starship");
-  const [crew, setCrew] = useState(4);
-  const [surfaceDays, setSurfaceDays] = useState(90);
+export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignInput }) {
+  const [destination, setDestination] = useState<Destination>(initial.destination);
+  const [vehicleId, setVehicleId] = useState<string>(initial.vehicleId);
+  const [crew, setCrew] = useState(initial.crew);
+  const [surfaceDays, setSurfaceDays] = useState(initial.surfaceDays);
+  const [copied, setCopied] = useState(false);
 
   const design = useMemo(
     () => designMission({ destination, vehicleId, crew, surfaceDays }),
     [destination, vehicleId, crew, surfaceDays],
   );
+
+  const current: DesignInput = { destination, vehicleId, crew, surfaceDays };
+
+  useEffect(() => {
+    const next: DesignInput = { destination, vehicleId, crew, surfaceDays };
+    const query = isCustomDesign(next) ? `?${encodeDesignQuery(next)}` : "";
+    window.history.replaceState(null, "", `/mission${query}`);
+  }, [destination, vehicleId, crew, surfaceDays]);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const resetDesign = () => {
+    setDestination(DEFAULT_DESIGN.destination);
+    setVehicleId(DEFAULT_DESIGN.vehicleId);
+    setCrew(DEFAULT_DESIGN.crew);
+    setSurfaceDays(DEFAULT_DESIGN.surfaceDays);
+  };
 
   const careerLimitNote =
     design.radiationMsvTotal > RADIATION_LIMIT_MSV
@@ -77,6 +104,27 @@ export function MissionPlanner() {
         Every number below is computed live from the platform physics engine and cited NASA datasets — nothing is
         hard-coded for effect.
       </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={copyLink}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+          {copied ? "Link copied" : "Copy mission link"}
+        </button>
+        <button
+          type="button"
+          onClick={resetDesign}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+        >
+          <RotateCcw className="h-3.5 w-3.5" /> Reset
+        </button>
+        <span className="text-xs text-slate-500">
+          The URL encodes your design — bookmark it, or challenge someone to beat your grade.
+        </span>
+      </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <Card>

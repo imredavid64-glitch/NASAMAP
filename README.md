@@ -20,7 +20,7 @@ published reference.
 
 | Act | Route | What it does |
 | --- | --- | --- |
-| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. |
+| **I · Plan** | `/mission` | Pick a destination, rocket, crew and surface stay. The engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. The design is encoded in the URL, so a mission is a shareable, bookmarkable link. |
 | **II · Fly** | `/fly` | Three trajectory modes: replay **Apollo 11** event-by-event from an interpolated historical timeline; fly a **patched-conic Hohmann transfer** to the Moon (`?mode=hohmann`); or coast Earth→Mars on a Sun-centred **Kepler solve** of the minimum-energy ellipse (`?mode=mars`). |
 | **III · Live** | `/live` | Real-time ISS ground track, Voyager 1 & 2 range (JPL Horizons), the day's APOD, near-Earth objects and NOAA space weather — with a committed snapshot fallback so the demo never dies on stage. |
 | **IV · Share** | `/library`, `/search`, `/commons`, `/challenges` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, the Mission Passport & Patch you can download and print, and a live **Challenge Aligner** mapping all 86 official 2026 challenges to the platform. |
@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**139 tests**, `vitest`).
+  (**147 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -82,7 +82,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 139 tests
+npm test             # vitest — 147 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data

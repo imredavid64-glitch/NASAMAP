@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Rocket, Orbit, FileBadge, ArrowRight } from "lucide-react";
 import { SpaceCanvas } from "@/components/space-canvas";
+import { decodeDesign } from "@/lib/design-link";
 import { MissionPlanner } from "./MissionPlanner";
 
 export const metadata: Metadata = { title: "Mission — Plan the frontier" };
@@ -19,7 +20,7 @@ const acts = [
     n: "02",
     label: "Fly",
     title: "Watch the trajectory",
-    body: "Replay Apollo 11 event-by-event, or fly a patched-conic Hohmann transfer over the Moon.",
+    body: "Replay Apollo 11 event-by-event, or fly a Hohmann transfer to the Moon or Mars from the design you just built.",
     href: "/fly",
     icon: Orbit,
   },
@@ -33,7 +34,12 @@ const acts = [
   },
 ] as const;
 
-export default function MissionPage() {
+export default async function MissionPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const initialDesign = decodeDesign(await searchParams);
   return (
     <div className="pt-28">
       <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
@@ -83,7 +89,7 @@ export default function MissionPage() {
       </div>
 
       <div id="design" className="scroll-mt-20">
-        <MissionPlanner />
+        <MissionPlanner initial={initialDesign} />
       </div>
     </div>
   );
