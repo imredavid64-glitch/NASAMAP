@@ -1,0 +1,87 @@
+[
+  {
+    "slug": "moon-transfer-101",
+    "title": "Moon Transfer 101: From LEO to Lunar Surface",
+    "category": "Mission Design",
+    "tags": ["moon", "TLI", "LOI", "delta-v", "hohmann"],
+    "excerpt": "How a translunar injection burn, 3-day coast, and lunar orbit insertion add up to a crewed Moon landing.",
+    "date": "2026-09-10",
+    "readTimeMin": 6,
+    "body": "# Moon Transfer 101\n\nA crewed Moon mission is not a single burn — it's a chain of maneuvers each with its own margin.\n\n## 1. Launch to LEO\nYour rocket puts the stack into a circular low-Earth orbit (~200–400 km). From there the real journey begins.\n\n## 2. Trans-Lunar Injection (TLI)\nA ~3.1 km/s burn raises apogee to the Moon's distance. The spacecraft then coasts for ~3.2 days along a highly elliptical orbit.\n\n## 3. Lunar Orbit Insertion (LOI)\nAt perilune, a ~0.9 km/s retrograde burn captures into low lunar orbit.\n\n## 4. Descent & Landing\nThe lander separates, descends, and touches down. Total surface Δv budget ~2.0 km/s.\n\n## Δv Summary (Apollo-style)\n| Maneuver | Δv (km/s) |\n|----------|-----------|\n| TLI | 3.10 |\n| LOI | 0.90 |\n| Descent | 2.00 |\n| **Total** | **~6.0** |\n\nThe Mission Planner on this site computes these numbers from your selected launch vehicle and payload.",
+    "sources": [
+      { "label": "NASA Apollo Mission Reports", "url": "https://www.hq.nasa.gov/alsj/" },
+      { "label": "NASA SP-362 Apollo Expeditions to the Moon", "url": "https://history.nasa.gov/SP-362/" }
+    ]
+  },
+  {
+    "slug": "mars-windows-explained",
+    "title": "Mars Launch Windows: Why Every 26 Months?",
+    "category": "Mission Design",
+    "tags": ["mars", "synodic", "hohmann", "launch-window"],
+    "excerpt": "The geometry of Earth and Mars orbits creates a ~780-day cycle — here's why and what it means for mission mass.",
+    "date": "2026-09-12",
+    "readTimeMin": 5,
+    "body": "# Mars Launch Windows Explained\n\nEarth laps Mars every **779.94 days** (the synodic period). This is the rhythm of interplanetary exploration.\n\n## The Geometry\n- Earth orbital period: 365.25 days\n- Mars orbital period: 686.98 days\n- Relative angular speed: 360°/365.25 − 360°/686.98 ≈ 0.461°/day\n- Time to gain 360°: 360 / 0.461 ≈ 780 days\n\n## Hohmann Transfer to Mars\nThe minimum-energy trajectory departs at Earth-Mars opposition + ~44° phase angle. Transfer time ~259 days.\n\n## Why It Matters for Mass\nOutside the window, Δv increases sharply. The Mission Planner shows how your launch vehicle's payload capacity drops as the departure date drifts from the optimal window.\n\n## Next Windows (Earth→Mars)\n| Launch Opens | Launch Closes | Arrival |\n|--------------|---------------|---------|\n| Late 2026 | Early 2027 | Late 2027 |\n| Late 2028 | Early 2029 | Late 2029 |\n| Late 2030 | Early 2031 | Late 2031 |\n\nPlan early — habitat mass, radiation shielding, and consumables all scale with transit time.",
+    "sources": [
+      { "label": "NASA Human Exploration of Mars Design Reference Architecture 5.0", "url": "https://www.nasa.gov/wp-content/uploads/2015/02/mars_dra5_0.pdf" },
+      { "label": "JPL CNEOS Mission Design", "url": "https://cneos.jpl.nasa.gov/" }
+    ]
+  },
+  {
+    "slug": "radiation-budget-deep-space",
+    "title": "Radiation Budgets for Deep-Space Crew",
+    "category": "Life Support",
+    "tags": ["radiation", "GCR", "SPE", "ECLSS", "shielding"],
+    "excerpt": "Galactic cosmic rays and solar particle events set the real limit on mission duration — here's the math.",
+    "date": "2026-09-14",
+    "readTimeMin": 7,
+    "body": "# Radiation Budgets for Deep-Space Crew\n\nSpace radiation comes in two flavors:\n\n## Galactic Cosmic Rays (GCR)\nHigh-energy nuclei (mostly H, He, Fe) — isotropic, continuous, hard to shield. Typical deep-space dose rate: **0.5–1.0 mSv/day** behind modest aluminum shielding.\n\n## Solar Particle Events (SPE)\nBursts of protons from solar flares — directional, sporadic, potentially lethal without a storm shelter. A large SPE can deliver **>1000 mSv** in hours to an unshielded crew.\n\n## NASA Career Limits\n| Age / Sex | Limit (mSv) |\n|-----------|-------------|\n| 30-yo male | 800 |\n| 30-yo female | 600 |\n| 50-yo male | 1200 |\n\n## Shielding Trade-offs\n- **Water / polyethylene**: best mass efficiency for GCR (~15 g/cm² halves dose)\n- **Storm shelter**: dedicated small volume (e.g., 5 g/cm²) for SPE events\n- **Active shielding** (magnetic/electric): promising but TRL 3–4\n\nThe Life Support core in this app computes mission radiation dose from transit + surface days and compares to the career limit for your crew profile.",
+    "sources": [
+      { "label": "NASA Space Radiation Cancer Risk Projection Model (NSCR 2020)", "url": "https://www.nasa.gov/space-radiation/" },
+      { "label": "NCRP Report No. 153", "url": "https://ncrponline.org/publications/ncrp-report-153/" }
+    ]
+  },
+  {
+    "slug": "farmer-sky-card-deep-dive",
+    "title": "Farmer Persona Sky Card — A Deep Dive",
+    "category": "Persona Guides",
+    "tags": ["farmer", "agriculture", "insolation", "frost", "meteor-shower"],
+    "excerpt": "How the Cosmic Data Commons turns almanac data into planting-day decisions for a mid-latitude farmer.",
+    "date": "2026-09-15",
+    "readTimeMin": 4,
+    "body": "# Farmer Persona Sky Card — A Deep Dive\n\nThe Farmer card answers: **\"When should I plant?\"**\n\n## Signals Computed\n1. **Day length & sun path** — photoperiod for crop variety selection\n2. **Moon phase** — traditional planting lore (root crops at new moon, leaf at full)\n3. **Tidal window** — high/low tide times for coastal fields\n4. **Solunar periods** — major/minor feeding times (fish & wildlife activity)\n5. **Insolation index** — clear-sky daily MJ/m² scaled by cloud climatology\n6. **Frost window** — median last-freeze / first-freeze dates for the latitude\n7. **Meteor shower proximity** — nights of elevated fire risk (dry conditions + fireballs)\n\n## Live Feeds (when online)\n- **Solar flux (F10.7)** → ionospheric absorption → GPS precision for auto-steer tractors\n- **Kp index** → GNSS scintillation risk → RTK correction reliability\n- **Aurora oval** → high-latitude comms degradation\n\n## Offline Mode\nAll almanac signals (1–7) are computed from the JPL DE440 ephemeris and NOAA solar algorithms — no network required. The farmer gets a complete briefing even in a cornfield with zero bars.",
+    "sources": [
+      { "label": "NOAA Solar Calculator", "url": "https://gml.noaa.gov/grad/solcalc/" },
+      { "label": "USDA Plant Hardiness Zone Map", "url": "https://planthardiness.ars.usda.gov/" },
+      { "label": "AMS Meteor Shower Calendar", "url": "https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" }
+    ]
+  },
+  {
+    "slug": "comm-delay-mars-relay",
+    "title": "Communications Delay & Relay Architecture for Mars",
+    "category": "Mission Operations",
+    "tags": ["mars", "comm", "light-time", "relay", "DSN"],
+    "excerpt": "From 4 to 24 minutes one-way — how missions plan around the speed of light.",
+    "date": "2026-09-16",
+    "readTimeMin": 5,
+    "body": "# Communications Delay & Relay Architecture for Mars\n\nLight is fast. Space is big. The combination means **no real-time control**.\n\n## Earth–Mars Light Time\n| Geometry | One-way | Round-trip |\n|----------|---------|------------|\n| Closest approach (opposition) | 3.0 min | 6.0 min |\n| Conjunction (Sun in between) | 22.3 min | 44.6 min |\n| Typical transfer midpoint | 12–15 min | 24–30 min |\n\n## Relay Assets\n- **MRO / MAVEN / TGO / MEX** — UHF relay orbiters (250–400 km altitude)\n- **DSN 34 m / 70 m** — Earth ground stations (Goldstone, Madrid, Canberra)\n- **Future**: Mars Relay Network (MRN) — dedicated comm satellites\n\n## Operational Impact\n- **Rover drives**: planned sol-by-sol, not joystick\n- **Science decisions**: uplink overnight, downlink next morning\n- **Emergency**: crewed missions need onboard autonomy for aborts\n\nThe Live Frontier ribbon shows Voyager's current light-lag as a reference — Mars is ~100× closer than Voyager 1, but the ops discipline is the same.",
+    "sources": [
+      { "label": "NASA Deep Space Network (DSN)", "url": "https://deepspace.jpl.nasa.gov/" },
+      { "label": "MEPAG Mars Relay Architecture", "url": "https://mepag.jpl.nasa.gov/" }
+    ]
+  },
+  {
+    "slug": "apollo-11-replay",
+    "title": "Apollo 11 Replay: The 3-Day Coast to the Moon",
+    "category": "History",
+    "tags": ["apollo", "apollo-11", "trajectory", "replay", "TLI"],
+    "excerpt": "Relive the translunar coast — TLI, mid-course corrections, LOI, and the view from the command module.",
+    "date": "2026-09-17",
+    "readTimeMin": 8,
+    "body": "# Apollo 11 Replay\n\n**Launch**: 1969-07-16 13:32 UTC from KSC LC-39A (Saturn V SA-506).\n\n## Timeline\n| Event | GET (hh:mm:ss) | UTC |\n|-------|----------------|-----|\n| Launch | 00:00:00 | 1969-07-16 13:32:00 |\n| TLI ignition | 02:44:16 | 1969-07-16 16:16:16 |\n| TLI cutoff | 02:50:03 | 1969-07-16 16:22:03 |\n| CSM/LM separation | 03:17:04 | 1969-07-16 16:49:04 |\n| MCC-1 (mid-course) | 26:44:58 | 1969-07-17 16:16:58 |\n| MCC-2 | 61:40:00 | 1969-07-19 01:12:00 |\n| LOI-1 ignition | 75:49:50 | 1969-07-19 15:21:50 |\n| LOI-2 | 80:11:36 | 1969-07-19 19:43:36 |\n| Undocking (LM) | 100:12:00 | 1969-07-20 17:44:00 |\n| Powered descent | 102:33:05 | 1969-07-20 20:05:05 |\n| **Touchdown** | **102:45:40** | **1969-07-20 20:17:40** |\n\n## The View\nDuring the 3-day coast, the Earth shrank from a disk filling the window to a marble. The Moon grew from a sliver to a dominant presence. The Fly view in this app recreates that coast with the real trajectory.\n\n## Your Turn\nOpen **Fly** → select **Apollo 11** → scrub the timeline. Watch the TLI burn, the coast, and the lunar approach.",
+    "sources": [
+      { "label": "Apollo 11 Mission Report (MSC-00171)", "url": "https://www.nasa.gov/mission_pages/apollo/missions/apollo11.html" },
+      { "label": "Apollo 11 Flight Journal", "url": "https://www.hq.nasa.gov/alsj/a11/a11.html" }
+    ]
+  }
+]
