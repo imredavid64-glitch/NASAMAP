@@ -1,6 +1,6 @@
 import { Trophy, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import { type MissionDesign } from "@/lib/mission";
-import { scoreMission, type ObjectiveStatus } from "@/lib/score";
+import { scoreMission, type ObjectiveStatus, type Scorecard as ScorecardResult } from "@/lib/score";
 import { Card, CardBody } from "@/components/ui/card";
 
 const STATUS: Record<ObjectiveStatus, { tone: string; Icon: typeof CheckCircle2; label: string }> = {
@@ -17,8 +17,8 @@ const GRADE_TONE: Record<string, string> = {
   D: "text-space-crimson",
 };
 
-export function Scorecard({ design }: { design: MissionDesign }) {
-  const card = scoreMission(design);
+export function Scorecard({ design, card: cardProp }: { design: MissionDesign; card?: ScorecardResult }) {
+  const card = cardProp ?? scoreMission(design);
 
   return (
     <Card className="border-space-cyan/25">

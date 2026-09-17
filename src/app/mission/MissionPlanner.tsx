@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw } from "lucide-react";
+import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
+import { scoreMission, RADIATION_LIMIT_MSV } from "@/lib/score";
+import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -11,7 +13,6 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { TransferDiagram } from "@/components/mission/transfer-diagram";
 import { OpsBudget } from "@/components/mission/ops-budget";
 import { Scorecard } from "@/components/mission/scorecard";
-import { RADIATION_LIMIT_MSV } from "@/lib/score";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
 
@@ -66,6 +67,27 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
     () => designMission({ destination, vehicleId, crew, surfaceDays }),
     [destination, vehicleId, crew, surfaceDays],
   );
+
+  const scorecard = useMemo(() => scoreMission(design), [design]);
+  const [best, setBest] = useState<BestRecord | null>(null);
+  const [newBest, setNewBest] = useState(false);
+
+  useEffect(() => {
+    setBest(readBest(window.localStorage, destination));
+  }, [destination]);
+
+  useEffect(() => {
+    const prev = readBest(window.localStorage, destination);
+    const candidate = { grade: scorecard.grade, score: scorecard.score };
+    if (isBetter(candidate, prev)) {
+      const record: BestRecord = { ...candidate, at: new Date().toISOString() };
+      writeBest(window.localStorage, destination, record);
+      setBest(record);
+      setNewBest(true);
+    } else {
+      setNewBest(false);
+    }
+  }, [destination, scorecard]);
 
   const current: DesignInput = { destination, vehicleId, crew, surfaceDays };
 
@@ -253,8 +275,20 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
           </div>
 
           <div id="scorecard" className="scroll-mt-20">
-            <Scorecard design={design} />
+            <Scorecard design={design} card={scorecard} />
           </div>
+
+          {best && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+              <Medal className={`h-3.5 w-3.5 ${newBest ? "text-space-amber" : "text-slate-500"}`} />
+              {newBest ? "New personal best for " : "Personal best for "}
+              {destination === "mars" ? "Mars" : "the Moon"}:{" "}
+              <span className="font-mono text-space-cyan">
+                {best.grade} · {best.score}
+              </span>
+              <span className="text-slate-600">· saved on this device</span>
+            </p>
+          )}
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <StatTile
