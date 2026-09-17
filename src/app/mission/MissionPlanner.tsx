@@ -126,6 +126,27 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
         </span>
       </div>
 
+      <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-2 lg:grid-cols-4">
+        {(
+          [
+            { n: "1", t: "Design", d: "Pick a target, a real launch vehicle, crew size and surface stay." },
+            { n: "2", t: "Score", d: "Seven weighted objectives judge Δv, radiation, life support, comms and more." },
+            { n: "3", t: "Fix the caps", d: "An unliftable stack or an over-limit dose caps your grade — close the gap for an S." },
+            { n: "4", t: "Share", d: "Copy the mission link, fly the trajectory, print the passport and patch." },
+          ] as const
+        ).map((s) => (
+          <div key={s.n} className="flex gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-space-cyan/40 bg-space-cyan/10 font-mono text-xs text-space-cyan">
+              {s.n}
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-white">{s.t}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-400">{s.d}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <Card>
           <CardBody>
