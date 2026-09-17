@@ -50,6 +50,8 @@ export interface MissionDesign {
   destination: Destination;
   vehicle: LaunchVehicleLite;
   crew: number;
+  surfaceDays: number;
+  totalDays: number;
   transferDays: number;
   transferHours: number;
   arrivalLt: { oneWayLabel: string; oneWaySec: number; roundTripLabel: string };
@@ -162,6 +164,8 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     destination: opts.destination,
     vehicle,
     crew,
+    surfaceDays,
+    totalDays,
     transferDays,
     transferHours: transferDays * 24,
     arrivalLt: { oneWayLabel: `${arrivalLt.oneWayLabel}`, oneWaySec: arrivalLt.oneWaySec, roundTripLabel: arrivalLt.roundTripLabel },

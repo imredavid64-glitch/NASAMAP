@@ -7,6 +7,7 @@ import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { MissionPassport } from "./MissionPassport";
 
 type Destination = "moon" | "mars";
 
@@ -240,6 +241,8 @@ export function MissionPlanner() {
               </ul>
             </CardBody>
           </Card>
+
+          <MissionPassport design={design} />
         </div>
       </div>
     </section>
