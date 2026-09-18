@@ -5,6 +5,7 @@
  */
 
 import type { MissionDesign } from "@/lib/mission";
+import { estimateMissionCost, formatUsd } from "@/lib/cost";
 
 export interface PassportData {
   missionId: string;
@@ -35,6 +36,7 @@ interface Row {
 export function passportSvg(data: PassportData): string {
   const { design, missionId, issuedUTC } = data;
   const d = design;
+  const cost = estimateMissionCost(d);
 
   const rows: Row[] = [
     { label: "Destination", value: d.destination === "mars" ? "MARS" : "MOON" },
@@ -68,6 +70,11 @@ export function passportSvg(data: PassportData): string {
       label: "Stack mass budget",
       value: `${(d.requiredMassKg / 1000).toFixed(1)} t`,
       sub: `capacity ${d.payloadCapacityKg ? `${(d.payloadCapacityKg / 1000).toFixed(0)} t` : "undocumented"}`,
+    },
+    {
+      label: "Estimated cost",
+      value: `${formatUsd(cost.totalUsd)}`,
+      sub: `confidence: ${cost.bestConfidence}`,
     },
   ];
 

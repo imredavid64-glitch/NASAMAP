@@ -42,6 +42,9 @@ interface LaunchVehicle {
   engine: string;
   description: string;
   source: string;
+  costPerLaunchUsd: number;
+  costConfidence: "documented" | "estimate";
+  costNote: string;
 }
 
 interface Persona {
@@ -147,6 +150,15 @@ for (const l of launchVehicles as LaunchVehicle[]) {
   check(`[${l.id}] isp vacuum > isp sea-level`, l.ispVacuumS > l.ispSeaLevelS);
   check(`[${l.id}] stages 1..5`, l.stages >= 1 && l.stages <= 5);
   check(`[${l.id}] date parseable`, !Number.isNaN(Date.parse(l.firstFlight)));
+  check(
+    `[${l.id}] costPerLaunchUsd>0`,
+    isNum(l.costPerLaunchUsd) && l.costPerLaunchUsd > 0,
+  );
+  check(
+    `[${l.id}] costConfidence enum`,
+    l.costConfidence === "documented" || l.costConfidence === "estimate",
+  );
+  check(`[${l.id}] costNote cited`, typeof l.costNote === "string" && l.costNote.length > 0);
 }
 
 console.log("personas.json");

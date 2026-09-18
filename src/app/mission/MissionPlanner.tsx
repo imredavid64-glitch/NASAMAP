@@ -15,6 +15,7 @@ import { TransferDiagram } from "@/components/mission/transfer-diagram";
 import { OpsBudget } from "@/components/mission/ops-budget";
 import { Scorecard } from "@/components/mission/scorecard";
 import { ScenarioPanel } from "@/components/mission/scenario-panel";
+import { CostCard } from "@/components/mission/cost-card";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
 
@@ -326,6 +327,10 @@ export function MissionPlanner({
 
           <div id="scorecard" className="scroll-mt-20">
             <Scorecard design={design} card={scorecard} />
+          </div>
+
+          <div id="budget" className="mt-4 scroll-mt-20">
+            <CostCard design={design} />
           </div>
 
           {best && (

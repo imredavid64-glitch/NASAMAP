@@ -8,6 +8,7 @@
 import type { MissionDesign } from "@/lib/mission";
 import type { Scenario } from "@/lib/scenarios";
 import type { Scorecard } from "@/lib/score";
+import { estimateMissionCost, formatUsd } from "@/lib/cost";
 
 export interface ReportCardData {
   design: MissionDesign;
@@ -47,6 +48,7 @@ interface Stat {
 }
 
 function statsFor(d: MissionDesign): Stat[] {
+  const cost = estimateMissionCost(d);
   return [
     { label: "Vehicle", value: d.vehicle.name },
     { label: "Crew", value: String(d.crew) },
@@ -55,6 +57,7 @@ function statsFor(d: MissionDesign): Stat[] {
     { label: "Radiation", value: `${d.radiationMsvTotal.toFixed(0)} mSv` },
     { label: "Δv", value: `${d.totalDeltaVKmS.toFixed(2)} km/s` },
     { label: "Stack", value: `${(d.requiredMassKg / 1000).toFixed(1)} t` },
+    { label: "Cost", value: `${formatUsd(cost.totalUsd)} · ${cost.bestConfidence}` },
   ];
 }
 

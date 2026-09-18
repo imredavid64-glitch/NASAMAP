@@ -5,12 +5,13 @@ import { scoreMission, RADIATION_LIMIT_MSV, RADIATION_WAIVER_MSV, DV_REFERENCE_K
 const tuned = () => designMission({ destination: "mars", vehicleId: "starship", crew: 4, surfaceDays: 30 });
 
 describe("mission scoring", () => {
-  it("judges seven weighted objectives totalling 100 points", () => {
+  it("judges eight weighted objectives totalling 100 points", () => {
     const card = scoreMission(tuned());
-    expect(card.objectives).toHaveLength(7);
+    expect(card.objectives).toHaveLength(8);
     expect(card.maxScore).toBe(100);
     expect(card.objectives.reduce((s, o) => s + o.weight, 0)).toBe(100);
-    expect(card.total).toBe(7);
+    expect(card.total).toBe(8);
+    expect(card.objectives.map((o) => o.id)).toContain("budget");
   });
 
   it("keeps the score in range and picks a valid grade", () => {

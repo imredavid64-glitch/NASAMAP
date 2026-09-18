@@ -1,14 +1,15 @@
-/**
- * Mission scoring engine — the "game layer" over the design engine.
+﻿/**
+ * Mission scoring engine â€” the "game layer" over the design engine.
  *
- * Turns a MissionDesign into a set of judged objectives with a 0–100 score and
+ * Turns a MissionDesign into a set of judged objectives with a 0â€“100 score and
  * a letter grade, so the planner has a win condition and replay value. Every
  * threshold is anchored to a published reference (NASA-STD-3001, NASA ISS
- * ECLSS, Apollo-class Δv). Pure and unit-tested in tests/score.test.ts.
+ * ECLSS, Apollo-class Î”v). Pure and unit-tested in tests/score.test.ts.
  */
 
 import { type MissionDesign } from "@/lib/mission";
 import { opsBudget } from "@/lib/life";
+import { estimateMissionCost, formatUsd } from "@/lib/cost";
 
 export type ObjectiveStatus = "pass" | "warn" | "fail";
 
@@ -17,7 +18,7 @@ export const RADIATION_LIMIT_MSV = 600;
 /** Above the career limit a mission needs an agency waiver. */
 export const RADIATION_WAIVER_MSV = 800;
 
-/** Reference total Δv (km/s) above which a transfer is penalised. */
+/** Reference total Î”v (km/s) above which a transfer is penalised. */
 export const DV_REFERENCE_KM_S: Record<MissionDesign["destination"], number> = {
   moon: 3.2,
   mars: 6.0,
@@ -74,7 +75,7 @@ const OBJECTIVES: Objective[] = [
     label: "Lift the stack",
     detail: "The chosen vehicle must be documented to carry the whole mass budget.",
     reference: "Published vehicle payload (launch-vehicles.json)",
-    weight: 20,
+    weight: 18,
     judge: (d) => ({
       status: d.launchGate === "pass" ? "pass" : d.launchGate === "unknown" ? "warn" : "fail",
       actual: `${(d.requiredMassKg / 1000).toFixed(1)} t stack`,
@@ -86,7 +87,7 @@ const OBJECTIVES: Objective[] = [
     label: "Respect the radiation career limit",
     detail: "Keep the crew's total mission dose under NASA's universal career limit.",
     reference: "NASA-STD-3001: < 600 mSv career effective dose",
-    weight: 20,
+    weight: 18,
     judge: (d) => ({
       status: tier(d.radiationMsvTotal, RADIATION_LIMIT_MSV, RADIATION_WAIVER_MSV),
       actual: `${d.radiationMsvTotal.toFixed(0)} mSv`,
@@ -97,14 +98,14 @@ const OBJECTIVES: Objective[] = [
     id: "eclss-loop",
     label: "Close the life-support loop",
     detail: "An ISS-class regenerative ECLSS should carry most of the consumable load.",
-    reference: "NASA ISS ECLSS (~90% water, ~50% O₂ recovery)",
-    weight: 15,
+    reference: "NASA ISS ECLSS (~90% water, ~50% Oâ‚‚ recovery)",
+    weight: 13,
     judge: (d) => {
       const ops = opsBudget({ destination: d.destination, crew: d.crew, days: d.totalDays });
       return {
         status: ops.savedPct >= 0.5 ? "pass" : ops.savedPct >= 0.35 ? "warn" : "fail",
         actual: `${(ops.savedPct * 100).toFixed(0)}% recycled`,
-        target: "≥ 50% of consumables",
+        target: "â‰Ą 50% of consumables",
       };
     },
   },
@@ -112,26 +113,26 @@ const OBJECTIVES: Objective[] = [
     id: "comms",
     label: "Keep a workable comms window",
     detail: "One-way light-lag must stay inside remote-operations tolerance.",
-    reference: "Speed of light over mean Earth–Mars distance",
-    weight: 10,
+    reference: "Speed of light over mean Earthâ€“Mars distance",
+    weight: 8,
     judge: (d) => ({
       status: tier(d.arrivalLt.oneWaySec, 1300, 2400),
       actual: `${d.arrivalLt.oneWayLabel} one-way`,
-      target: "≤ 21.7 min",
+      target: "â‰¤ 21.7 min",
     }),
   },
   {
     id: "transfer",
     label: "Fly an efficient transfer",
-    detail: "Total Δv should sit near the Hohmann / Apollo-class optimum for the destination.",
+    detail: "Total Î”v should sit near the Hohmann / Apollo-class optimum for the destination.",
     reference: "Hohmann transfer & Apollo-class TLI (rocket.ts)",
-    weight: 15,
+    weight: 13,
     judge: (d) => {
       const ref = DV_REFERENCE_KM_S[d.destination];
       return {
         status: tier(d.totalDeltaVKmS, ref, ref * 1.3),
         actual: `${d.totalDeltaVKmS.toFixed(2)} km/s`,
-        target: `≤ ${ref.toFixed(2)} km/s`,
+        target: `â‰¤ ${ref.toFixed(2)} km/s`,
       };
     },
   },
@@ -140,27 +141,42 @@ const OBJECTIVES: Objective[] = [
     label: "Do meaningful surface work",
     detail: "The crew should have time on the surface to justify the trip.",
     reference: "Mission design intent",
-    weight: 10,
+    weight: 8,
     judge: (d) => {
       const min = d.destination === "mars" ? 30 : 3;
       return {
         status: d.surfaceDays >= min ? "pass" : d.surfaceDays > 0 ? "warn" : "fail",
         actual: `${d.surfaceDays.toFixed(0)} days`,
-        target: `≥ ${min} days`,
+        target: `â‰Ą ${min} days`,
       };
     },
   },
-  {
+{
     id: "duration",
     label: "Keep the mission duration sane",
     detail: "Longer missions compound consumables, radiation and human factors.",
     reference: "Mission design intent",
-    weight: 10,
+    weight: 8,
     judge: (d) => ({
       status: tier(d.totalDays, 900, 1100),
       actual: `${d.totalDays.toFixed(0)} days`,
       target: "≤ 900 days",
     }),
+  },
+  {
+    id: "budget",
+    label: "Respect the budget",
+    detail: "Pick the cheapest proven stack that still closes — overruns kill missions before launch.",
+    reference: "Estimated per-launch cost (launch-vehicles.json, tagged)",
+    weight: 14,
+    judge: (d) => {
+      const total = estimateMissionCost(d).totalUsd;
+      return {
+        status: tier(total, 500_000_000, 1_500_000_000),
+        actual: formatUsd(total),
+        target: "≤ $500 M",
+      };
+    },
   },
 ];
 
@@ -185,7 +201,7 @@ function capGrade(grade: Scorecard["grade"], cap: Scorecard["grade"]): Scorecard
 
 const VERDICTS: Record<Scorecard["grade"], string> = {
   S: "Flight-ready. This design closes on every axis.",
-  A: "Strong design — minor margin to recover.",
+  A: "Strong design â€” minor margin to recover.",
   B: "Workable, but the margins are thin.",
   C: "Risky. Rework the budget before committing.",
   D: "No-go. This stack will not survive the frontier.",

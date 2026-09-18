@@ -28,6 +28,9 @@ export interface LaunchVehicleLite {
   ispVacuumS: number;
   stages: number;
   description: string;
+  costPerLaunchUsd: number;
+  costConfidence: "documented" | "estimate";
+  costNote: string;
 }
 
 const VEHICLES = launchVehicles as unknown as LaunchVehicleLite[];
