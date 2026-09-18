@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "artemis-crewed-landing",
+      "title": "Artemis: Crewed Lunar Landing",
+      "lane": "mission-design",
+      "difficulty": "Beginner/Youth",
+      "brief": "Put a crew on the Moon and bring them home. Fit the whole stack on a documented lunar rocket, keep the dose under NASA's career limit, and give the crew real time on the surface.",
+      "destination": "moon",
+      "constraints": {
+        "allowedVehicleIds": ["saturn-v", "sls-block-1"],
+        "crew": { "min": 2, "max": 4 },
+        "surfaceDays": { "min": 3, "max": 14 },
+        "maxRadiationMsv": 600
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "The stack fits the rocket's documented TLI payload" },
+        { "id": "radiation", "label": "Crew dose under 600 mSv" },
+        { "id": "surface", "label": "At least 3 days of surface work" }
+      ],
+      "parScore": 78
+    },
+    {
+      "id": "habitat-in-a-can",
+      "title": "Habitat in a Can",
+      "lane": "life-support",
+      "difficulty": "Beginner/Youth",
+      "brief": "A lunar habitat has to keep four people alive for months without resupply. Close the air and water loops and prove the surface stay is sustainable.",
+      "destination": "moon",
+      "constraints": {
+        "allowedVehicleIds": ["saturn-v", "sls-block-1"],
+        "crew": { "min": 2, "max": 4 },
+        "surfaceDays": { "min": 30, "max": 90 },
+        "maxRadiationMsv": 600
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "The habitat stack fits the rocket" },
+        { "id": "eclss-loop", "label": "Regenerative life support carries the load" },
+        { "id": "surface", "label": "A meaningful surface stay" }
+      ],
+      "parScore": 72
+    },
+    {
+      "id": "first-boots-on-mars",
+      "title": "First Boots on Mars",
+      "lane": "mission-design",
+      "difficulty": "Intermediate",
+      "brief": "The headline mission. Get humans to Mars and back inside the radiation career limit without letting the mission drag on for years.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["starship", "falcon-heavy"],
+        "crew": { "min": 4, "max": 6 },
+        "surfaceDays": { "min": 30, "max": 120 },
+        "maxRadiationMsv": 600
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "The stack fits the launch vehicle" },
+        { "id": "radiation", "label": "Crew dose under 600 mSv" },
+        { "id": "surface", "label": "At least 30 days on Mars" },
+        { "id": "duration", "label": "Total mission under 900 days" }
+      ],
+      "parScore": 82
+    },
+    {
+      "id": "recycling-on-mars",
+      "title": "Recycling on Mars",
+      "lane": "life-support",
+      "difficulty": "Intermediate",
+      "brief": "Everything the crew drinks, breathes and eats has to be recycled or grown. Push the closed-loop life-support budget as far as it will go on a long surface stay.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["starship", "falcon-heavy", "sls-block-1"],
+        "crew": { "min": 4, "max": 6 },
+        "surfaceDays": { "min": 30, "max": 365 },
+        "maxRadiationMsv": 700
+      },
+      "objectives": [
+        { "id": "eclss-loop", "label": "Most consumables recovered in-loop" },
+        { "id": "surface", "label": "At least 30 days to run the loops" },
+        { "id": "duration", "label": "Total mission under 900 days" }
+      ],
+      "parScore": 76
+    },
+    {
+      "id": "mars-outpost-one",
+      "title": "Mars Outpost One",
+      "lane": "mission-design",
+      "difficulty": "Advanced",
+      "brief": "A long-duration outpost, one full synodic stay. The crew will be exposed to deep-space radiation for years — make every gram and every day count.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["starship"],
+        "crew": { "min": 4, "max": 6 },
+        "surfaceDays": { "min": 300, "max": 365 },
+        "maxRadiationMsv": 800,
+        "maxTotalDays": 700
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "A super-heavy stack leaves the pad" },
+        { "id": "surface", "label": "A long surface campaign" },
+        { "id": "duration", "label": "Total mission under 700 days" }
+      ],
+      "parScore": 80
+    },
+    {
+      "id": "lunar-express",
+      "title": "Lunar Express",
+      "lane": "mission-design",
+      "difficulty": "Intermediate",
+      "brief": "A fast crewed dash to the Moon: small crew, short stay, efficient transfer. Speed is the objective — the clock and the Δv both matter.",
+      "destination": "moon",
+      "constraints": {
+        "allowedVehicleIds": ["saturn-v", "sls-block-1"],
+        "crew": { "min": 2, "max": 3 },
+        "surfaceDays": { "min": 0, "max": 3 },
+        "maxRadiationMsv": 600
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "A lean stack on a lunar rocket" },
+        { "id": "radiation", "label": "Crew dose under 600 mSv" },
+        { "id": "transfer", "label": "An efficient transfer" },
+        { "id": "duration", "label": "A short mission" }
+      ],
+      "parScore": 85
+    }
+  ]
+}

@@ -74,6 +74,24 @@ interface MeteorShower {
   notes: string;
 }
 
+interface Scenario {
+  id: string;
+  title: string;
+  lane: string;
+  difficulty: string;
+  brief: string;
+  destination: string;
+  constraints: {
+    allowedVehicleIds: string[];
+    crew: { min: number; max: number };
+    surfaceDays: { min: number; max: number };
+    maxRadiationMsv?: number;
+    maxTotalDays?: number;
+  };
+  objectives: { id: string; label: string; require?: string }[];
+  parScore: number;
+}
+
 import fs from "node:fs";
 import path from "node:path";
 
@@ -83,6 +101,7 @@ import launchVehicles from "../src/data/launch-vehicles.json";
 import personas from "../src/data/personas.json";
 import crops from "../src/data/crops.json";
 import meteorShowers from "../src/data/meteor-showers.json";
+import scenariosFile from "../src/data/scenarios.json";
 
 let failures = 0;
 function check(label: string, pass: boolean, detail = "") {
@@ -168,6 +187,28 @@ for (const m of meteorShowers as MeteorShower[]) {
   check(`[${m.id}] peakMonth 1..12`, m.peakMonth >= 1 && m.peakMonth <= 12);
   check(`[${m.id}] ZHR sanity`, isNum(m.zhPerHour) && m.zhPerHour > 0 && m.zhPerHour < 1000);
   check(`[${m.id}] dates ISO + ordered`, !Number.isNaN(Date.parse(m.dateRange[0])) && m.dateRange[0] <= m.dateRange[1]);
+}
+
+console.log("scenarios.json");
+const scenarioIds = new Set<string>();
+const objectiveIds = new Set(["lift-stack", "radiation", "eclss-loop", "comms", "transfer", "surface", "duration"]);
+const allowedDiff = new Set(["Beginner/Youth", "Intermediate", "Advanced"]);
+const allowedDest = new Set(["moon", "mars"]);
+for (const s of (scenariosFile as { version: number; scenarios: Scenario[] }).scenarios) {
+  check(`[${s.id}] unique id`, !scenarioIds.has(s.id));
+  scenarioIds.add(s.id);
+  check(`[${s.id}] title + brief present`, s.title.length > 0 && s.brief.length > 0);
+  check(`[${s.id}] destination valid`, allowedDest.has(s.destination));
+  check(`[${s.id}] difficulty valid`, allowedDiff.has(s.difficulty));
+  check(`[${s.id}] parScore 0..100`, isNum(s.parScore) && s.parScore >= 0 && s.parScore <= 100);
+  const c = s.constraints;
+  check(`[${s.id}] allowed vehicles exist`, c.allowedVehicleIds.length > 0 && c.allowedVehicleIds.every((v) => lvIds.has(v)));
+  check(`[${s.id}] crew range sane`, isNum(c.crew.min) && isNum(c.crew.max) && c.crew.min <= c.crew.max);
+  check(`[${s.id}] surface range sane`, isNum(c.surfaceDays.min) && isNum(c.surfaceDays.max) && c.surfaceDays.min <= c.surfaceDays.max);
+  check(`[${s.id}] objectives present`, s.objectives.length > 0);
+  for (const o of s.objectives) {
+    check(`[${s.id}] objective "${o.id}" known`, objectiveIds.has(o.id));
+  }
 }
 
 console.log(`\n${failures === 0 ? "✓ ALL DATASETS VALID" : `✗ ${failures} FAILURE(S)`}`);

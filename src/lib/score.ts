@@ -166,6 +166,9 @@ const OBJECTIVES: Objective[] = [
 
 const MAX_SCORE = OBJECTIVES.reduce((sum, o) => sum + o.weight, 0);
 
+/** Stable list of judgeable objective ids, used by the scenario layer. */
+export const SCORE_OBJECTIVE_IDS: string[] = OBJECTIVES.map((o) => o.id);
+
 const GRADE_ORDER: Scorecard["grade"][] = ["D", "C", "B", "A", "S"];
 
 function gradeFor(score: number): Scorecard["grade"] {
