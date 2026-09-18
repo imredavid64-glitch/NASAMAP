@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Star, CheckCircle2, XCircle, Gamepad2, ArrowRight, Target } from "lucide-react";
 import { evaluateScenario, nextScenarioId, scenarioById, type Scenario } from "@/lib/scenarios";
@@ -46,8 +46,9 @@ export function ScenarioPanel({
 }) {
   const [progress, setProgress] = useState<ProgressMap | null>(null);
   const result = evaluateScenario(scenario, design, scorecard);
-  const issuedUTC = passportIssued();
-  const missionId = passportMissionId(design, issuedUTC);
+  const [issuedUTC, setIssuedUTC] = useState("");
+  useEffect(() => setIssuedUTC(passportIssued()), []);
+  const missionId = useMemo(() => passportMissionId(design, issuedUTC), [design, issuedUTC]);
   const permalink = `${basePath}?d=${encodeDesignQuery({
     destination: design.destination,
     vehicleId: design.vehicle.id,
@@ -112,7 +113,7 @@ export function ScenarioPanel({
           </div>
         )}
 
-        {result.completed && (
+        {result.completed && issuedUTC && (
           <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <ReportCard
               design={design}

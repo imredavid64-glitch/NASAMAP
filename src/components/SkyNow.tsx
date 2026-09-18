@@ -28,7 +28,7 @@ export function SkyNow() {
   const [lat, setLat] = useState(DEFAULT_LAT);
   const [lon, setLon] = useState(DEFAULT_LON);
   const [label, setLabel] = useState(DEFAULT_LABEL);
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -45,16 +45,28 @@ export function SkyNow() {
   }, []);
 
   useEffect(() => {
+    setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(t);
   }, []);
 
   const data = useMemo(() => {
+    if (!now) return null;
     const ss: SunriseSunset = sunriseSunset(now, lat, lon);
     const moon = moonPhase(now);
     const moonLight = lightTime(384400);
     return { ss, moon, moonLight, gmst: gmstHours(now) };
   }, [now, lat, lon]);
+
+  if (!now || !data) {
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Stat key={i} label="…" value="—" />
+        ))}
+      </div>
+    );
+  }
 
   const moonPct = Math.round(data.moon.illumination * 100);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download, Printer } from "lucide-react";
 import { type MissionDesign } from "@/lib/mission";
 import { missionPatchSvg } from "@/lib/patch";
@@ -8,7 +8,8 @@ import { passportIssued, passportMissionId } from "@/lib/passport";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
 export function MissionPatch({ design }: { design: MissionDesign }) {
-  const issuedUTC = passportIssued();
+  const [issuedUTC, setIssuedUTC] = useState("");
+  useEffect(() => setIssuedUTC(passportIssued()), []);
   const missionId = useMemo(() => passportMissionId(design, issuedUTC), [design, issuedUTC]);
   const svg = useMemo(() => missionPatchSvg({ design, missionId }), [design, missionId]);
 
@@ -31,6 +32,17 @@ export function MissionPatch({ design }: { design: MissionDesign }) {
     w.document.close();
     w.focus();
     w.print();
+  }
+
+  if (!issuedUTC) {
+    return (
+      <Card>
+        <CardBody>
+          <CardTitle>Mission Patch</CardTitle>
+          <p className="mt-2 text-xs text-slate-500">Sewing the insignia…</p>
+        </CardBody>
+      </Card>
+    );
   }
 
   return (

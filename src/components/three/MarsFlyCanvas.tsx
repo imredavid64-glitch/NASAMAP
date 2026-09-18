@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Stars, Html, Line } from "@react-three/drei";
+import { OrbitControls, Stars, Line } from "@react-three/drei";
 import { Download } from "lucide-react";
 import * as THREE from "three";
 import { Globe } from "./Globe";
@@ -56,7 +56,7 @@ function Craft({ state, samples, index }: { state: MarsTransferState; samples: M
     <group>
       <points ref={trailRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={TRAIL_POINTS} itemSize={3} array={new Float32Array(TRAIL_POINTS * 3)} />
+          <bufferAttribute attach="attributes-position" count={TRAIL_POINTS} itemSize={3} args={[new Float32Array(TRAIL_POINTS * 3), 3]} />
         </bufferGeometry>
         <pointsMaterial color="#00f0ff" size={0.22} transparent opacity={0.85} sizeAttenuation />
       </points>
@@ -122,10 +122,7 @@ function HUD({
   const distMars = Math.hypot(state.craftAu.x - state.marsAu.x, state.craftAu.y - state.marsAu.y);
 
   return (
-    <Html
-      className="pointer-events-none"
-      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 10 }}
-    >
+    <div className="pointer-events-none absolute inset-0 z-10">
       <div className="pointer-events-auto p-4 font-mono text-space-cyan" style={{ fontSize: "11px", lineHeight: "1.6" }}>
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="bg-black/60 border border-space-cyan/30 rounded p-3">
@@ -169,7 +166,7 @@ function HUD({
           </div>
         </div>
       </div>
-    </Html>
+    </div>
   );
 }
 

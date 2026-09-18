@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Download, Printer, Orbit } from "lucide-react";
 import { type MissionDesign } from "@/lib/mission";
@@ -8,7 +8,8 @@ import { passportSvg, passportMissionId, passportIssued } from "@/lib/passport";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
 export function MissionPassport({ design, flyHref }: { design: MissionDesign; flyHref?: string }) {
-  const issuedUTC = passportIssued();
+  const [issuedUTC, setIssuedUTC] = useState("");
+  useEffect(() => setIssuedUTC(passportIssued()), []);
   const missionId = useMemo(() => passportMissionId(design, issuedUTC), [design, issuedUTC]);
   const svg = useMemo(() => passportSvg({ design, missionId, issuedUTC }), [design, missionId, issuedUTC]);
 
@@ -29,6 +30,17 @@ export function MissionPassport({ design, flyHref }: { design: MissionDesign; fl
     w.document.close();
     w.focus();
     w.print();
+  }
+
+  if (!issuedUTC) {
+    return (
+      <Card>
+        <CardBody>
+          <CardTitle>Mission Passport</CardTitle>
+          <p className="mt-2 text-xs text-slate-500">Issuing document…</p>
+        </CardBody>
+      </Card>
+    );
   }
 
   return (

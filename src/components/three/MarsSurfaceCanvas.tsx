@@ -162,7 +162,7 @@ function Dust() {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={700} itemSize={3} array={positions} />
+        <bufferAttribute attach="attributes-position" count={700} itemSize={3} args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial color="#e0a878" size={0.07} transparent opacity={0.35} sizeAttenuation />
     </points>
