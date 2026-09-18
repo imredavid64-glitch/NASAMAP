@@ -79,5 +79,14 @@
     "signals": ["dayLength", "sunPath", "moonPhase", "planetEvents"],
     "action": "Lesson cards + printable mission worksheets.",
     "description": "Every card links to the formula behind it, with classroom-ready explainers."
+  },
+  {
+    "id": "hiker",
+    "name": "Hiker / Star Camper",
+    "icon": "Mountain",
+    "tagline": "Plan the daylight, fear the frost, time the showers.",
+    "signals": ["dayLength", "sunPath", "frostWindow", "temperature", "meteorShowers"],
+    "action": "Trail-day daylight + frost + dark-sky windows.",
+    "description": "Long golden hours beat midday heat, hard frosts end unprotected nights, and a meteor shower decides where (not whether) you camp."
   }
 ]

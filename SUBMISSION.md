@@ -19,7 +19,7 @@ npm ci
 npm run dev            # http://localhost:3000
 npm run validate:data  # schema check on every dataset
 npm run lint && npm run typecheck
-npx vitest run         # 233 tests
+npx vitest run         # 234 tests
 npm run build && npm start
 ```
 
@@ -44,11 +44,11 @@ npm run build && npm start
 ## Engineering honesty
 - Live data is labelled **live**; anything cached is labelled **snapshot** with a timestamp; snapshots are committed so the demo never dies on stage.
 - Estimated parameters (vehicle capability, mass budgets) are tagged `estimate` in the data with a `costConfidence`/provenance field â€” nothing is fabricated.
-- 233 automated tests cover the physics, datasets, scoring, scenarios and exports; `validate:data` schema-checks every JSON dataset in CI.
+- 234 automated tests cover the physics, datasets, scoring, scenarios and exports; `validate:data` schema-checks every JSON dataset in CI.
 - Fonts are self-hosted; no external network calls from the app at runtime except the documented live-data endpoints.
 
 ## Deploy (already on GitHub)
-Every change is gated by CI (`.github/workflows/ci.yml`): lint â†’ typecheck â†’ dataset validation â†’ 233 tests â†’ production build. To go live on Vercel:
+Every change is gated by CI (`.github/workflows/ci.yml`): lint â†’ typecheck â†’ dataset validation â†’ 234 tests â†’ production build. To go live on Vercel:
 
 1. Push `main` to GitHub (repo: `imredavid64-glitch/NASAMAP`).
 2. Go to **vercel.com/import** â†’ select GitHub repo â†’ it auto-detects Next.js; keep defaults, click Deploy.

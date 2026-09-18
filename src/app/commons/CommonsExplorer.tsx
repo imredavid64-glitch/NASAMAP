@@ -11,6 +11,7 @@ import {
   Telescope,
   Sparkles,
   GraduationCap,
+  Mountain,
   LocateFixed,
   type LucideIcon,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const ICONS: Record<string, LucideIcon> = {
   Telescope,
   Sparkles,
   GraduationCap,
+  Mountain,
 };
 
 const STATUS_TONE = {

@@ -105,6 +105,7 @@ import personas from "../src/data/personas.json";
 import crops from "../src/data/crops.json";
 import meteorShowers from "../src/data/meteor-showers.json";
 import scenariosFile from "../src/data/scenarios.json";
+import articles from "../src/data/articles.json";
 
 let failures = 0;
 function check(label: string, pass: boolean, detail = "") {
@@ -203,7 +204,7 @@ for (const m of meteorShowers as MeteorShower[]) {
 
 console.log("scenarios.json");
 const scenarioIds = new Set<string>();
-const objectiveIds = new Set(["lift-stack", "radiation", "eclss-loop", "comms", "transfer", "surface", "duration"]);
+const objectiveIds = new Set(["lift-stack", "radiation", "eclss-loop", "comms", "transfer", "surface", "duration", "budget"]);
 const allowedDiff = new Set(["Beginner/Youth", "Intermediate", "Advanced"]);
 const allowedDest = new Set(["moon", "mars"]);
 for (const s of (scenariosFile as { version: number; scenarios: Scenario[] }).scenarios) {
@@ -221,6 +222,18 @@ for (const s of (scenariosFile as { version: number; scenarios: Scenario[] }).sc
   for (const o of s.objectives) {
     check(`[${s.id}] objective "${o.id}" known`, objectiveIds.has(o.id));
   }
+}
+
+console.log("articles.json");
+const articleSlugs = new Set<string>();
+for (const a of articles as { slug: string; title: string; category: string; tags: string[]; body: string; date: string; readTimeMin: number }[]) {
+  check(`[${a.slug}] unique slug`, !articleSlugs.has(a.slug));
+  articleSlugs.add(a.slug);
+  check(`[${a.slug}] title + excerpt`, a.title.length > 0 && Boolean((a as { excerpt?: string }).excerpt?.length));
+  check(`[${a.slug}] body has content`, a.body.length > 200);
+  check(`[${a.slug}] date ISO + sane`, !Number.isNaN(Date.parse(a.date)) && a.body.length > 0);
+  check(`[${a.slug}] readTime>=1`, isNum(a.readTimeMin) && a.readTimeMin >= 1);
+  check(`[${a.slug}] tags non-empty`, Array.isArray(a.tags) && a.tags.length > 0);
 }
 
 console.log(`\n${failures === 0 ? "✓ ALL DATASETS VALID" : `✗ ${failures} FAILURE(S)`}`);

@@ -83,5 +83,47 @@
       { "label": "Apollo 11 Mission Report (MSC-00171)", "url": "https://www.nasa.gov/mission_pages/apollo/missions/apollo11.html" },
       { "label": "Apollo 11 Flight Journal", "url": "https://www.hq.nasa.gov/alsj/a11/a11.html" }
     ]
+  },
+  {
+    "slug": "mission-cost-101",
+    "title": "Mission Costing 101: The Price Tag Is an Engineering Limit",
+    "category": "Mission Design",
+    "tags": ["budget", "launch-cost", "commercial", "documented-vs-estimate"],
+    "excerpt": "Fuel, labor, insurance, and the rocket itself — a mission's budget is as real a constraint as its Δv. Here's how the app prices a launch.",
+    "date": "2026-09-18",
+    "readTimeMin": 6,
+    "body": "# Mission Costing 101\n\nA mission is usually killed by money long before it is killed by physics. Cost is a first-class engineering limit.\n\n## What a Launch Really Costs\nEvery vehicle in the Mission Planner carries a price per launch, tagged **documented** (a published sticker price) or **estimate** (a derived, sourced figure):\n\n| Vehicle | Launch cost | Tag |\n|---------|-------------|-----|\n| Falcon 9 | $67 M | documented (published) |\n| Falcon Heavy | $97 M | documented (published) |\n| Starship | ~$90 M | documented (SpaceX RGV estimate) |\n| Saturn V | ~$1.16 B | estimate (inflation-adjusted historical) |\n| SLS Block 1 | ~$2.2 B | estimate (NASA OIG marginal cost report) |\n\n## Documented vs Estimated\nThe app never pretends a model figure is a receipt. **Documented** figures come from published price lists; **estimate** figures are transparent model assumptions, each labeled so you can judge it yourself. Empty slots in the ledger are flagged rather than guessed.\n\n## Beyond the Rocket\nLaunch cost dominates, but the ledger adds per-astronaut operations and surface ops (ISS-class crew-support rates). The **Respect the budget** objective scores a design against these line items — cheaper proven stacks that still close the mission win.\n\n## The Game Principle\nIn the scorecard, budget failure never caps a grade by itself — it is one of *eight weighted objectives* you can trade against. Fly efficient, move mass smartly, and the papers work.",
+    "sources": [
+      { "label": "SpaceX pricing page carrier", "url": "https://www.spacex.com/launches/" },
+      { "label": "NASA OIG on SLS marginal cost", "url": "https://oig.nasa.gov/" }
+    ]
+  },
+  {
+    "slug": "eclss-closing-the-loop",
+    "title": "ECLSS: How We Close the Air and Water Loop",
+    "category": "Life Support",
+    "tags": ["ECLSS", "oxygen", "water", "sabatier", "electrolysis", "recycling", "ISS"],
+    "excerpt": "Electrolysis, Sabatier reactions and molecular sieves — the machinery that makes a crewed Mars mission weigh less than a rental truck.",
+    "date": "2026-09-18",
+    "readTimeMin": 6,
+    "body": "# ECLSS: Closing the Loop\n\nRepeat after the payload office: **life support is a mass problem.** Every innocent daily need (drinking, breathing, flushing) becomes tonnes of payload unless you recycle.\n\n## The Air Loop\n1. **Oxygen generation** — electrolysis splits water into O₂ and H₂ (4.5–5 kW per crew member).\n2. **CO₂ removal** — molecular sieves absorb exhaled carbon dioxide.\n3. **Sabatier reactor** — combines CO₂ with the H₂ from electrolysis to make water and methane. Water goes back to the crew; methane fuels propellant cycles.\n\n## The Water Loop\nISS-class systems recover roughly **90% of water** — condensate, hygiene water, even urine — via distillation and filtration. Recovery is capped by chemistry, not plumbing; the last ~10% is makeup water.\n\n## Why the Percentage Matters\nIn the planner, the **Close the life-support loop** objective reads the ECLSS recovery percentages. Higher recovery pulls hundreds of kilograms out of the launch stack — which is why the objective weighs the same as a maneuver.\n\n## The Remaining Bill\nEven with a closed loop, food, spares and consumables still stack up. That remaining open-loop mass is exactly what shows up in the planner's mass budget under its ECLSS figures (sourced to ISS-class benchmarks).",
+    "sources": [
+      { "label": "NASA ISS ECLSS overview", "url": "https://www.nasa.gov/mission_pages/station/structure/elements/eclss/" },
+      { "label": "NASA Sabatier system (ISS)", "url": "https://www.nasa.gov/mission_pages/station/research/news/methane_production/" }
+    ]
+  },
+  {
+    "slug": "scoring-engine-explained",
+    "title": "How the Eight-Objective Scoring Engine Rates Your Mission",
+    "category": "Mission Design",
+    "tags": ["score", "grade", "objectives", "caps", "game", "guide-mode"],
+    "excerpt": "Every design is judged by eight weighted objectives against cited NASA references, with feasibility caps — and a Guide mode that explains it all.",
+    "date": "2026-09-18",
+    "readTimeMin": 5,
+    "body": "# The Scoring Engine\n\nThe Mission Design Game is a game, but it is graded like an engineering review board.\n\n## The Eight Objectives\n| Objective | What it checks | Reference |\n|-----------|----------------|-----------|\n| Lift the stack | Vehicle can carry the whole mass budget | Published payload |\n| Radiation career limit | Crew dose under 600 mSv | NASA-STD-3001 |\n| Close the life-support loop | ≥50% of consumables recycled | ISS ECLSS |\n| Comms window | One-way light-lag inside tolerance | Speed-of-light geometry |\n| Efficient transfer | Δv near the Hohmann/Apollo optimum | Rocket equations |\n| Meaningful surface stay | Long enough on the surface to do science | Design intent |\n| Sane duration | Total days within mission-design flavor | Design intent |\n| Respect the budget | Total program cost under the ledger | Sourced launch prices |\n\n## Grades and Caps\nEvery objective earns full, half, or zero points; grades map from the 0–100 total. Two objectives are *feasibility gates*: an unliftable stack or an over-limit crew dose **caps** the grade no matter how clean the rest is, because cannot-fly is not \"S\" material.\n\n## Stars and Progress\nScenarios wrap the engine: meet hard constraints for ★1, clear the required objectives for ★2, and beat the par score for ★3.\n\n## Guide vs Tech Modes\nThe toggle on the Mission Lab swaps the strictness of the grade curve and adds plain-language coach hints next to each objective — the numbers stay identical, the journey is friendlier. Same physics, same sources, honest either way.",
+    "sources": [
+      { "label": "NASA-STD-3001 human reference mission", "url": "https://www.nasa.gov/reference/nasa-standards-and-tools/" },
+      { "label": "NASA Space Math that powers the app", "url": "https://www.nasa.gov/stem-content/space-math/" }
+    ]
   }
 ]

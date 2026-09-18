@@ -17,6 +17,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nasamap.vercel.app"),
   title: {
     default: "NASAMAP — Every human has a seat at the frontier",
     template: "%s · NASAMAP",

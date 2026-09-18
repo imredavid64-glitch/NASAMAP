@@ -364,6 +364,16 @@ function rate(personaId: string, ctx: Ctx): { rating: number | null; label: stri
     }
     case "student":
       return { rating: 100, label: "lesson-ready" };
+    case "hiker": {
+      const dl = dayLengthHours(date, latDeg);
+      const band = frostBand(date, latDeg).band;
+      const frostPenalty = band === "high" ? 30 : band === "elevated" ? 18 : band === "low" ? 6 : 0;
+      const near = nearestShower(date);
+      const showerBonus = near && near.daysTo < 7 ? 12 : 0;
+      const hours = Math.max(0, Math.min(100, ((dl - 6) / 8) * 100));
+      const rating = Math.round(Math.max(0, Math.min(100, 0.75 * hours - frostPenalty + showerBonus)));
+      return { rating, label: "trail-day suitability" };
+    }
     default:
       return { rating: null, label: "awaiting live feed" };
   }

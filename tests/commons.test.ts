@@ -29,6 +29,20 @@ describe("sky cards: computed persona data", () => {
     expect(card.signals.every((s) => s.status === "live")).toBe(true);
     expect(card.honesty).toMatch(/live feed/i);
   });
+
+  it("hiker ties daylight, frost and showers into one trail-day rating", () => {
+    const card = buildSkyCard({ personaId: "hiker", ...opts });
+    expect(card.signals.map((s) => s.id).sort()).toEqual([
+      "dayLength",
+      "frostWindow",
+      "meteorShowers",
+      "sunPath",
+      "temperature",
+    ]);
+    expect(card.rating!).toBeGreaterThanOrEqual(0);
+    expect(card.rating!).toBeLessThanOrEqual(100);
+    expect(card.ratingLabel).toBe("trail-day suitability");
+  });
 });
 
 describe("sky cards: rating behaviour", () => {
