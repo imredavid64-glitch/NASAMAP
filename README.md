@@ -102,9 +102,9 @@ Runtime smoke test (after `npm run build && npm start`): `/`, `/mission`, `/fly`
 ### Deploy & CI
 
 Pushing to `main` runs the full gate pipeline in GitHub Actions (`.github/workflows/ci.yml`): lint → typecheck →
-dataset validation → 219 tests → production build. The app is a standard Next.js project and deploys cleanly to
-**Vercel** — import the repo at vercel.com/new (auto-detects Next.js; no server env needed). Optional:
-set `NEXT_PUBLIC_SITE_URL` to the production URL so `sitemap.xml` / `robots.txt` point at the real host.
+dataset validation → 219 tests → production build. Live now at **https://nasamap.vercel.app** (standard Next.js
+project, zero server env). Optional: set `NEXT_PUBLIC_SITE_URL` to the production URL so `sitemap.xml` / `robots.txt`
+point at the real host.
 
 The judges' brief lives in **[`SUBMISSION.md`](SUBMISSION.md)** — narrative, a 5-minute tour, an evidence map from
 route to source file, and the engineering-honesty notes.

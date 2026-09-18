@@ -6,7 +6,7 @@
 - **Developer space**: (fill in)
 - **Primary lane**: Space Mission Design Game
 - **Also relevant to**: Life Support & ECLSS, Flight — Trajectory & Orbital Mechanics, Live Space Feeds & Simulation, Data Pool & Insights, Open Data for Impact
-- **Live URL**: (fill in after Vercel deploy — see "Deploy" below)
+- **Live URL**: https://nasamap.vercel.app
 
 ## Elevator pitch
 NASAMAP turns a real Moon-to-Mars mission design into a playable loop: players pick a rocket, crew and surface stay, the engine computes Δv, mass budget, radiation dose, comms light-lag, consumables and a closed-loop life-support budget, then **rerates every change S–D across seven weighted objectives** and stamps GO / NO-GO. On top of the free Mission Lab sit **six mission briefs** with constraints, objectives and a 0–3 star grade. Every design is a shareable link; every run can be saved as a **mission report card** image.
