@@ -84,4 +84,42 @@ describe("mission scoring", () => {
     expect(RADIATION_WAIVER_MSV).toBeGreaterThan(RADIATION_LIMIT_MSV);
     expect(DV_REFERENCE_KM_S.mars).toBeGreaterThan(DV_REFERENCE_KM_S.moon);
   });
+
+  it("defaults to expert mode with the same score across modes", () => {
+    const expert = scoreMission(tuned());
+    const beginner = scoreMission(tuned(), { mode: "beginner" });
+    expect(expert.mode).toBe("expert");
+    expect(beginner.mode).toBe("beginner");
+    expect(beginner.score).toBe(expert.score);
+    expect(beginner.objectives.map((o) => o.status)).toEqual(expert.objectives.map((o) => o.status));
+  });
+
+  it("adds plain-language coach hints only in beginner mode", () => {
+    const expert = scoreMission(tuned());
+    const beginner = scoreMission(tuned(), { mode: "beginner" });
+    expect(expert.objectives.every((o) => o.coach === undefined)).toBe(true);
+    expect(beginner.objectives.every((o) => typeof o.coach === "string" && o.coach.length > 10)).toBe(true);
+  });
+
+  it("uses a gentler grade curve in beginner mode", () => {
+    const expert = scoreMission(
+      designMission({ destination: "mars", vehicleId: "sls-block-1", crew: 4, surfaceDays: 150 }),
+    );
+    const beginner = scoreMission(
+      designMission({ destination: "mars", vehicleId: "sls-block-1", crew: 4, surfaceDays: 150 }),
+      { mode: "beginner" },
+    );
+    expect(expert.grade).toBe("A");
+    expect(beginner.grade).toBe("S");
+    expect(beginner.score).toBe(expert.score);
+  });
+
+  it("keeps feasibility caps in beginner mode", () => {
+    const beginner = scoreMission(
+      designMission({ destination: "moon", vehicleId: "falcon-9", crew: 2, surfaceDays: 7 }),
+      { mode: "beginner" },
+    );
+    expect(beginner.capped).toBe(true);
+    expect(beginner.grade).toBe("B");
+  });
 });

@@ -13,6 +13,9 @@ import { estimateMissionCost, formatUsd } from "@/lib/cost";
 
 export type ObjectiveStatus = "pass" | "warn" | "fail";
 
+/** Presentation depth for the scorecard: beginner adds plain-language coach hints and a gentler grade curve. */
+export type PlayMode = "expert" | "beginner";
+
 /** NASA-STD-3001 (2022/23) universal career effective dose limit. */
 export const RADIATION_LIMIT_MSV = 600;
 /** Above the career limit a mission needs an agency waiver. */
@@ -34,6 +37,8 @@ export interface ObjectiveResult {
   earned: number;
   actual: string;
   target: string;
+  /** Plain-language, mode-dependent hint shown in Beginner/Guide mode. */
+  coach?: string;
 }
 
 export interface Scorecard {
@@ -46,6 +51,7 @@ export interface Scorecard {
   capped: boolean;
   capReason?: string;
   objectives: ObjectiveResult[];
+  mode: PlayMode;
 }
 
 interface Judgement {
@@ -187,13 +193,32 @@ export const SCORE_OBJECTIVE_IDS: string[] = OBJECTIVES.map((o) => o.id);
 
 const GRADE_ORDER: Scorecard["grade"][] = ["D", "C", "B", "A", "S"];
 
-function gradeFor(score: number): Scorecard["grade"] {
-  if (score >= 90) return "S";
-  if (score >= 80) return "A";
-  if (score >= 65) return "B";
-  if (score >= 50) return "C";
+/** Grade thresholds: beginner curve is gentler so younger players progress. */
+const GRADE_CURVES: Record<PlayMode, [number, number, number, number]> = {
+  expert: [90, 80, 65, 50],
+  beginner: [80, 65, 50, 35],
+};
+
+function gradeFor(score: number, mode: PlayMode): Scorecard["grade"] {
+  const [s, a, b, c] = GRADE_CURVES[mode];
+  if (score >= s) return "S";
+  if (score >= a) return "A";
+  if (score >= b) return "B";
+  if (score >= c) return "C";
   return "D";
 }
+
+/** Plain-language advice per objective for Beginner/Guide mode. */
+const COACH: Record<string, string> = {
+  "lift-stack": "Pick a vehicle that can actually lift your whole stack — the target line shows the limit.",
+  radiation: "Use the dose bars to shorten the trip or swap hardware so the crew stays under NASA's career limit.",
+  "eclss-loop": "The recycling card shows how much ISS-class life support rescues — better recycling, lighter stack.",
+  comms: "Talking to Mars takes minutes each way — keep the comms window inside a workable range.",
+  transfer: "Watch the Δv bar: a tighter transfer saves fuel and months of flight time.",
+  surface: "Land long enough to do real science — the surface-stay bar shows the minimum worth flying for.",
+  duration: "Every extra day adds consumables and radiation. Trim duration where the design still closes.",
+  budget: "Watch the dollar bar — the cheapest proven stack that still closes the mission wins.",
+};
 
 function capGrade(grade: Scorecard["grade"], cap: Scorecard["grade"]): Scorecard["grade"] {
   return GRADE_ORDER.indexOf(grade) <= GRADE_ORDER.indexOf(cap) ? grade : cap;
@@ -201,13 +226,22 @@ function capGrade(grade: Scorecard["grade"], cap: Scorecard["grade"]): Scorecard
 
 const VERDICTS: Record<Scorecard["grade"], string> = {
   S: "Flight-ready. This design closes on every axis.",
-  A: "Strong design â€” minor margin to recover.",
+  A: "Strong design — minor margin to recover.",
   B: "Workable, but the margins are thin.",
   C: "Risky. Rework the budget before committing.",
   D: "No-go. This stack will not survive the frontier.",
 };
 
-export function scoreMission(design: MissionDesign): Scorecard {
+const VERDICTS_BEGINNER: Record<Scorecard["grade"], string> = {
+  S: "Ready to fly — every check comes back green.",
+  A: "Nearly there. One concept could be stronger.",
+  B: "A workable plan, but some margins are thin.",
+  C: "Risky. Try a lighter stack or a shorter mission.",
+  D: "No-go. This setup won't survive the trip.",
+};
+
+export function scoreMission(design: MissionDesign, opts: { mode?: PlayMode } = {}): Scorecard {
+  const mode = opts.mode ?? "expert";
   const objectives: ObjectiveResult[] = OBJECTIVES.map((o) => {
     const { status, actual, target } = o.judge(design);
     const earned = status === "pass" ? o.weight : status === "warn" ? o.weight / 2 : 0;
@@ -221,6 +255,7 @@ export function scoreMission(design: MissionDesign): Scorecard {
       earned,
       actual,
       target,
+      coach: mode === "beginner" ? COACH[o.id] : undefined,
     };
   });
 
@@ -232,7 +267,7 @@ export function scoreMission(design: MissionDesign): Scorecard {
   const lift = objectives.find((o) => o.id === "lift-stack")?.status;
   const radiation = objectives.find((o) => o.id === "radiation")?.status;
   const caps: string[] = [];
-  let grade = gradeFor(score);
+  let grade = gradeFor(score, mode);
   if (lift === "fail") {
     grade = capGrade(grade, "D");
     caps.push("the stack exceeds the vehicle's documented payload");
@@ -251,9 +286,10 @@ export function scoreMission(design: MissionDesign): Scorecard {
     grade,
     met: objectives.filter((o) => o.status === "pass").length,
     total: objectives.length,
-    verdict: VERDICTS[grade],
-    capped: caps.length > 0 && grade !== gradeFor(score),
+    verdict: mode === "beginner" ? VERDICTS_BEGINNER[grade] : VERDICTS[grade],
+    capped: caps.length > 0 && grade !== gradeFor(score, mode),
     capReason: caps.length > 0 ? `Grade capped: ${caps.join("; ")}.` : undefined,
     objectives,
+    mode,
   };
 }

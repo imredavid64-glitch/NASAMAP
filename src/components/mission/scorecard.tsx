@@ -70,6 +70,9 @@ export function Scorecard({ design, card: cardProp }: { design: MissionDesign; c
                   <p className="mt-0.5 text-[11px] text-slate-500">
                     w{o.weight} · {s.label} · {o.reference}
                   </p>
+                  {card.mode === "beginner" && o.coach && (
+                    <p className="mt-1 text-[11px] leading-snug text-space-cyan/80">{o.coach}</p>
+                  )}
                 </div>
               </li>
             );

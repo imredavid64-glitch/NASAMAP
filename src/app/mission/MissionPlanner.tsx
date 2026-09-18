@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
-import { scoreMission, RADIATION_LIMIT_MSV } from "@/lib/score";
+import { scoreMission, RADIATION_LIMIT_MSV, type PlayMode } from "@/lib/score";
 import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
 import { clampDesignToScenario, applyScenarioDefaults, type Scenario } from "@/lib/scenarios";
 import launchVehicles from "@/data/launch-vehicles.json";
@@ -16,6 +16,7 @@ import { OpsBudget } from "@/components/mission/ops-budget";
 import { Scorecard } from "@/components/mission/scorecard";
 import { ScenarioPanel } from "@/components/mission/scenario-panel";
 import { CostCard } from "@/components/mission/cost-card";
+import { GlossaryCard } from "@/components/mission/glossary-card";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
 
@@ -75,6 +76,19 @@ export function MissionPlanner({
   const [crew, setCrew] = useState(seed.crew);
   const [surfaceDays, setSurfaceDays] = useState(seed.surfaceDays);
   const [copied, setCopied] = useState(false);
+  const [mode, setMode] = useState<PlayMode | null>(null);
+
+  const respMode: PlayMode = mode ?? "expert";
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("nasamap.mode");
+    setMode(saved === "beginner" ? "beginner" : "expert");
+  }, []);
+
+  const switchMode = (next: PlayMode) => {
+    setMode(next);
+    setTimeout(() => window.localStorage.setItem("nasamap.mode", next), 0);
+  };
 
   const vehicleOptions = scenario
     ? VEHICLES.filter((v) => scenario.constraints.allowedVehicleIds.includes(v.id))
@@ -90,7 +104,7 @@ export function MissionPlanner({
     [destination, vehicleId, crew, surfaceDays],
   );
 
-  const scorecard = useMemo(() => scoreMission(design), [design]);
+  const scorecard = useMemo(() => scoreMission(design, { mode: respMode }), [design, respMode]);
   const [best, setBest] = useState<BestRecord | null>(null);
   const [newBest, setNewBest] = useState(false);
 
@@ -171,6 +185,26 @@ export function MissionPlanner({
         >
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </button>
+        <div className="inline-flex items-center rounded-lg border border-white/15 bg-white/[0.03] p-0.5 text-xs">
+          <button
+            type="button"
+            onClick={() => switchMode("beginner")}
+            className={`rounded-md px-3 py-1.5 font-medium transition ${
+              respMode === "beginner" ? "bg-space-cyan/20 text-space-cyan" : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Guide
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMode("expert")}
+            className={`rounded-md px-3 py-1.5 font-medium transition ${
+              respMode === "expert" ? "bg-space-cyan/20 text-space-cyan" : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Tech
+          </button>
+        </div>
         <span className="text-xs text-slate-500">
           The URL encodes your design — bookmark it, or challenge someone to beat your grade.
         </span>
@@ -181,7 +215,7 @@ export function MissionPlanner({
           {(
             [
               { n: "1", t: "Design", d: "Pick a target, a real launch vehicle, crew size and surface stay." },
-              { n: "2", t: "Score", d: "Seven weighted objectives judge Δv, radiation, life support, comms and more." },
+              { n: "2", t: "Score", d: "Eight weighted objectives judge Δv, radiation, life support, comms, budget and more." },
               { n: "3", t: "Fix the caps", d: "An unliftable stack or an over-limit dose caps your grade — close the gap for an S." },
               { n: "4", t: "Share", d: "Copy the mission link, fly the trajectory, print the passport and patch." },
             ] as const
@@ -331,6 +365,10 @@ export function MissionPlanner({
 
           <div id="budget" className="mt-4 scroll-mt-20">
             <CostCard design={design} />
+          </div>
+
+          <div className="mt-4">
+            <GlossaryCard open={respMode === "beginner"} />
           </div>
 
           {best && (
