@@ -17,6 +17,7 @@ import {
   formatSolClock,
 } from "@/lib/surface";
 import { opsBudget } from "@/lib/life";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 const DEG = Math.PI / 180;
 const LATITUDE_DEG = 18; // Jezero-class landing latitude
@@ -145,7 +146,7 @@ function SolarArray({ elevationDeg, azimuthDeg, generating }: { elevationDeg: nu
   );
 }
 
-function Dust() {
+function Dust({ reduced }: { reduced: boolean }) {
   const ref = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
     const arr = new Float32Array(700 * 3);
@@ -157,7 +158,7 @@ function Dust() {
     return arr;
   }, []);
   useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta * 0.01;
+    if (!reduced && ref.current) ref.current.rotation.y += delta * 0.01;
   });
   return (
     <points ref={ref}>
@@ -175,12 +176,14 @@ function Scene({
   loadKw,
   declinationDeg,
   batteryPct,
+  reduced,
 }: {
   hour: number;
   arrayKw: number;
   loadKw: number;
   declinationDeg: number;
   batteryPct: number;
+  reduced: boolean;
 }) {
   const { scene } = useThree();
   const sunRef = useRef<THREE.Group>(null);
@@ -202,6 +205,15 @@ function Scene({
     else if (e > -4) target.copy(duskColor);
     else target.copy(nightColor);
     if (!(scene.background instanceof THREE.Color)) scene.background = new THREE.Color();
+    if (reduced) {
+      (scene.background as THREE.Color).copy(target);
+      if (sunRef.current) sunRef.current.position.copy(dir.clone().multiplyScalar(70));
+      if (lightRef.current) {
+        lightRef.current.position.copy(dir.clone().multiplyScalar(60));
+        lightRef.current.intensity = Math.max(0, Math.sin(Math.max(0, elevationDeg) * DEG)) * 2.2;
+      }
+      return;
+    }
     (scene.background as THREE.Color).lerp(target, 0.05);
     scene.fog = scene.fog ?? new THREE.Fog("#c56a3f", 40, 130);
     if (scene.fog instanceof THREE.Fog) (scene.fog.color as THREE.Color).lerp(target, 0.05);
@@ -217,7 +229,7 @@ function Scene({
     <>
       <ambientLight intensity={0.25} color="#b06a4a" />
       <directionalLight ref={lightRef} intensity={2} color="#ffd9b0" />
-      <Stars radius={220} depth={40} count={2500} factor={4} saturation={0} fade speed={0.2} />
+      <Stars radius={220} depth={40} count={2500} factor={4} saturation={0} fade speed={reduced ? 0 : 0.2} />
 
       <group ref={sunRef}>
         <mesh>
@@ -236,7 +248,7 @@ function Scene({
 
       <Habitat />
       <SolarArray elevationDeg={elevationDeg} azimuthDeg={azimuthDeg} generating={gen} />
-      <Dust />
+      <Dust reduced={reduced} />
       <OrbitControls target={[2, 1.5, 0]} minDistance={6} maxDistance={90} maxPolarAngle={Math.PI / 2.05} enablePan />
 
       <Html
@@ -272,6 +284,7 @@ export function MarsSurfaceCanvas({
   arrayKw?: number;
   loadKw?: number;
 }) {
+  const reduced = usePrefersReducedMotion();
   const ops = useMemo(() => opsBudget({ destination: "mars", crew: 4, days: 90 }), []);
   const loadKw = loadKwProp ?? ops.powerKw;
   const arrayKw = arrayKwProp ?? arrayKwForLoad(loadKw, LATITUDE_DEG);
@@ -292,6 +305,11 @@ export function MarsSurfaceCanvas({
   useEffect(() => {
     hourRef.current = hour;
   }, [hour]);
+
+  // Reduced-motion visitors get a static sol; the clock is user-triggered only.
+  useEffect(() => {
+    if (reduced) setPaused(true);
+  }, [reduced]);
 
   useEffect(() => {
     let raf = 0;
@@ -318,7 +336,14 @@ export function MarsSurfaceCanvas({
     <div className="relative h-full w-full">
       <Canvas dpr={[1, 1.75]} camera={{ position: [18, 11, 20], fov: 50 }} shadows>
         <Suspense fallback={null}>
-          <Scene hour={hour} arrayKw={arrayKw} loadKw={loadKw} declinationDeg={declinationDeg} batteryPct={batteryPct} />
+          <Scene
+            hour={hour}
+            arrayKw={arrayKw}
+            loadKw={loadKw}
+            declinationDeg={declinationDeg}
+            batteryPct={batteryPct}
+            reduced={reduced}
+          />
         </Suspense>
       </Canvas>
 

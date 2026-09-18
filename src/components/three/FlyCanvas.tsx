@@ -17,6 +17,7 @@ import {
   type InterpolatedState,
 } from "@/lib/trajectory";
 import { earthMoonTrajectoryCsv, downloadCsv } from "@/lib/export";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 type FlyMode = "apollo11" | "hohmann";
 
@@ -208,6 +209,7 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
 }
 
 export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasProps) {
+  const reduced = usePrefersReducedMotion();
   const samples = useMemo(
     () => (mode === "apollo11" ? getApollo11Samples(500) : getHohmannSamples(500)),
     [mode],
@@ -224,6 +226,11 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
   useEffect(() => {
     timeRef.current = time;
   }, [time]);
+
+  // Reduced-motion visitors get a static frame; playback is user-triggered only.
+  useEffect(() => {
+    if (reduced) setPaused(true);
+  }, [reduced]);
 
   const stateAt = useCallback(
     (t: number): InterpolatedState => {
@@ -259,8 +266,8 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
     setTime(0);
     setState(samples[0]);
     setIndex(0);
-    setPaused(false);
-  }, [samples]);
+    if (!reduced) setPaused(false);
+  }, [samples, reduced]);
 
   const handleScrub = (t: number) => {
     timeRef.current = t;
@@ -283,9 +290,9 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
       >
         <ambientLight intensity={0.4} />
         <directionalLight position={[8, 4, 6]} intensity={1.8} />
-        <Stars radius={80} depth={50} count={4000} factor={3} saturation={0} fade speed={0.4} />
+        <Stars radius={80} depth={50} count={4000} factor={3} saturation={0} fade speed={reduced ? 0 : 0.4} />
         <Suspense fallback={null}>
-          <Globe bodyId="earth" radiusKm={6371} markers={markers.filter((m) => m.id === "kennedy")} atmosphere spin={[0, 0.0005, 0]} />
+          <Globe bodyId="earth" radiusKm={6371} markers={markers.filter((m) => m.id === "kennedy")} atmosphere spin={reduced ? [0, 0, 0] : [0, 0.0005, 0]} />
         </Suspense>
         <Suspense fallback={null}>
           <group position={[MOON_POSITION.x, MOON_POSITION.y, MOON_POSITION.z]}>
@@ -294,7 +301,7 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
               radiusKm={1737}
               markers={markers.filter((m) => m.id === "tranquility")}
               atmosphere={false}
-              spin={[0, 0.0001, 0]}
+              spin={reduced ? [0, 0, 0] : [0, 0.0001, 0]}
             />
           </group>
         </Suspense>

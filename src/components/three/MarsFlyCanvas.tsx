@@ -15,6 +15,7 @@ import {
   type MarsTransferState,
 } from "@/lib/trajectory";
 import { marsTrajectoryCsv, downloadCsv } from "@/lib/export";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 /** Scene units per astronomical unit (Earth orbit = 12 units). */
 const SCENE_AU = 12;
@@ -171,6 +172,7 @@ function HUD({
 }
 
 export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) {
+  const reduced = usePrefersReducedMotion();
   const totalSec = useMemo(() => marsTransferSeconds(), []);
   const samples = useMemo(() => getMarsTransferSamples(500), []);
   const [time, setTime] = useState(0);
@@ -184,6 +186,11 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
   useEffect(() => {
     timeRef.current = time;
   }, [time]);
+
+  // Reduced-motion visitors get a static frame; playback is user-triggered only.
+  useEffect(() => {
+    if (reduced) setPaused(true);
+  }, [reduced]);
 
   const stateAt = useCallback(
     (t: number) => {
@@ -230,7 +237,7 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
       <Canvas dpr={[1, 1.75]} camera={{ position: [0, 22, 30], fov: 45 }} gl={{ antialias: true, alpha: true }}>
         <ambientLight intensity={0.35} />
         <pointLight position={[0, 0, 0]} intensity={2.4} color="#fff3cf" />
-        <Stars radius={300} depth={60} count={4000} factor={4} saturation={0} fade speed={0.3} />
+        <Stars radius={300} depth={60} count={4000} factor={4} saturation={0} fade speed={reduced ? 0 : 0.3} />
 
         {/* Sun */}
         <mesh>
@@ -255,12 +262,12 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
 
         <Suspense fallback={null}>
           <group position={toScene({ x: 1, y: 0 })} scale={0.42}>
-            <Globe bodyId="earth" radiusKm={6371} atmosphere spin={[0, 0.0006, 0]} />
+            <Globe bodyId="earth" radiusKm={6371} atmosphere spin={reduced ? [0, 0, 0] : [0, 0.0006, 0]} />
           </group>
         </Suspense>
         <Suspense fallback={null}>
           <group position={toScene(state.marsAu)} scale={0.36}>
-            <Globe bodyId="mars" radiusKm={3389} atmosphere={false} spin={[0, 0.0003, 0]} />
+            <Globe bodyId="mars" radiusKm={3389} atmosphere={false} spin={reduced ? [0, 0, 0] : [0, 0.0003, 0]} />
           </group>
         </Suspense>
 

@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** â€” Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator â€” all pure and unit-tested
-  (**225 tests**, `vitest`).
+  (**233 tests**, `vitest`).
 - **Usability** â€” responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** â€” typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -89,7 +89,7 @@ No `.env`, database, or API keys required â€” live feeds are public and eve
 ### Quality gates
 
 ```bash
-npm test             # vitest â€” 225 tests
+npm test             # vitest â€” 233 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
@@ -102,7 +102,7 @@ Runtime smoke test (after `npm run build && npm start`): `/`, `/mission`, `/fly`
 ### Deploy & CI
 
 Pushing to `main` runs the full gate pipeline in GitHub Actions (`.github/workflows/ci.yml`): lint â†’ typecheck â†’
-dataset validation â†’ 225 tests â†’ production build. Live now at **https://nasamap.vercel.app** (standard Next.js
+dataset validation â†’ 233 tests â†’ production build. Live now at **https://nasamap.vercel.app** (standard Next.js
 project, zero server env). Optional: set `NEXT_PUBLIC_SITE_URL` to the production URL so `sitemap.xml` / `robots.txt`
 point at the real host.
 
