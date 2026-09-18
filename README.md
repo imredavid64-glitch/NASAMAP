@@ -20,7 +20,7 @@ published reference.
 
 | Act | Route | What it does |
 | --- | --- | --- |
-| **I · Play & Plan** | `/play`, `/mission` | Play the **Space Mission Design Game**: six briefs with hard constraints (vehicle, crew, surface time, radiation), objectives judged by the scoring engine, and a **0–3 star** grade with local progress. In the free Mission Lab, pick a destination, rocket, crew and surface stay; the engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. Your best grade per destination is kept locally. The design is encoded in the URL, so a mission is a shareable, bookmarkable link. A **3D surface-ops view** spins one Martian sol to show the array and battery earning their place. |
+| **I · Play & Plan** | `/play`, `/mission` | Play the **Space Mission Design Game**: six briefs with hard constraints (vehicle, crew, surface time, radiation), objectives judged by the scoring engine, and a **0–3 star** grade with local progress. Every completed run can be saved as a **mission report card** — an image that carries the grade, the engine's numbers and a permalink to the exact design. In the free Mission Lab, pick a destination, rocket, crew and surface stay; the engine sums Δv, mass budget, radiation dose, light-lag, consumables and the closed-loop life-support budget, then **rates the design S–D** across seven weighted objectives and stamps **GO / NO-GO**. Your best grade per destination is kept locally. The design is encoded in the URL, so a mission is a shareable, bookmarkable link. A **3D surface-ops view** spins one Martian sol to show the array and battery earning their place. |
 | **II · Fly** | `/fly` | Three trajectory modes: replay **Apollo 11** event-by-event from an interpolated historical timeline; fly a **patched-conic Hohmann transfer** to the Moon (`?mode=hohmann`); or coast Earth→Mars on a Sun-centred **Kepler solve** of the minimum-energy ellipse (`?mode=mars`). Any mode exports its full path to **CSV**. |
 | **III · Live** | `/live` | Real-time ISS ground track, Voyager 1 & 2 range (JPL Horizons), the day's APOD, near-Earth objects and NOAA space weather — with a committed snapshot fallback so the demo never dies on stage. The ISS card exports a full-orbit **ground track as KML** for Google Earth. |
 | **IV · Share** | `/library`, `/search`, `/commons`, `/challenges` | A curated **Cosmic Data Commons**: explainer articles, persona-based advice cards, a full-text search index, the Mission Passport & Patch you can download and print, and a live **Challenge Aligner** mapping all 86 official 2026 challenges to the platform, plus a recommended **submission playbook** from challenge to evidence. |
@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**214 tests**, `vitest`).
+  (**219 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -58,6 +58,7 @@ published reference.
 | `src/lib/best-score.ts` | **Personal best** — per-destination high score in localStorage, injected storage for testing | Pure, store-agnostic comparison |
 | `src/lib/scenarios.ts` | **Game layer** — scenario briefs, constraints, objectives, 0–3 star grading | Re-uses the scored objectives, par-score beats |
 | `src/lib/progress.ts` | **Star progress** — per-scenario best across sessions | Injected storage, validated records |
+| `src/lib/report-card.ts` | **Mission report card** — a shareable SVG grade image with the permalink baked in | Pure, deterministic string builder |
 | `src/lib/orbit.ts` | SGP4 satellite propagation, pass prediction | `satellite.js` |
 | `src/lib/trajectory.ts` | Apollo 11 interpolation, patched-conic Moon transfer, Sun-centred Earth→Mars Kepler solve | Committed historical timeline |
 | `src/lib/export.ts` | CSV serialisation of trajectories (Earth-Moon scene units / Mars au) and KML of the ISS ground track | RFC-4180 quoting, OGC KML 2.2 |
@@ -88,7 +89,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 214 tests
+npm test             # vitest — 219 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
@@ -96,7 +97,17 @@ npm run build
 ```
 
 Runtime smoke test (after `npm run build && npm start`): `/`, `/mission`, `/fly`, `/fly?mode=hohmann`,
-`/live`, `/library`, `/library/apollo-11-replay`, `/search`, `/commons`, `/challenges`, and every `/api/live/*` route.
+`/live`, `/library`, `/library/apollo-11-replay`, `/search`, `/commons`, `/challenges`, `/play`, and every `/api/live/*` route.
+
+### Deploy & CI
+
+Pushing to `main` runs the full gate pipeline in GitHub Actions (`.github/workflows/ci.yml`): lint → typecheck →
+dataset validation → 219 tests → production build. The app is a standard Next.js project and deploys cleanly to
+**Vercel** — import the repo at vercel.com/new (auto-detects Next.js; no server env needed). Optional:
+set `NEXT_PUBLIC_SITE_URL` to the production URL so `sitemap.xml` / `robots.txt` point at the real host.
+
+The judges' brief lives in **[`SUBMISSION.md`](SUBMISSION.md)** — narrative, a 5-minute tour, an evidence map from
+route to source file, and the engineering-honesty notes.
 
 ---
 
