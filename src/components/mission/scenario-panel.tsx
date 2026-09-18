@@ -7,6 +7,9 @@ import { evaluateScenario, nextScenarioId, scenarioById, type Scenario } from "@
 import { type MissionDesign } from "@/lib/mission";
 import { type Scorecard } from "@/lib/score";
 import { readProgress, recordScenarioResult, starsFor, type ProgressMap } from "@/lib/progress";
+import { encodeDesignQuery } from "@/lib/design-link";
+import { passportIssued, passportMissionId } from "@/lib/passport";
+import { ReportCard } from "@/components/mission/report-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
@@ -43,6 +46,14 @@ export function ScenarioPanel({
 }) {
   const [progress, setProgress] = useState<ProgressMap | null>(null);
   const result = evaluateScenario(scenario, design, scorecard);
+  const issuedUTC = passportIssued();
+  const missionId = passportMissionId(design, issuedUTC);
+  const permalink = `${basePath}?d=${encodeDesignQuery({
+    destination: design.destination,
+    vehicleId: design.vehicle.id,
+    crew: design.crew,
+    surfaceDays: design.surfaceDays,
+  })}`;
 
   useEffect(() => {
     recordScenarioResult(window.localStorage, scenario.id, {
@@ -98,6 +109,20 @@ export function ScenarioPanel({
                 All missions <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
+          </div>
+        )}
+
+        {result.completed && (
+          <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+            <ReportCard
+              design={design}
+              scorecard={scorecard}
+              scenario={scenario}
+              stars={result.stars}
+              missionId={missionId}
+              issuedUTC={issuedUTC}
+              permalink={permalink}
+            />
           </div>
         )}
 
