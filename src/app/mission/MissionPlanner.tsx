@@ -6,6 +6,7 @@ import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
 import { scoreMission, RADIATION_LIMIT_MSV } from "@/lib/score";
 import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
+import { clampDesignToScenario, applyScenarioDefaults, type Scenario } from "@/lib/scenarios";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { TransferDiagram } from "@/components/mission/transfer-diagram";
 import { OpsBudget } from "@/components/mission/ops-budget";
 import { Scorecard } from "@/components/mission/scorecard";
+import { ScenarioPanel } from "@/components/mission/scenario-panel";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
 
@@ -56,12 +58,31 @@ function GateBadge({ gate }: { gate: "pass" | "fail" | "unknown" }) {
   );
 }
 
-export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignInput }) {
-  const [destination, setDestination] = useState<Destination>(initial.destination);
-  const [vehicleId, setVehicleId] = useState<string>(initial.vehicleId);
-  const [crew, setCrew] = useState(initial.crew);
-  const [surfaceDays, setSurfaceDays] = useState(initial.surfaceDays);
+export function MissionPlanner({
+  initial = DEFAULT_DESIGN,
+  scenario,
+  basePath,
+}: {
+  initial?: DesignInput;
+  scenario?: Scenario;
+  /** Base path the permalink rewrites to (e.g. `/play/artemis-crewed-landing`), default `/mission`. */
+  basePath?: string;
+}) {
+  const seed = useMemo(() => (scenario ? clampDesignToScenario(scenario, initial) : initial), [scenario, initial]);
+  const [destination, setDestination] = useState<Destination>(seed.destination);
+  const [vehicleId, setVehicleId] = useState<string>(seed.vehicleId);
+  const [crew, setCrew] = useState(seed.crew);
+  const [surfaceDays, setSurfaceDays] = useState(seed.surfaceDays);
   const [copied, setCopied] = useState(false);
+
+  const vehicleOptions = scenario
+    ? VEHICLES.filter((v) => scenario.constraints.allowedVehicleIds.includes(v.id))
+    : VEHICLES;
+
+  const crewMin = scenario ? scenario.constraints.crew.min : 1;
+  const crewMax = scenario ? scenario.constraints.crew.max : 6;
+  const surfMin = scenario ? scenario.constraints.surfaceDays.min : 0;
+  const surfMax = scenario ? scenario.constraints.surfaceDays.max : 365;
 
   const design = useMemo(
     () => designMission({ destination, vehicleId, crew, surfaceDays }),
@@ -89,13 +110,11 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
     }
   }, [destination, scorecard]);
 
-  const current: DesignInput = { destination, vehicleId, crew, surfaceDays };
-
   useEffect(() => {
     const next: DesignInput = { destination, vehicleId, crew, surfaceDays };
     const query = isCustomDesign(next) ? `?${encodeDesignQuery(next)}` : "";
-    window.history.replaceState(null, "", `/mission${query}`);
-  }, [destination, vehicleId, crew, surfaceDays]);
+    window.history.replaceState(null, "", `${basePath ?? "/mission"}${query}`);
+  }, [destination, vehicleId, crew, surfaceDays, basePath]);
 
   const copyLink = async () => {
     try {
@@ -108,6 +127,14 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
   };
 
   const resetDesign = () => {
+    if (scenario) {
+      const d = applyScenarioDefaults(scenario);
+      setDestination(d.destination);
+      setVehicleId(d.vehicleId);
+      setCrew(d.crew);
+      setSurfaceDays(d.surfaceDays);
+      return;
+    }
     setDestination(DEFAULT_DESIGN.destination);
     setVehicleId(DEFAULT_DESIGN.vehicleId);
     setCrew(DEFAULT_DESIGN.crew);
@@ -148,26 +175,28 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
         </span>
       </div>
 
-      <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-2 lg:grid-cols-4">
-        {(
-          [
-            { n: "1", t: "Design", d: "Pick a target, a real launch vehicle, crew size and surface stay." },
-            { n: "2", t: "Score", d: "Seven weighted objectives judge Δv, radiation, life support, comms and more." },
-            { n: "3", t: "Fix the caps", d: "An unliftable stack or an over-limit dose caps your grade — close the gap for an S." },
-            { n: "4", t: "Share", d: "Copy the mission link, fly the trajectory, print the passport and patch." },
-          ] as const
-        ).map((s) => (
-          <div key={s.n} className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-space-cyan/40 bg-space-cyan/10 font-mono text-xs text-space-cyan">
-              {s.n}
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-white">{s.t}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-slate-400">{s.d}</p>
+      {!scenario && (
+        <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              { n: "1", t: "Design", d: "Pick a target, a real launch vehicle, crew size and surface stay." },
+              { n: "2", t: "Score", d: "Seven weighted objectives judge Δv, radiation, life support, comms and more." },
+              { n: "3", t: "Fix the caps", d: "An unliftable stack or an over-limit dose caps your grade — close the gap for an S." },
+              { n: "4", t: "Share", d: "Copy the mission link, fly the trajectory, print the passport and patch." },
+            ] as const
+          ).map((s) => (
+            <div key={s.n} className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-space-cyan/40 bg-space-cyan/10 font-mono text-xs text-space-cyan">
+                {s.n}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-white">{s.t}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-400">{s.d}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <Card>
@@ -176,38 +205,50 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
             <div className="mt-5 space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-300">Destination</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(
-                    [
-                      { id: "moon", label: "Earth's Moon", note: "≈3-day trip · 1.3 s of light-lag" },
-                      { id: "mars", label: "Mars", note: "≈259-day Hohmann · up to 25 min round-trip" },
-                    ] as const
-                  ).map((d) => (
-                    <button
-                      key={d.id}
-                      type="button"
-                      onClick={() => setDestination(d.id)}
-                      className={`rounded-xl border p-3 text-left transition ${
-                        destination === d.id
-                          ? "border-space-cyan/60 bg-space-cyan/10"
-                          : "border-white/10 bg-white/[0.02] hover:border-white/25"
-                      }`}
-                    >
-                      <span className="block text-sm font-semibold text-white">{d.label}</span>
-                      <span className="mt-1 block text-xs text-slate-500">{d.note}</span>
-                    </button>
-                  ))}
-                </div>
+                {scenario ? (
+                  <div className="flex items-center gap-2 rounded-xl border border-space-cyan/30 bg-space-cyan/10 p-3">
+                    <span className="text-sm font-semibold text-white">
+                      {destination === "mars" ? "Mars" : "Earth's Moon"}
+                    </span>
+                    <span className="text-xs text-slate-400">fixed by this mission brief</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        { id: "moon", label: "Earth's Moon", note: "≈3-day trip · 1.3 s of light-lag" },
+                        { id: "mars", label: "Mars", note: "≈259-day Hohmann · up to 25 min round-trip" },
+                      ] as const
+                    ).map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => setDestination(d.id)}
+                        className={`rounded-xl border p-3 text-left transition ${
+                          destination === d.id
+                            ? "border-space-cyan/60 bg-space-cyan/10"
+                            : "border-white/10 bg-white/[0.02] hover:border-white/25"
+                        }`}
+                      >
+                        <span className="block text-sm font-semibold text-white">{d.label}</span>
+                        <span className="mt-1 block text-xs text-slate-500">{d.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">Launch vehicle</label>
+                <label className="mb-2 block text-sm font-medium text-slate-300">
+                  Launch vehicle
+                  {scenario && <span className="ml-1 text-xs text-slate-500">(brief allows only these)</span>}
+                </label>
                 <select
                   value={vehicleId}
                   onChange={(e) => setVehicleId(e.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-space-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-space-cyan/60"
                 >
-                  {VEHICLES.map((v) => (
+                  {vehicleOptions.map((v) => (
                     <option key={v.id} value={v.id}>
                       {v.name} · {v.operator}
                     </option>
@@ -222,8 +263,8 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
                 </label>
                 <input
                   type="range"
-                  min={1}
-                  max={6}
+                  min={crewMin}
+                  max={crewMax}
                   step={1}
                   value={crew}
                   onChange={(e) => setCrew(Number(e.target.value))}
@@ -238,8 +279,8 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
                 </label>
                 <input
                   type="range"
-                  min={0}
-                  max={365}
+                  min={surfMin}
+                  max={surfMax}
                   step={1}
                   value={surfaceDays}
                   onChange={(e) => setSurfaceDays(Number(e.target.value))}
@@ -273,6 +314,15 @@ export function MissionPlanner({ initial = DEFAULT_DESIGN }: { initial?: DesignI
             </div>
             <GateBadge gate={design.launchGate} />
           </div>
+
+          {scenario && (
+            <ScenarioPanel
+              scenario={scenario}
+              design={design}
+              scorecard={scorecard}
+              basePath={basePath ?? `/play/${scenario.id}`}
+            />
+          )}
 
           <div id="scorecard" className="scroll-mt-20">
             <Scorecard design={design} card={scorecard} />

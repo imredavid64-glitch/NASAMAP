@@ -62,10 +62,10 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/mission"
+                href="/play"
                 className="inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:bg-space-cyan/80"
               >
-                Start a mission <ArrowRight className="h-4 w-4" />
+                Start the game <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/commons"

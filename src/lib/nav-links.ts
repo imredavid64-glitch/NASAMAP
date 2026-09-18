@@ -1,4 +1,4 @@
-import { Rocket, Compass, Radio, Library, Search, Orbit, Trophy, type LucideIcon } from "lucide-react";
+import { Rocket, Compass, Radio, Library, Search, Orbit, Trophy, Gamepad2, type LucideIcon } from "lucide-react";
 
 export interface NavLink {
   href: string;
@@ -7,7 +7,8 @@ export interface NavLink {
 }
 
 export const NAV_LINKS: NavLink[] = [
-  { href: "/mission", label: "Mission", icon: Rocket },
+  { href: "/play", label: "Play", icon: Gamepad2 },
+  { href: "/mission", label: "Mission Lab", icon: Rocket },
   { href: "/fly", label: "Fly", icon: Orbit },
   { href: "/challenges", label: "Challenges", icon: Trophy },
   { href: "/commons", label: "Data Commons", icon: Compass },

@@ -58,6 +58,13 @@ export function scenarioById(id: string | undefined): Scenario | undefined {
   return loadScenarios().find((s) => s.id === id);
 }
 
+/** The scenario that follows this one in catalogue order (for "next mission"). */
+export function nextScenarioId(id: string): string | undefined {
+  const all = loadScenarios();
+  const i = all.findIndex((s) => s.id === id);
+  return i >= 0 && i + 1 < all.length ? all[i + 1].id : undefined;
+}
+
 const STATUS_RANK: Record<ObjectiveStatus, number> = { fail: 0, warn: 1, pass: 2 };
 
 function statusMeets(status: ObjectiveStatus, require: "pass" | "warn"): boolean {

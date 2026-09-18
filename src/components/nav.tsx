@@ -29,10 +29,10 @@ export function Nav() {
         </nav>
         <div className="flex items-center gap-2">
           <Link
-            href="/mission"
+            href="/play"
             className="hidden rounded-lg bg-space-cyan px-4 py-2 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80 sm:inline-block"
           >
-            Start a mission
+            Start the game
           </Link>
           <MobileNav />
         </div>

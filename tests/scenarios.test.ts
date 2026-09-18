@@ -8,6 +8,7 @@ import {
   clampDesignToScenario,
   evaluateScenario,
   validateScenarios,
+  nextScenarioId,
   type Scenario,
 } from "@/lib/scenarios";
 
@@ -37,6 +38,12 @@ describe("scenario dataset", () => {
 
   it("has unique ids", () => {
     expect(new Set(scenarios.map((s) => s.id)).size).toBe(scenarios.length);
+  });
+
+  it("walks the scenario order with nextScenarioId", () => {
+    const first = scenarios[0].id;
+    expect(nextScenarioId(first)).toBe(scenarios[1].id);
+    expect(nextScenarioId(scenarios[scenarios.length - 1].id)).toBeUndefined();
   });
 });
 

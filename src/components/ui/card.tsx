@@ -5,20 +5,26 @@ export function Card({
   className,
   children,
   href,
+  id,
 }: {
   className?: string;
   children: React.ReactNode;
   href?: string;
+  id?: string;
 }) {
   const base = cn("glass-panel p-6", className);
   if (href) {
     return (
-      <Link href={href} className={cn(base, "transition hover:border-space-cyan/40 hover:bg-white/[0.06]")}>
+      <Link id={id} href={href} className={cn(base, "transition hover:border-space-cyan/40 hover:bg-white/[0.06]")}>
         {children}
       </Link>
     );
   }
-  return <div className={base}>{children}</div>;
+  return (
+    <div id={id} className={base}>
+      {children}
+    </div>
+  );
 }
 
 export function CardTitle({
