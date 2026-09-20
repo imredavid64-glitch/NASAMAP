@@ -59,7 +59,7 @@ export function useMission(missionId: string) {
 }
 
 export function useComments(missionId: string) {
-  return useQuery(api.comments.getComments as any, { missionId });
+  return useQuery(api.missions.getComments as any, { missionId });
 }
 
 export function useSubmitMission() {
@@ -71,7 +71,7 @@ export function useUpvoteMission() {
 }
 
 export function useSubmitComment() {
-  return useMutation(api.comments.submitComment as any);
+  return useMutation(api.missions.submitComment as any);
 }
 
 export function useAuthor() {
