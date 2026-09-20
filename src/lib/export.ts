@@ -1,4 +1,5 @@
 import type { InterpolatedState, MarsTransferState } from "./trajectory";
+import type { OpsBudget, ConsumablesTotals, OpsPowerLine, RecyclingRates, ISRURates } from "./life";
 
 export type CsvValue = string | number;
 
@@ -127,4 +128,153 @@ export function groundTrackKml(name: string, points: KmlTrackPoint[]): string {
     "</Document>",
     "</kml>",
   ].join("\n");
+}
+
+/** Life-support budget CSV export — full consumables, recycling, ISRU, power, and array sizing. */
+export function lifeSupportBudgetCsv(ops: OpsBudget, designLabel: string): string {
+  const header = [
+    "design",
+    "destination",
+    "crew",
+    "total_days",
+    "au",
+    // Gross consumables
+    "gross_oxygen_kg",
+    "gross_water_kg",
+    "gross_food_kg",
+    "gross_co2_kg",
+    "gross_resupply_kg",
+    // Recycled (ECLSS)
+    "recycled_water_kg",
+    "recycled_oxygen_kg",
+    "water_recycling_rate",
+    "oxygen_recycling_rate",
+    // ISRU waste-to-resource
+    "isru_water_kg",
+    "isru_oxygen_kg",
+    "isru_fertilizer_kg",
+    "isru_waste_to_water_rate",
+    "isru_waste_to_oxygen_rate",
+    "isru_waste_to_fertilizer_rate",
+    // Net consumables
+    "net_oxygen_kg",
+    "net_water_kg",
+    "net_food_kg",
+    "net_co2_kg",
+    "net_resupply_kg",
+    "mass_saved_kg",
+    "mass_saved_pct",
+    // ECLSS power
+    "total_eclss_power_kw",
+    "irradiance_kw_m2",
+    "array_efficiency",
+    "array_area_m2",
+  ];
+
+  const row = [
+    designLabel,
+    ops.destination,
+    ops.crew,
+    ops.days,
+    ops.au.toFixed(4),
+    // Gross
+    ops.gross.oxygenKg.toFixed(1),
+    ops.gross.waterKg.toFixed(1),
+    ops.gross.foodKg.toFixed(1),
+    ops.gross.co2Kg.toFixed(1),
+    ops.grossResupplyKg.toFixed(1),
+    // Recycled
+    ops.recycled.waterKg.toFixed(1),
+    ops.recycled.oxygenKg.toFixed(1),
+    ops.rates.water.toFixed(3),
+    ops.rates.oxygen.toFixed(3),
+    // ISRU
+    ops.isru.waterKg.toFixed(1),
+    ops.isru.oxygenKg.toFixed(1),
+    ops.isru.fertilizerKg.toFixed(1),
+    ops.isruRates.wasteToWater.toFixed(3),
+    ops.isruRates.wasteToOxygen.toFixed(3),
+    ops.isruRates.wasteToFertilizer.toFixed(3),
+    // Net
+    ops.net.oxygenKg.toFixed(1),
+    ops.net.waterKg.toFixed(1),
+    ops.net.foodKg.toFixed(1),
+    ops.net.co2Kg.toFixed(1),
+    ops.netResupplyKg.toFixed(1),
+    ops.savedKg.toFixed(1),
+    (ops.savedPct * 100).toFixed(1),
+    // Power
+    ops.powerKw.toFixed(3),
+    ops.irradianceKwM2.toFixed(6),
+    ops.arrayEfficiency.toFixed(3),
+    ops.arrayAreaM2.toFixed(1),
+  ];
+
+  return toCsv(header, [row]);
+}
+
+/** Detailed power breakdown CSV export. */
+export function eclssPowerBreakdownCsv(ops: OpsBudget, designLabel: string): string {
+  const header = [
+    "design",
+    "power_line_id",
+    "label",
+    "kw_per_crew",
+    "confidence",
+    "note",
+    "total_kw_for_crew",
+  ];
+
+  const rows = ops.powerLines.map((line) => [
+    designLabel,
+    line.id,
+    line.label,
+    line.kWPerCrew.toFixed(3),
+    line.confidence,
+    line.note,
+    (line.kWPerCrew * ops.crew).toFixed(3),
+  ]);
+
+  return toCsv(header, rows);
+}
+
+/** Consumables timeline CSV — daily net consumables over the mission. */
+export function consumablesTimelineCsv(ops: OpsBudget, designLabel: string): string {
+  const header = [
+    "design",
+    "day",
+    "net_oxygen_kg",
+    "net_water_kg",
+    "net_food_kg",
+    "cumulative_net_oxygen_kg",
+    "cumulative_net_water_kg",
+    "cumulative_net_food_kg",
+  ];
+
+  const rows: string[][] = [];
+  let cumO2 = 0;
+  let cumWater = 0;
+  let cumFood = 0;
+
+  const dailyO2 = ops.net.oxygenKg / ops.days;
+  const dailyWater = ops.net.waterKg / ops.days;
+  const dailyFood = ops.net.foodKg / ops.days;
+
+  for (let day = 1; day <= Math.ceil(ops.days); day++) {
+    cumO2 += dailyO2;
+    cumWater += dailyWater;
+    cumFood += dailyFood;
+    rows.push([
+      designLabel,
+      day.toString(),
+      dailyO2.toFixed(3),
+      dailyWater.toFixed(3),
+      dailyFood.toFixed(3),
+      cumO2.toFixed(1),
+      cumWater.toFixed(1),
+      cumFood.toFixed(1),
+    ]);
+  }
+
+  return toCsv(header, rows);
 }

@@ -1,8 +1,11 @@
-import { Recycle, BatteryCharging, Sun } from "lucide-react";
+import { Recycle, BatteryCharging, Sun, Download } from "lucide-react";
+import { useState } from "react";
 import { type MissionDesign } from "@/lib/mission";
-import { opsBudget, type Confidence } from "@/lib/life";
+import { opsBudget, type Confidence, type OpsBudget } from "@/lib/life";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { lifeSupportBudgetCsv, eclssPowerBreakdownCsv, consumablesTimelineCsv, downloadCsv } from "@/lib/export";
 
 const CONFIDENCE_TONE: Record<Confidence, "emerald" | "cyan" | "amber"> = {
   documented: "emerald",
@@ -32,13 +35,55 @@ function Bar({ label, grossKg, netKg, accent }: { label: string; grossKg: number
 
 export function OpsBudget({ design }: { design: MissionDesign }) {
   const ops = opsBudget({ destination: design.destination, crew: design.crew, days: design.totalDays });
+  const [exportType, setExportType] = useState<"budget" | "power" | "timeline" | null>(null);
+
+  const handleExport = (type: "budget" | "power" | "timeline") => {
+    const label = `${design.destination}-${design.crew}crew-${design.totalDays.toFixed(0)}d`;
+    if (type === "budget") {
+      const csv = lifeSupportBudgetCsv(ops, label);
+      downloadCsv(`${label}-life-support-budget.csv`, csv);
+    } else if (type === "power") {
+      const csv = eclssPowerBreakdownCsv(ops, label);
+      downloadCsv(`${label}-eclss-power-breakdown.csv`, csv);
+    } else if (type === "timeline") {
+      const csv = consumablesTimelineCsv(ops, label);
+      downloadCsv(`${label}-consumables-timeline.csv`, csv);
+    }
+    setExportType(null);
+  };
 
   return (
     <Card>
       <CardBody>
-        <CardTitle className="flex items-center gap-2">
+<CardTitle className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2">
           <Recycle className="h-4 w-4 text-space-emerald" /> Life-support budget · {design.totalDays.toFixed(0)} days
-        </CardTitle>
+        </span>
+        <div className="relative">
+          <Button variant="outline" size="sm" onClick={() => setExportType("budget")}>
+            <Download className="h-3.5 w-3.5" /> Export CSV
+          </Button>
+          {exportType && (
+            <div className="absolute right-0 top-full mt-1 z-10 rounded-xl border border-white/10 bg-space-950/95 backdrop-blur p-2 shadow-lg">
+              <div className="text-xs text-slate-400 px-3 py-2 border-b border-white/10">Export Life Support Data</div>
+              <button onClick={() => { handleExport("budget"); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 rounded-lg">
+                Full budget (consumables, recycling, ISRU, power, array)
+              </button>
+              <button onClick={() => { handleExport("power"); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 rounded-lg">
+                ECLSS power line breakdown
+              </button>
+              <button onClick={() => { handleExport("timeline"); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-white/10 rounded-lg">
+                Daily consumables timeline
+              </button>
+              <div className="pt-1">
+                <button onClick={() => setExportType(null)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:bg-white/10 rounded-lg">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardTitle>
         <p className="mt-2 text-xs text-slate-500">
           An ISS-class regenerative ECLSS closes the loop on most consumables — here is how much it saves out of the
           launch stack, and the power that costs.

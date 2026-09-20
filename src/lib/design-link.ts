@@ -60,6 +60,16 @@ export function decodeDesign(raw: Record<string, string | string[] | undefined>)
   };
 }
 
+/** Parse and validate a design from URL query string (convenience wrapper). */
+export function decodeDesignQuery(queryString: string): DesignInput {
+  const params = new URLSearchParams(queryString);
+  const raw: Record<string, string | string[] | undefined> = {};
+  params.forEach((value, key) => {
+    raw[key] = value;
+  });
+  return decodeDesign(raw);
+}
+
 /** True when the design differs from the default (i.e. worth persisting in the URL). */
 export function isCustomDesign(design: DesignInput): boolean {
   return (
