@@ -30,4 +30,12 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_missionId", ["missionId"])
     .index("by_missionId_createdAt", ["missionId", "createdAt"]),
+
+  users: defineTable({
+    tokenIdentifier: v.string(),
+    name: v.string(),
+    email: v.optional(v.string()),
+    picture: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_tokenIdentifier", ["tokenIdentifier"]),
 });
