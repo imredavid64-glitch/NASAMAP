@@ -2,8 +2,8 @@
 
 ## Entry
 - **Name**: NASAMAP â€” Every human has a seat at the frontier
-- **Team**: (fill in team name)
-- **Developer space**: (fill in)
+- **Team**: David (solo)
+- **Developer space**: GitHub: imredavid64-glitch/NASAMAP
 - **Primary lane**: Space Mission Design Game
 - **Also relevant to**: Life Support & ECLSS, Flight â€” Trajectory & Orbital Mechanics, Live Space Feeds & Simulation, Data Pool & Insights, Open Data for Impact
 - **Live URL**: https://nasamap.vercel.app
@@ -19,7 +19,7 @@ npm ci
 npm run dev            # http://localhost:3000
 npm run validate:data  # schema check on every dataset
 npm run lint && npm run typecheck
-npx vitest run         # 234 tests
+npx vitest run         # 249 tests
 npm run build && npm start
 ```
 
@@ -44,7 +44,7 @@ npm run build && npm start
 ## Engineering honesty
 - Live data is labelled **live**; anything cached is labelled **snapshot** with a timestamp; snapshots are committed so the demo never dies on stage.
 - Estimated parameters (vehicle capability, mass budgets) are tagged `estimate` in the data with a `costConfidence`/provenance field â€” nothing is fabricated.
-- 234 automated tests cover the physics, datasets, scoring, scenarios and exports; `validate:data` schema-checks every JSON dataset in CI.
+- 249 automated tests cover the physics, datasets, scoring, scenarios and exports; `validate:data` schema-checks every JSON dataset in CI.
 - Fonts are self-hosted; no external network calls from the app at runtime except the documented live-data endpoints.
 
 ## Deploy (already on GitHub)
