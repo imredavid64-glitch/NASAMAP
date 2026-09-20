@@ -328,12 +328,43 @@ export function MarsSurfaceCanvas({
     return () => cancelAnimationFrame(raf);
   }, [paused, speed]);
 
+  const handleTogglePause = () => setPaused(!paused);
+  const handleReset = () => { hourRef.current = 8; setHour(8); setPaused(false); };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement) return;
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          handleTogglePause();
+          break;
+        case "r":
+        case "R":
+          e.preventDefault();
+          handleReset();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setSpeed(Math.min(5, speed + 0.5));
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          setSpeed(Math.max(0.2, speed - 0.5));
+          break;
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [paused, speed]);
+
   const index = Math.min(profile.length - 1, Math.round((hour / MARS_SOL_HOURS) * (profile.length - 1)));
   const batteryPct = profile[index].batteryPct;
   const elevationDeg = solarElevationDeg(hour, LATITUDE_DEG, declinationDeg);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full" role="application" aria-label="Mars surface operations simulation">
       <Canvas dpr={[1, 1.75]} camera={{ position: [18, 11, 20], fov: 50 }} shadows>
         <Suspense fallback={null}>
           <Scene
@@ -347,7 +378,7 @@ export function MarsSurfaceCanvas({
         </Suspense>
       </Canvas>
 
-      <div className="pointer-events-auto absolute left-4 top-4 max-w-xs rounded-xl border border-white/10 bg-black/60 p-4 font-mono text-[11px] text-slate-300 backdrop-blur">
+      <div className="pointer-events-auto absolute left-4 top-4 max-w-xs rounded-xl border border-white/10 bg-black/60 p-4 font-mono text-[11px] text-slate-300 backdrop-blur" role="region" aria-label="Surface ops status">
         <p className="text-space-cyan">SURFACE OPS · JEZERO-CLASS SITE</p>
         <dl className="mt-2 space-y-1">
           <div className="flex justify-between gap-4">
@@ -373,28 +404,26 @@ export function MarsSurfaceCanvas({
             <dd>{batteryKwh.toFixed(0)} kWh</dd>
           </div>
         </dl>
-        <p className={`mt-2 ${elevationDeg > 0 ? "text-space-emerald" : "text-space-amber"}`}>
+        <p className={`mt-2 ${elevationDeg > 0 ? "text-space-emerald" : "text-space-amber"}`} aria-live="polite">
           {elevationDeg > 0 ? "sunlit — array charging" : "night — running on battery"}
         </p>
       </div>
 
-      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 rounded-xl border border-white/10 bg-black/40 p-2 backdrop-blur">
+      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 rounded-xl border border-white/10 bg-black/40 p-2 backdrop-blur" role="group" aria-label="Simulation controls">
         <button
-          onClick={() => setPaused(!paused)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/20 px-4 py-2 text-sm font-medium text-space-cyan hover:bg-space-cyan/30"
+          onClick={handleTogglePause}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/20 px-4 py-2 text-sm font-medium text-space-cyan hover:bg-space-cyan/30 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label={paused ? "Play simulation" : "Pause simulation"}
         >
-          {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+          {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
           {paused ? "Play" : "Pause"}
         </button>
         <button
-          onClick={() => {
-            hourRef.current = 8;
-            setHour(8);
-            setPaused(false);
-          }}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/20"
+          onClick={handleReset}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label="Reset simulation to sol start"
         >
-          <RotateCcw className="h-4 w-4" /> Reset
+          <RotateCcw className="h-4 w-4" aria-hidden="true" /> Reset
         </button>
         <label className="flex items-center gap-2 text-xs text-slate-300">
           Sol speed
@@ -405,11 +434,12 @@ export function MarsSurfaceCanvas({
             step={0.1}
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
-            className="w-32 accent-space-cyan"
+            className="w-32 accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+            aria-label="Simulation speed in hours per second"
           />
           <span className="w-12 text-right font-mono">{speed.toFixed(1)} h/s</span>
         </label>
-        <span className="font-mono text-xs text-slate-400">
+        <span className="font-mono text-xs text-slate-400" aria-live="polite">
           Sol clock {formatSolClock(hour)} · battery {batteryPct.toFixed(0)}%
         </span>
       </div>

@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Rocket, Moon, Sun } from "lucide-react";
+import { Rocket, Moon, Sun, Globe } from "lucide-react";
 import type { FlyMode } from "@/components/fly-stage";
 
 const MODES: { mode: FlyMode; label: string; hint: string; icon: typeof Rocket }[] = [
   { mode: "apollo11", label: "Apollo 11", hint: "historical replay", icon: Rocket },
   { mode: "hohmann", label: "Moon Hohmann", hint: "patched-conic", icon: Moon },
   { mode: "mars", label: "Mars Hohmann", hint: "Sun-centred Kepler", icon: Sun },
+  { mode: "orrery", label: "Solar System", hint: "all planets, real-time", icon: Globe },
 ];
 
 export function FlyModeTabs({ active }: { active: FlyMode }) {

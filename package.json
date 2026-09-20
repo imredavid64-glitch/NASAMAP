@@ -18,9 +18,12 @@
     "@tanstack/react-query": "^5.67.2",
     "@types/three": "^0.174.0",
     "clsx": "^2.1.1",
+    "convex": "^1.46.0",
+    "date-fns": "^4.4.0",
     "lucide-react": "^0.479.0",
     "minisearch": "^7.2.0",
     "next": "^15.1.0",
+    "next-pwa": "^5.6.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "satellite.js": "^5.0.0",
@@ -29,6 +32,7 @@
     "three-stdlib": "^2.35.13"
   },
   "devDependencies": {
+    "@types/next-pwa": "^5.6.9",
     "@types/node": "^22.13.10",
     "@types/react": "19.2.0",
     "@types/react-dom": "19.2.0",
@@ -36,6 +40,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.5",
     "postcss": "^8.5.3",
+    "sharp": "^0.35.4",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.23.13",
     "typescript": "^5.8.2",

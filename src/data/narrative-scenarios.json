@@ -1,0 +1,462 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "first-farmer-mars",
+      "title": "First Farmer on Mars",
+      "persona": "farmer",
+      "difficulty": "Intermediate",
+      "brief": "You're the first farmer on Mars. Every calorie counts. Choose your crops, manage your water, and prove agriculture can work on the Red Planet — or watch the colony starve.",
+      "lane": "life-support",
+      "parScore": 75,
+      "initialDesign": {
+        "destination": "mars",
+        "vehicleId": "starship",
+        "crew": 4,
+        "surfaceDays": 180
+      },
+      "startNode": "arrival",
+      "nodes": [
+        {
+          "id": "arrival",
+          "speaker": "Mission Control",
+          "narrative": "The Starship has landed in Jezero Crater. The hab is pressurized. Your crew of four steps onto Martian soil — the first farmers in history. You have 180 sols to prove this works. The hydroponics bay is empty. What do you plant first?",
+          "choices": [
+            {
+              "id": "potatoes",
+              "text": "Potatoes — high calories, proven on ISS (Veggie), tolerates low light",
+              "designDelta": { "surfaceDays": 180 },
+              "consequence": "Potatoes selected. They'll need 120 sols to mature. Water budget: 400L per sol for the crop. The crew will eat well — if the water holds.",
+              "setsFlag": "crop_potatoes",
+              "unlocks": "water_crisis"
+            },
+            {
+              "id": "soybeans",
+              "text": "Soybeans — complete protein, nitrogen-fixing, but longer growth cycle",
+              "designDelta": { "surfaceDays": 210 },
+              "consequence": "Soybeans selected. 150 sols to maturity. Higher protein yield but extends surface stay by 30 sols. Radiation dose increases. Water budget: 350L/sol.",
+              "setsFlag": "crop_soybeans",
+              "unlocks": "water_crisis"
+            },
+            {
+              "id": "mixed",
+              "text": "Mixed crop rotation — potatoes, soybeans, and leafy greens for morale",
+              "designDelta": { "surfaceDays": 240 },
+              "consequence": "Diverse rotation selected. 180 sols for full cycle. Best nutrition and crew morale, but extends stay to 240 sols. Radiation risk climbs. Water budget: 500L/sol.",
+              "setsFlag": "crop_mixed",
+              "unlocks": "water_crisis"
+            }
+          ]
+        },
+        {
+          "id": "water_crisis",
+          "requiresFlag": "crop_potatoes",
+          "speaker": "Hydroponics AI",
+          "narrative": "Sol 45. The water recycler is at 87% efficiency — below the 90% design spec. A brine leak in the WPA. You're losing 15L/sol. The potato crop needs 400L/sol. You have 12,000L reserves. Do you:",
+          "choices": [
+            {
+              "id": "repair_wpa",
+              "text": "Divert crew to repair the WPA — 3 sols downtime, restores 95% efficiency",
+              "designDelta": { "surfaceDays": 183 },
+              "consequence": "WPA repaired. Efficiency restored to 95%. Water crisis averted. Crew loses 3 sols of crop tending. Potatoes on track.",
+              "setsFlag": "wpa_repaired"
+            },
+            {
+              "id": "reduce_crop",
+              "text": "Reduce potato plot by 30% — saves 120L/sol, but cuts calorie yield",
+              "designDelta": {},
+              "consequence": "Crop reduced. Water budget balanced. But crew daily calories drop from 2800 to 2200. Morale suffers. Long-term health risk.",
+              "setsFlag": "crop_reduced"
+            },
+            {
+              "id": "mine_ice",
+              "text": "Send rover to mine subsurface ice — 10 sols, yields 5000L if successful",
+              "designDelta": { "surfaceDays": 190 },
+              "consequence": "Ice mining mission launched. 10 sols round trip. 60% chance of success based on orbital radar. High risk, high reward.",
+              "setsFlag": "ice_mining"
+            }
+          ]
+        },
+        {
+          "id": "water_crisis_soy",
+          "requiresFlag": "crop_soybeans",
+          "speaker": "Hydroponics AI",
+          "narrative": "Sol 45. Water recycler at 87%. Soybeans need 350L/sol. You have 12,000L reserves. The nitrogen-fixing roots are helping soil health, but the longer growth cycle means more total water. Do you:",
+          "choices": [
+            {
+              "id": "repair_wpa_soy",
+              "text": "Repair WPA — 3 sols, restores 95% efficiency",
+              "designDelta": { "surfaceDays": 213 },
+              "consequence": "WPA fixed. Soybeans on track for 150-sol maturity. Extended stay to 213 sols total. Radiation dose increases slightly.",
+              "setsFlag": "wpa_repaired"
+            },
+            {
+              "id": "stagger_planting",
+              "text": "Stagger planting — harvest half early, replant. Reduces peak water by 20%",
+              "designDelta": { "surfaceDays": 225 },
+              "consequence": "Staggered planting works. Peak water demand reduced. But adds 15 sols to total cycle. Surface stay now 225 sols. Crew fatigue a concern.",
+              "setsFlag": "staggered"
+            }
+          ]
+        },
+        {
+          "id": "water_crisis_mixed",
+          "requiresFlag": "crop_mixed",
+          "speaker": "Hydroponics AI",
+          "narrative": "Sol 45. Water recycler at 87%. Mixed rotation needs 500L/sol — over budget. The leafy greens are boosting crew morale (psych scores +15%), but the water math doesn't close. Do you:",
+          "choices": [
+            {
+              "id": "cut_greens",
+              "text": "Cut leafy greens — saves 150L/sol, morale drops 15%",
+              "designDelta": {},
+              "consequence": "Greens removed. Water budget closes. Crew morale declines. Psych scores drop. Long-duration risk increases.",
+              "setsFlag": "greens_cut"
+            },
+            {
+              "id": "ice_mining_mixed",
+              "text": "Mine ice — 10 sols, 5000L potential, keeps full rotation",
+              "designDelta": { "surfaceDays": 250 },
+              "consequence": "Ice mining launched. Full crop rotation preserved. Surface stay extends to 250 sols. Radiation dose climbs. High stakes.",
+              "setsFlag": "ice_mining"
+            }
+          ]
+        },
+        {
+          "id": "harvest",
+          "speaker": "Farmer",
+          "narrative": "The harvest day arrives. The crew gathers in the hydroponics bay. The yield determines whether Mars agriculture is viable — and whether your crew eats well for the return journey.",
+          "choices": [
+            {
+              "id": "harvest_success",
+              "text": "Harvest complete — yield meets or exceeds targets",
+              "designDelta": {},
+              "consequence": "Bumper crop! 110% of calorie target. Crew gains 5kg each. Surplus packaged for return journey. Mars farming PROVEN.",
+              "setsFlag": "harvest_success",
+              "unlocks": "ending_success"
+            },
+            {
+              "id": "harvest_partial",
+              "text": "Harvest partial — 70% of target, crew on reduced rations",
+              "designDelta": {},
+              "consequence": "Crop shortfall. Crew on 2000 cal/day for return. Weight loss 3-5kg each. Viable but hard. Mars farming POSSIBLE.",
+              "setsFlag": "harvest_partial",
+              "unlocks": "ending_partial"
+            },
+            {
+              "id": "harvest_failure",
+              "text": "Crop failure — blight, equipment failure, or water loss",
+              "designDelta": {},
+              "consequence": "Crop lost. Emergency rations only. Crew must abort surface stay early. Mars farming UNPROVEN. Mission recast as technology demonstrator.",
+              "setsFlag": "harvest_failure",
+              "unlocks": "ending_failure"
+            }
+          ]
+        },
+        {
+          "id": "ending_success",
+          "isEnding": true,
+          "endingType": "success",
+          "speaker": "Mission Control",
+          "narrative": "The first farmer on Mars has proven it: we can grow food on the Red Planet. Your harvest feeds the crew, seeds the next rotation, and writes the playbook for every settlement that follows. The Starship returns heavy with data, seeds, and hope. History records this sol as the day humanity became a two-planet species — starting with a potato.",
+          "choices": []
+        },
+        {
+          "id": "ending_partial",
+          "isEnding": true,
+          "endingType": "partial",
+          "speaker": "Mission Control",
+          "narrative": "The harvest came up short — but you learned why. The water recycler, the lighting spectrum, the regolith simulant... every failure is data. The next rotation will do better. Mars farming is possible, just not easy. The crew returns thinner but wiser. The colony survives.",
+          "choices": []
+        },
+        {
+          "id": "ending_failure",
+          "isEnding": true,
+          "endingType": "failure",
+          "speaker": "Mission Control",
+          "narrative": "The crop failed. But the data didn't. Every sensor reading, every water sample, every failed leaf teaches the next crew what not to do. The first farmer on Mars didn't feed the colony — but they fed the knowledge base. The next Starship carries better lights, better recyclers, better seeds. You planted the first seeds of success, even if they never sprouted.",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "id": "artemis-geologist",
+      "title": "Artemis Geologist",
+      "persona": "geologist",
+      "difficulty": "Intermediate",
+      "brief": "You're the geologist on Artemis III. The Moon's south pole holds secrets: water ice, volcanic history, the late heavy bombardment. Every sample tells a story. But the rover has limited range, the suit has limited time, and the launch window doesn't wait.",
+      "lane": "mission-design",
+      "parScore": 80,
+      "initialDesign": {
+        "destination": "moon",
+        "vehicleId": "sls-block-1",
+        "crew": 2,
+        "surfaceDays": 6
+      },
+      "startNode": "landing",
+      "nodes": [
+        {
+          "id": "landing",
+          "speaker": "Mission Control",
+          "narrative": "Orion has docked with the HLS. You and your crewmate descend to Shackleton Crater rim. The Sun barely kisses the horizon — permanent shadows in the crater floor hold water ice billions of years old. You have 6 days. The rover has 20km range. The suit has 8 hours per EVA. Where do you go first?",
+          "choices": [
+            {
+              "id": "rim_traverse",
+              "text": "Long traverse along crater rim — sample ejecta from multiple impacts",
+              "designDelta": { "surfaceDays": 6 },
+              "consequence": "Rim traverse planned. 18km round trip. Samples from 3 different basin ejecta blankets. High science return. Uses 2 of 4 EVAs. Leaves 2 EVAs for contingency.",
+              "setsFlag": "rim_done"
+            },
+            {
+              "id": "shadow_probe",
+              "text": "Descend into permanent shadow — direct ice sampling with drill",
+              "designDelta": { "surfaceDays": 6 },
+              "consequence": "Shadow descent planned. High risk — thermal extremes, navigation in darkness. But direct ice core sample is the holy grail. Uses 2 EVAs. Requires special lighting and thermal management.",
+              "setsFlag": "shadow_done"
+            },
+            {
+              "id": "volcanic_hunt",
+              "text": "Hunt for young volcanic vents — test recent lunar activity theories",
+              "designDelta": { "surfaceDays": 6 },
+              "consequence": "Volcanic hunt planned. Targeting irregular mare patches. Could rewrite lunar thermal history. Moderate risk. Uses 2 EVAs. High science impact if vents found.",
+              "setsFlag": "volcanic_done"
+            }
+          ]
+        },
+        {
+          "id": "evas",
+          "speaker": "EVA Systems",
+          "narrative": "First two EVAs complete. Samples secured. But an anomaly: the rover's spectrometer shows unexpected thorium concentrations at your second site. Do you use your remaining two EVAs to investigate, or stick to the plan and secure the primary samples?",
+          "choices": [
+            {
+              "id": "investigate_anomaly",
+              "text": "Investigate thorium anomaly — could indicate KREEP terrain, deep mantle material",
+              "designDelta": {},
+              "consequence": "Anomaly investigated. Thorium confirmed — you've found KREEP basalt. Sample return will revolutionize lunar formation models. But primary traverse samples reduced.",
+              "setsFlag": "anomaly_investigated"
+            },
+            {
+              "id": "stick_to_plan",
+              "text": "Stick to plan — primary traverse samples are the mission requirement",
+              "designDelta": {},
+              "consequence": "Primary samples secured. Thorium anomaly left for next mission. Safe, conservative. Meets all mission requirements. Science return solid but not revolutionary.",
+              "setsFlag": "plan_followed"
+            },
+            {
+              "id": "split_difference",
+              "text": "Quick anomaly sample (30 min), then finish traverse — compromise",
+              "designDelta": {},
+              "consequence": "Compromise achieved. Anomaly sampled (small piece). Primary traverse mostly complete. Both objectives partially met. Good balance.",
+              "setsFlag": "compromise"
+            }
+          ]
+        },
+        {
+          "id": "launch_prep",
+          "speaker": "Mission Control",
+          "narrative": "EVA 4 complete. The ascent vehicle is fueled. Orion awaits in NRHO. You have 2 hours to load samples, secure the hab, and launch. The sample mass budget is tight — 35kg allocated. You collected 42kg. What stays?",
+          "choices": [
+            {
+              "id": "keep_ice",
+              "text": "Prioritize ice core — unique volatile record, highest science value",
+              "designDelta": {},
+              "consequence": "Ice core kept. Volatile science secured. Some basalt samples left behind. Water ice provenance confirmed.",
+              "setsFlag": "ice_priority"
+            },
+            {
+              "id": "keep_kreep",
+              "text": "Prioritize KREEP/thorium samples — mantle process record",
+              "designDelta": {},
+              "consequence": "KREEP samples kept. Deep mantle process record secured. Ice core left. Volatile science deferred.",
+              "setsFlag": "kreep_priority"
+            },
+            {
+              "id": "balanced",
+              "text": "Balanced suite — representative of all sites visited",
+              "designDelta": {},
+              "consequence": "Balanced collection. All sites represented. No single story complete, but all stories started. Good for broad science.",
+              "setsFlag": "balanced_suite"
+            }
+          ]
+        },
+        {
+          "id": "ending_science_star",
+          "isEnding": true,
+          "endingType": "success",
+          "speaker": "Principal Investigator",
+          "narrative": "The samples are in the lab. The ice core shows layered deposition — seasonal cycles from 3 billion years ago. The KREEP basalt proves the Moon's mantle was still churning 1 billion years later than models predicted. The volcanic hunt found vents active 50 million years ago. Three papers in Nature. The Moon is alive. You didn't just collect rocks. You rewrote the history of the Earth-Moon system.",
+          "choices": []
+        },
+        {
+          "id": "ending_solid",
+          "isEnding": true,
+          "endingType": "partial",
+          "speaker": "Mission Control",
+          "narrative": "Mission complete. All primary objectives met. The samples are good — representative, well-documented, properly curated. No revolutions, but solid incremental science. The next crew will build on your traverse. The ice core waits in shadow for the next mission. You did the job. That's what professionals do.",
+          "choices": []
+        },
+        {
+          "id": "ending_conservative",
+          "isEnding": true,
+          "endingType": "failure",
+          "speaker": "Mission Control",
+          "narrative": "Safe return. Samples collected. But the thorium anomaly... it haunts the science team. Was it KREEP? A new rock type? We'll never know from this mission. The rover sits at the rim, spectrometer silent. Sometimes the most important sample is the one you didn't take. The next geologist will have to go back and find out.",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "id": "gateway-assembly-lead",
+      "title": "Gateway Assembly Lead",
+      "persona": "commander",
+      "difficulty": "Advanced",
+      "brief": "You're the Assembly Lead for Gateway — humanity's first lunar space station. International modules arriving on different rockets, different schedules, different interfaces. One wrong connection, one software mismatch, one delayed launch, and the whole architecture slips. You have 365 days to make it a home.",
+      "lane": "life-support",
+      "parScore": 78,
+      "initialDesign": {
+        "destination": "moon",
+        "vehicleId": "sls-block-1",
+        "crew": 4,
+        "surfaceDays": 0
+      },
+      "startNode": "kickoff",
+      "nodes": [
+        {
+          "id": "kickoff",
+          "speaker": "Program Director",
+          "narrative": "The Gateway manifest: PPE (Power & Propulsion Element) on Falcon Heavy, HALO (Habitation) on SLS, I-HAB (International Hab) on Ariane 6, ESPRIT (refueling/comms) on Ariane 6, Canadarm3 on commercial. Four launch vehicles. Three space agencies. One NRHO. 365 days to first crew. Your call: which module flies first?",
+          "choices": [
+            {
+              "id": "ppe_first",
+              "text": "PPE first — power and propulsion before anything else",
+              "designDelta": {},
+              "consequence": "PPE launches on Falcon Heavy. Solar arrays deploy. Ion thrusters fire. NRHO achieved. But HALO delayed 60 days. No crew habitat until Month 8.",
+              "setsFlag": "ppe_first"
+            },
+            {
+              "id": "halo_first",
+              "text": "HALO first — crew habitat ready when PPE arrives",
+              "designDelta": {},
+              "consequence": "HALO launches on SLS Block 1. Habitat ready. But PPE on Falcon Heavy slips 90 days (fairing issue). Station unpowered for 3 months. Thermal cycling risks systems.",
+              "setsFlag": "halo_first"
+            },
+            {
+              "id": "dual_manifest",
+              "text": "Dual manifest — PPE + HALO on same SLS Block 1B (if ready)",
+              "designDelta": {},
+              "consequence": "SLS Block 1B not certified. 50% chance it flies in window. If it works, perfect integration. If not, both delay 120 days. High risk, high reward.",
+              "setsFlag": "dual_manifest"
+            }
+          ]
+        },
+        {
+          "id": "integration_crisis",
+          "speaker": "Systems Engineer",
+          "narrative": "Month 4. The I-HAB module (ESA) arrives with a software interface mismatch — European docking standard vs NASA standard. The Canadarm3 (CSA) can't grapple it without a software patch. ESA says 60 days for patch. NASA says 30. CSA says they can build a mechanical adapter in 45. The clock is ticking.",
+          "choices": [
+            {
+              "id": "esa_patch",
+              "text": "Wait for ESA software patch — 60 days, correct fix",
+              "designDelta": {},
+              "consequence": "ESA patch delivered. Correct, tested, certified. But 60-day slip pushes first crew to Month 13. Political pressure mounts.",
+              "setsFlag": "esa_patch"
+            },
+            {
+              "id": "csa_adapter",
+              "text": "Build CSA mechanical adapter — 45 days, hardware workaround",
+              "designDelta": {},
+              "consequence": "Adapter built. Works mechanically. But software telemetry limited. EVA required for final mate. 45 days. Crewed demo delayed to Month 11.",
+              "setsFlag": "csa_adapter"
+            },
+            {
+              "id": "nasa_patch",
+              "text": "NASA crash patch — 30 days, high risk, untested",
+              "designDelta": {},
+              "consequence": "NASA patch deployed. 30 days saved. But untested in orbit. First mating attempt... 30% chance of hard dock failure. If it works, crew by Month 10. If not, total loss of I-HAB.",
+              "setsFlag": "nasa_patch"
+            }
+          ]
+        },
+        {
+          "id": "life_support_test",
+          "speaker": "ECLSS Lead",
+          "narrative": "Month 8. The regenerative ECLSS (ESA water, NASA air) runs for first time in orbit. Water recovery hits 88% — below 90% spec. CO2 scrubber cycles irregularly. The first crew arrives in 60 days. You have one shot to fix it remotely.",
+          "choices": [
+            {
+              "id": "upgrade_water",
+              "text": "Upload brine processor upgrade — adds 5% water recovery, 14 days",
+              "designDelta": {},
+              "consequence": "Brine processor code uploaded. Water recovery reaches 93%. CO2 scrubber still cycling irregularly. Crew health risk: manageable.",
+              "setsFlag": "water_upgraded"
+            },
+            {
+              "id": "fix_co2",
+              "text": "Patch CO2 scrubber logic — stabilizes cycles, 10 days",
+              "designDelta": {},
+              "consequence": "CO2 scrubber stabilized. Air quality solid. Water recovery stays at 88%. Crew needs 12% more water resupply. Budget impact: $40M.",
+              "setsFlag": "co2_fixed"
+            },
+            {
+              "id": "both_minimal",
+              "text": "Minimal fixes for both — 21 days, gets to 90% water, stable CO2",
+              "designDelta": {},
+              "consequence": "Both patched minimally. Water 90.5%. CO2 stable. Just barely meets spec. No margin. Any degradation = crisis.",
+              "setsFlag": "both_minimal"
+            }
+          ]
+        },
+        {
+          "id": "first_crew",
+          "speaker": "Gateway Commander",
+          "narrative": "Day 1 of Expedition 1. Four crew — NASA, ESA, JAXA, CSA. The station is yours. PPE humming. HALO pressurized. I-HAB mated (mostly). ESPRIT refueling demo next week. Canadarm3 checkout tomorrow. You're the first to live in deep space. What's your first order?",
+          "choices": [
+            {
+              "id": "science_first",
+              "text": "Deploy external payloads — heliophysics, radiation, lunar science",
+              "designDelta": {},
+              "consequence": "Science payloads deployed. Data flowing. Gateway proves its worth as science platform. Crew morale high. But maintenance backlog grows.",
+              "setsFlag": "science_first"
+            },
+            {
+              "id": "maintenance_first",
+              "text": "Burn down maintenance backlog — ECLSS, comms, thermal, robotics",
+              "designDelta": {},
+              "consequence": "Maintenance caught up. Station healthy. Science delayed 2 weeks. International partners annoyed but station survives.",
+              "setsFlag": "maintenance_first"
+            },
+            {
+              "id": "esprit_demo",
+              "text": "Prioritize ESPRIT refueling demo — proves Gateway as logistics hub",
+              "designDelta": {},
+              "consequence": "Refueling demo succeeds. Gateway validated as fuel depot. Critical for Mars architecture. ESA thrilled. Other systems wait.",
+              "setsFlag": "esprit_demo"
+            }
+          ]
+        },
+        {
+          "id": "ending_gateway_operational",
+          "isEnding": true,
+          "endingType": "success",
+          "speaker": "Gateway Commander",
+          "narrative": "Expedition 1 complete. Gateway is operational — power, propulsion, habitat, air, water, comms, robotics, refueling. All international elements integrated. All agencies proud. The next crew arrives in 30 days. The one after that, in 60. The Mars transit habitat will dock here next year. You built the first rung of the ladder to Mars. It holds.",
+          "choices": []
+        },
+        {
+          "id": "ending_gateway_fragile",
+          "isEnding": true,
+          "endingType": "partial",
+          "speaker": "Mission Control",
+          "narrative": "Gateway flies. Crew lives. Systems work — mostly. The ECLSS runs at 90.5% water recovery. The CO2 scrubber needs a manual reset every 48 hours. The I-HAB thermal blanket has a tear from the adapter mating. But it flies. And the next crew will fix what you couldn't. That's how stations are built. One expedition at a time.",
+          "choices": []
+        },
+        {
+          "id": "ending_gateway_delayed",
+          "isEnding": true,
+          "endingType": "failure",
+          "speaker": "Program Director",
+          "narrative": "The schedule slipped. First crew delayed to Month 18. The political will wavered. Budget hearings questioned the architecture. International partners threatened withdrawal. But the modules are built. The rockets are ready. The station will fly — just not on your watch. You laid the foundation. Someone else cuts the ribbon. That's the job.",
+          "choices": []
+        }
+      ]
+    }
+  ]
+}

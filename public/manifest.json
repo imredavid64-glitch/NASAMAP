@@ -1,0 +1,49 @@
+{
+  "name": "NASAMAP — Every human has a seat at the frontier",
+  "short_name": "NASAMAP",
+  "description": "Plan, fly and live a real Moon-to-Mars mission. Turn cosmic data into everyday decisions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#00f0ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "science", "simulation"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Mission Lab",
+      "short_name": "Mission Lab",
+      "description": "Design your Moon-to-Mars mission",
+      "url": "/mission",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Play Game",
+      "short_name": "Play",
+      "description": "Space Mission Design Game",
+      "url": "/play",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Live Data",
+      "short_name": "Live",
+      "description": "Real-time ISS, Voyager, space weather",
+      "url": "/live",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -11,11 +11,16 @@ import {
   ExternalLink,
   LocateFixed,
   Download,
+  WifiOff,
+  Database,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { groundTrackKml, downloadFile, type KmlTrackPoint } from "@/lib/export";
+import { CardSkeleton, ListSkeleton } from "@/components/ui/skeleton";
+import { ErrorState, LoadingState, StaleDataBanner } from "@/components/ui/empty-state";
 
 interface Feed {
   source: "live" | "snapshot";
@@ -91,10 +96,6 @@ function useFeeds(lat: number, lon: number) {
   return { iss, voyager, apod, neo, sw, loading, at, reload: load };
 }
 
-function Skeleton() {
-  return <div className="h-40 animate-pulse rounded-xl bg-white/5" />;
-}
-
 export function LiveRibbon() {
   const [lat, setLat] = useState(29.56);
   const [lon, setLon] = useState(-95.09);
@@ -136,7 +137,7 @@ export function LiveRibbon() {
             always tells you which one you are looking at.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3" role="group" aria-label="Location and refresh controls">
           <label className="text-xs text-slate-400">
             Lat
             <input
@@ -144,7 +145,8 @@ export function LiveRibbon() {
               value={lat}
               step={0.01}
               onChange={(e) => setLat(Number(e.target.value))}
-              className="ml-2 w-24 rounded-lg border border-white/10 bg-space-950/60 px-2 py-1 font-mono text-sm text-white outline-none focus:border-space-cyan/60"
+              className="ml-2 w-24 rounded-lg border border-white/10 bg-space-950/60 px-2 py-1 font-mono text-sm text-white outline-none focus:border-space-cyan/60 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Latitude"
             />
           </label>
           <label className="text-xs text-slate-400">
@@ -154,22 +156,25 @@ export function LiveRibbon() {
               value={lon}
               step={0.01}
               onChange={(e) => setLon(Number(e.target.value))}
-              className="ml-2 w-24 rounded-lg border border-white/10 bg-space-950/60 px-2 py-1 font-mono text-sm text-white outline-none focus:border-space-cyan/60"
+              className="ml-2 w-24 rounded-lg border border-white/10 bg-space-950/60 px-2 py-1 font-mono text-sm text-white outline-none focus:border-space-cyan/60 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Longitude"
             />
           </label>
           <button
             type="button"
             onClick={locate}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+            aria-label="Use current location"
           >
-            <LocateFixed className="h-3.5 w-3.5" /> Locate
+            <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" /> Locate
           </button>
           <button
             type="button"
             onClick={() => void reload()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+            aria-label="Refresh all live data feeds"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden="true" /> Refresh
           </button>
         </div>
       </div>
@@ -193,7 +198,7 @@ export function LiveRibbon() {
               {iss.passes.length === 0 ? (
                 <p className="mt-1 text-sm text-slate-400">No visible passes in the next 24 h.</p>
               ) : (
-                <ul className="mt-1 space-y-1 text-sm text-slate-300">
+                <ul className="mt-1 space-y-1 text-sm text-slate-300" role="list" aria-label="Upcoming ISS passes">
                   {iss.passes.slice(0, 4).map((p) => (
                     <li key={p.startUtc} className="font-mono">
                       {fmtUtc(p.peakUtc)} UTC · max {p.maxElevationDeg.toFixed(0)}° · {p.durationMin.toFixed(0)} min
@@ -205,14 +210,15 @@ export function LiveRibbon() {
                 type="button"
                 onClick={() => void downloadKml()}
                 disabled={kmlBusy}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20 disabled:opacity-50"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+                aria-label={kmlBusy ? "Building KML file" : "Download ISS ground track as KML for Google Earth"}
               >
-                <Download className="h-3.5 w-3.5" /> {kmlBusy ? "Building…" : "Ground track (KML)"}
+                <Download className="h-3.5 w-3.5" aria-hidden="true" /> {kmlBusy ? "Building…" : "Ground track (KML)"}
               </button>
             </CardBody>
           </Card>
         ) : (
-          <Skeleton />
+          <CardSkeleton lines={4} />
         )}
 
         {voyager ? (
@@ -240,7 +246,7 @@ export function LiveRibbon() {
             </CardBody>
           </Card>
         ) : (
-          <Skeleton />
+          <CardSkeleton lines={3} />
         )}
 
         {sw ? (
@@ -263,7 +269,7 @@ export function LiveRibbon() {
             </CardBody>
           </Card>
         ) : (
-          <Skeleton />
+          <CardSkeleton lines={3} />
         )}
 
         {neo ? (
@@ -292,7 +298,7 @@ export function LiveRibbon() {
             </CardBody>
           </Card>
         ) : (
-          <Skeleton />
+          <CardSkeleton lines={3} />
         )}
 
         {apod ? (
@@ -321,7 +327,7 @@ export function LiveRibbon() {
             </CardBody>
           </Card>
         ) : (
-          <Skeleton />
+          <CardSkeleton lines={3} />
         )}
       </div>
 

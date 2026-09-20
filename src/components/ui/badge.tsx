@@ -24,6 +24,8 @@ export function Badge({
         tones[tone],
         className,
       )}
+      role="status"
+      aria-live="polite"
     >
       {children}
     </span>

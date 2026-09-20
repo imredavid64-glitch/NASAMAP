@@ -106,26 +106,36 @@ function HUD({
   speed,
   follow,
   totalSec,
+  time,
   onSpeedChange,
   onFollowChange,
   onScrub,
+  paused,
+  onTogglePause,
+  onReset,
+  onDownload,
 }: {
   state: MarsTransferState;
   speed: number;
   follow: string;
   totalSec: number;
+  time: number;
   onSpeedChange: (s: number) => void;
   onFollowChange: (f: string) => void;
   onScrub: (t: number) => void;
+  paused: boolean;
+  onTogglePause: () => void;
+  onReset: () => void;
+  onDownload: () => void;
 }) {
   const days = state.met / 86_400;
   const distEarth = Math.hypot(state.craftAu.x - state.earthAu.x, state.craftAu.y - state.earthAu.y);
   const distMars = Math.hypot(state.craftAu.x - state.marsAu.x, state.craftAu.y - state.marsAu.y);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10">
+    <div className="pointer-events-none absolute inset-0 z-10" role="region" aria-label="Mars transfer flight controls">
       <div className="pointer-events-auto p-4 font-mono text-space-cyan" style={{ fontSize: "11px", lineHeight: "1.6" }}>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-4 mb-4" role="group" aria-label="Mission status">
           <div className="bg-black/60 border border-space-cyan/30 rounded p-3">
             <div className="text-xs text-slate-400">T+ ELAPSED</div>
             <div className="text-lg font-bold">{days.toFixed(1)} days</div>
@@ -145,15 +155,30 @@ function HUD({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs" role="group" aria-label="Playback controls">
           <label className="flex items-center gap-2 bg-black/60 border border-white/10 rounded px-2 py-1">
             Speed
-            <input type="range" min="0" max="100" value={speed} onChange={(e) => onSpeedChange(Number(e.target.value))} className="w-32 accent-space-cyan" />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={speed}
+              onChange={(e) => onSpeedChange(Number(e.target.value))}
+              className="w-32 accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Playback speed"
+              step="1"
+            />
             <span className="w-10 text-right">{speed}x</span>
           </label>
+
           <label className="flex items-center gap-2 bg-black/60 border border-white/10 rounded px-2 py-1">
             Camera
-            <select value={follow} onChange={(e) => onFollowChange(e.target.value)} className="bg-space-950 border-white/10 text-white text-xs rounded px-1">
+            <select
+              value={follow}
+              onChange={(e) => onFollowChange(e.target.value)}
+              className="bg-space-950 border-white/10 text-white text-xs rounded px-1 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Camera follow mode"
+            >
               <option value="craft">Follow Craft</option>
               <option value="earth">Track Earth</option>
               <option value="mars">Track Mars</option>
@@ -161,11 +186,51 @@ function HUD({
               <option value="free">Free</option>
             </select>
           </label>
+
           <div className="flex-1"></div>
+
           <div className="bg-black/60 border border-white/10 rounded px-3 py-1">
-            <input type="range" min="0" max={totalSec} value={state.met} onChange={(e) => onScrub(Number(e.target.value))} className="w-56 accent-space-cyan" />
+            <input
+              type="range"
+              min="0"
+              max={totalSec}
+              value={state.met}
+              onChange={(e) => onScrub(Number(e.target.value))}
+              className="w-56 accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Mission elapsed time scrubber"
+              step="1"
+            />
           </div>
         </div>
+      </div>
+
+      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10" role="group" aria-label="Mission actions">
+        <button
+          onClick={onTogglePause}
+          className="px-4 py-2 rounded-lg bg-space-cyan/20 border border-space-cyan/40 text-space-cyan text-sm font-medium hover:bg-space-cyan/30 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label={paused ? "Play simulation" : "Pause simulation"}
+        >
+          {paused ? "▶ Play" : "⏸ Pause"}
+        </button>
+        <button
+          onClick={onReset}
+          className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label="Reset simulation to start"
+        >
+          ⟲ Reset
+        </button>
+
+        <button
+          onClick={onDownload}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label="Download trajectory as CSV"
+        >
+          <Download className="h-4 w-4" aria-hidden="true" /> CSV
+        </button>
+
+        <span className="text-xs text-slate-400 px-2" aria-live="polite">
+          {paused ? "Paused" : `T+${(time / 86_400).toFixed(1)} / ${(totalSec / 86_400).toFixed(0)} days`}
+        </span>
       </div>
     </div>
   );
@@ -227,13 +292,53 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
     setIndex(Math.floor((t / totalSec) * (samples.length - 1)));
   };
 
+  const handleTogglePause = () => setPaused(!paused);
+  const handleReset = () => { timeRef.current = 0; setTime(0); setState(samples[0]); setIndex(0); setPaused(false); };
+  const handleDownload = () => downloadCsv("nasamap-mars-transfer.csv", marsTrajectoryCsv(samples));
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          handleTogglePause();
+          break;
+        case "r":
+        case "R":
+          e.preventDefault();
+          handleReset();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setSpeed(Math.min(100, speed + 5));
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          setSpeed(Math.max(0, speed - 5));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setFollow("sun");
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          setFollow("craft");
+          break;
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [paused, speed, follow]);
+
   const pathPoints = useMemo(
     () => getMarsTransferSamples(160).map((s) => toScene(s.craftAu)),
     [],
   );
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" role="application" aria-label="Earth-Mars transfer simulation">
       <Canvas dpr={[1, 1.75]} camera={{ position: [0, 22, 30], fov: 45 }} gl={{ antialias: true, alpha: true }}>
         <ambientLight intensity={0.35} />
         <pointLight position={[0, 0, 0]} intensity={2.4} color="#fff3cf" />
@@ -281,34 +386,15 @@ export function MarsFlyCanvas({ initialSpeed = 10 }: { initialSpeed?: number }) 
         speed={speed}
         follow={follow}
         totalSec={totalSec}
+        time={time}
         onSpeedChange={setSpeed}
         onFollowChange={(v) => setFollow(v as "craft" | "earth" | "mars" | "sun" | "free")}
         onScrub={handleScrub}
+        paused={paused}
+        onTogglePause={handleTogglePause}
+        onReset={handleReset}
+        onDownload={handleDownload}
       />
-
-      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10">
-        <button
-          onClick={() => setPaused(!paused)}
-          className="px-4 py-2 rounded-lg bg-space-cyan/20 border border-space-cyan/40 text-space-cyan text-sm font-medium hover:bg-space-cyan/30"
-        >
-          {paused ? "▶ Play" : "⏸ Pause"}
-        </button>
-        <button
-          onClick={() => { timeRef.current = 0; setTime(0); setState(samples[0]); setIndex(0); setPaused(false); }}
-          className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
-        >
-          ⟲ Reset
-        </button>
-        <button
-          onClick={() => downloadCsv("nasamap-mars-transfer.csv", marsTrajectoryCsv(samples))}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
-        >
-          <Download className="h-4 w-4" /> CSV
-        </button>
-        <span className="text-xs text-slate-400 px-2">
-          {paused ? "Paused" : `T+${(time / 86_400).toFixed(1)} / ${(totalSec / 86_400).toFixed(0)} days`}
-        </span>
-      </div>
     </div>
   );
 }

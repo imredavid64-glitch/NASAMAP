@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { CanvasErrorBoundary } from "@/components/ui/error-boundary";
 
 const MarsSurfaceCanvasInner = dynamic(
   () => import("@/components/three/MarsSurfaceCanvas").then((m) => m.MarsSurfaceCanvas),
@@ -18,7 +19,9 @@ const MarsSurfaceCanvasInner = dynamic(
 export function SurfaceStage({ arrayKw, loadKw }: { arrayKw?: number; loadKw?: number }) {
   return (
     <Suspense fallback={null}>
-      <MarsSurfaceCanvasInner arrayKw={arrayKw} loadKw={loadKw} />
+      <CanvasErrorBoundary canvasName="Mars Surface Ops">
+        <MarsSurfaceCanvasInner arrayKw={arrayKw} loadKw={loadKw} />
+      </CanvasErrorBoundary>
     </Suspense>
   );
 }

@@ -3,6 +3,10 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { ToastProvider } from "@/components/ui/toast";
+import { JudgeTourProvider } from "@/components/judge-tour";
+import { PWAInstallPrompt } from "@/components/pwa-install";
+import { ConvexProvider } from "@/components/convex-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,6 +46,12 @@ export const metadata: Metadata = {
       "Plan. Fly. Live. The Next Frontier — with real NASA data, for every human.",
     type: "website",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "NASAMAP",
+  },
 };
 
 export const viewport: Viewport = {
@@ -57,11 +67,21 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${mono.variable} font-sans`}>
-        <div className="flex min-h-screen flex-col">
-          <Nav />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <ToastProvider>
+          <ConvexProvider>
+            <JudgeTourProvider>
+              <div className="flex min-h-screen flex-col">
+                <Nav />
+                <main id="main-content" className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <PWAInstallPrompt />
+            </JudgeTourProvider>
+          </ConvexProvider>
+        </ToastProvider>
       </body>
     </html>
   );

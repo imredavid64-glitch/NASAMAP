@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SpaceCanvas } from "@/components/space-canvas";
 import { LiveRibbon } from "./LiveRibbon";
+import { CanvasErrorBoundary } from "@/components/ui/error-boundary";
 
 export const metadata: Metadata = { title: "Live Frontier" };
 
@@ -30,7 +31,9 @@ export default function LivePage() {
         </div>
       </div>
 
-      <LiveRibbon />
+      <CanvasErrorBoundary canvasName="Live Frontier Ribbon">
+        <LiveRibbon />
+      </CanvasErrorBoundary>
     </div>
   );
 }

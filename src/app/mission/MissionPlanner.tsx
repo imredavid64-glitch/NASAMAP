@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal } from "lucide-react";
+import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal, Users, Send } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
 import { scoreMission, RADIATION_LIMIT_MSV, type PlayMode } from "@/lib/score";
 import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
 import { clampDesignToScenario, applyScenarioDefaults, type Scenario } from "@/lib/scenarios";
+import { opsBudget } from "@/lib/life";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TransferDiagram } from "@/components/mission/transfer-diagram";
@@ -19,6 +21,12 @@ import { CostCard } from "@/components/mission/cost-card";
 import { GlossaryCard } from "@/components/mission/glossary-card";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
+import { ShareButton } from "@/components/ui/share-button";
+import { useToast, successToast } from "@/components/ui/toast";
+import { ShowYourWorkPanel } from "@/components/mission/show-your-work";
+import { CrewHealthDashboard } from "@/components/mission/crew-health";
+import { EarthImpact } from "@/components/mission/earth-impact";
+import { useSubmitMission, useAuthor } from "@/lib/convex-community";
 
 type Destination = "moon" | "mars";
 
@@ -75,8 +83,8 @@ export function MissionPlanner({
   const [vehicleId, setVehicleId] = useState<string>(seed.vehicleId);
   const [crew, setCrew] = useState(seed.crew);
   const [surfaceDays, setSurfaceDays] = useState(seed.surfaceDays);
-  const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<PlayMode | null>(null);
+  const { toast } = useToast();
 
   const respMode: PlayMode = mode ?? "expert";
 
@@ -108,6 +116,41 @@ export function MissionPlanner({
   const [best, setBest] = useState<BestRecord | null>(null);
   const [newBest, setNewBest] = useState(false);
 
+  // Community sharing
+  const submitMission = useSubmitMission();
+  const { authorId, authorName } = useAuthor();
+  const [submittingCommunity, setSubmittingCommunity] = useState(false);
+  const [communityToast, setCommunityToast] = useState<{ type: "success" | "error"; title: string } | null>(null);
+
+  const handleShareToCommunity = async () => {
+    if (submittingCommunity) return;
+    setSubmittingCommunity(true);
+    try {
+      const missionName = destination === "mars" ? "Mars Surface Mission" : "Artemis Lunar Mission";
+      await submitMission({
+        design,
+        scorecard,
+        missionId: encodeDesignQuery({ destination, vehicleId, crew, surfaceDays }),
+        missionName,
+        destination,
+        vehicleName: design.vehicle.name,
+        crew,
+        surfaceDays,
+        grade: scorecard.grade,
+        score: scorecard.score,
+        authorId,
+        authorName,
+      });
+      setCommunityToast({ type: "success", title: "Mission shared to community!" });
+      toast({ type: "success", title: "Mission shared to community!" });
+    } catch (e) {
+      console.error("Failed to share mission", e);
+      setCommunityToast({ type: "error", title: "Failed to share mission" });
+      toast({ type: "error", title: "Failed to share mission" });
+    }
+    setSubmittingCommunity(false);
+  };
+
   useEffect(() => {
     setBest(readBest(window.localStorage, destination));
   }, [destination]);
@@ -130,16 +173,6 @@ export function MissionPlanner({
     const query = isCustomDesign(next) ? `?${encodeDesignQuery(next)}` : "";
     window.history.replaceState(null, "", `${basePath ?? "/mission"}${query}`);
   }, [destination, vehicleId, crew, surfaceDays, basePath]);
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   const resetDesign = () => {
     if (scenario) {
@@ -170,40 +203,50 @@ export function MissionPlanner({
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={copyLink}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-space-cyan/40 bg-space-cyan/10 px-3 py-1.5 text-xs font-medium text-space-cyan transition hover:bg-space-cyan/20"
-        >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-          {copied ? "Link copied" : "Copy mission link"}
-        </button>
+        <ShareButton
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          text="Check out my mission design on NASAMAP"
+          size="sm"
+          showLabel={true}
+        />
+        {!scenario && (
+          <Button
+            type="button"
+            onClick={handleShareToCommunity}
+            disabled={submittingCommunity}
+            variant="outline"
+            size="sm"
+            className="bg-space-emerald/20 border-space-emerald/40 text-space-emerald hover:bg-space-emerald/30"
+          >
+            <Send className="h-3.5 w-3.5" /> Share to Community
+          </Button>
+        )}
         <button
           type="button"
           onClick={resetDesign}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
         >
-          <RotateCcw className="h-3.5 w-3.5" /> Reset
+          <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Reset
         </button>
-        <div className="inline-flex items-center rounded-lg border border-white/15 bg-white/[0.03] p-0.5 text-xs">
-          <button
+        <div className="inline-flex items-center rounded-lg border border-white/15 bg-white/[0.03] p-0.5 text-xs" role="group" aria-label="Display mode">
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            aria-pressed={respMode === "beginner"}
             onClick={() => switchMode("beginner")}
-            className={`rounded-md px-3 py-1.5 font-medium transition ${
-              respMode === "beginner" ? "bg-space-cyan/20 text-space-cyan" : "text-slate-400 hover:text-white"
-            }`}
           >
             Guide
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            aria-pressed={respMode === "expert"}
             onClick={() => switchMode("expert")}
-            className={`rounded-md px-3 py-1.5 font-medium transition ${
-              respMode === "expert" ? "bg-space-cyan/20 text-space-cyan" : "text-slate-400 hover:text-white"
-            }`}
           >
             Tech
-          </button>
+          </Button>
         </div>
         <span className="text-xs text-slate-500">
           The URL encodes your design — bookmark it, or challenge someone to beat your grade.
@@ -258,6 +301,9 @@ export function MissionPlanner({
                       <button
                         key={d.id}
                         type="button"
+                        role="radio"
+                        aria-checked={destination === d.id}
+                        aria-label={d.label}
                         onClick={() => setDestination(d.id)}
                         className={`rounded-xl border p-3 text-left transition ${
                           destination === d.id
@@ -292,33 +338,45 @@ export function MissionPlanner({
               </div>
 
               <div>
-                <label className="mb-2 flex items-center justify-between text-sm font-medium text-slate-300">
+                <label id="crew-label" className="mb-2 flex items-center justify-between text-sm font-medium text-slate-300">
                   Crew size
                   <span className="font-mono text-space-cyan">{crew}</span>
                 </label>
                 <input
                   type="range"
+                  id="crew-slider"
                   min={crewMin}
                   max={crewMax}
                   step={1}
                   value={crew}
                   onChange={(e) => setCrew(Number(e.target.value))}
+                  aria-labelledby="crew-label"
+                  aria-valuemin={crewMin}
+                  aria-valuemax={crewMax}
+                  aria-valuenow={crew}
+                  aria-orientation="horizontal"
                   className="w-full accent-cyan-400"
                 />
               </div>
 
               <div>
-                <label className="mb-2 flex items-center justify-between text-sm font-medium text-slate-300">
+                <label id="surface-label" className="mb-2 flex items-center justify-between text-sm font-medium text-slate-300">
                   Days on the surface
                   <span className="font-mono text-space-cyan">{surfaceDays}</span>
                 </label>
                 <input
                   type="range"
+                  id="surface-slider"
                   min={surfMin}
                   max={surfMax}
                   step={1}
                   value={surfaceDays}
                   onChange={(e) => setSurfaceDays(Number(e.target.value))}
+                  aria-labelledby="surface-label"
+                  aria-valuemin={surfMin}
+                  aria-valuemax={surfMax}
+                  aria-valuenow={surfaceDays}
+                  aria-orientation="horizontal"
                   className="w-full accent-cyan-400"
                 />
               </div>
@@ -362,6 +420,8 @@ export function MissionPlanner({
           <div id="scorecard" className="scroll-mt-20">
             <Scorecard design={design} card={scorecard} />
           </div>
+
+          <ShowYourWorkPanel design={design} scorecard={scorecard} />
 
           <div id="budget" className="mt-4 scroll-mt-20">
             <CostCard design={design} />
@@ -470,6 +530,10 @@ export function MissionPlanner({
           <div id="ops" className="scroll-mt-20">
             <OpsBudget design={design} />
           </div>
+
+          <CrewHealthDashboard design={design} scorecard={scorecard} />
+
+          <EarthImpact design={design} ops={opsBudget({ destination: design.destination, crew: design.crew, days: design.totalDays })} />
 
           <MissionPassport
             design={design}

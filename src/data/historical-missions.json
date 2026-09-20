@@ -1,0 +1,316 @@
+{
+  "version": 1,
+  "missions": [
+    {
+      "id": "apollo-8",
+      "name": "Apollo 8",
+      "description": "First crewed mission to orbit the Moon. First humans to see Earthrise.",
+      "destination": "moon",
+      "launchDate": "1968-12-21",
+      "durationDays": 6.1,
+      "crew": ["Frank Borman", "James Lovell Jr.", "William Anders"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch from KSC LC-39A" },
+        { "name": "Trans-Lunar Injection", "timeSec": 9840, "description": "S-IVB restart for TLI burn" },
+        { "name": "Lunar Orbit Insertion", "timeSec": 250800, "description": "SPS burn to enter lunar orbit" },
+        { "name": "Earthrise Photo", "timeSec": 298800, "description": "William Anders captures iconic Earthrise image" },
+        { "name": "Christmas Eve Broadcast", "timeSec": 316800, "description": "Crew reads Genesis from lunar orbit" },
+        { "name": "Trans-Earth Injection", "timeSec": 385200, "description": "SPS burn to leave lunar orbit" },
+        { "name": "Splashdown", "timeSec": 525600, "description": "Pacific Ocean recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-201", "Apollo 8 Mission Report"]
+    },
+    {
+      "id": "apollo-10",
+      "name": "Apollo 10",
+      "description": "Dress rehearsal for Moon landing. LM descended to 15.6 km above surface.",
+      "destination": "moon",
+      "launchDate": "1969-05-18",
+      "durationDays": 8.0,
+      "crew": ["Thomas Stafford", "John Young", "Eugene Cernan"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch from KSC LC-39B" },
+        { "name": "Trans-Lunar Injection", "timeSec": 9840, "description": "S-IVB restart for TLI" },
+        { "name": "Lunar Orbit Insertion", "timeSec": 277200, "description": "SPS burn for lunar orbit" },
+        { "name": "LM Descent Test", "timeSec": 367200, "description": "LM Snoopy descends to 15.6 km" },
+        { "name": "LM Ascent & Rendezvous", "timeSec": 388800, "description": "LM ascent stage docks with CSM" },
+        { "name": "Trans-Earth Injection", "timeSec": 518400, "description": "SPS burn for return" },
+        { "name": "Splashdown", "timeSec": 691200, "description": "Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-231", "Apollo 10 Mission Report"]
+    },
+    {
+      "id": "apollo-11",
+      "name": "Apollo 11",
+      "description": "First human Moon landing. 'One small step for man...'",
+      "destination": "moon",
+      "launchDate": "1969-07-16",
+      "durationDays": 8.1,
+      "crew": ["Neil Armstrong", "Michael Collins", "Buzz Aldrin"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch from KSC LC-39A" },
+        { "name": "Trans-Lunar Injection", "timeSec": 9840, "description": "S-IVB restart for TLI burn" },
+        { "name": "Lunar Orbit Insertion", "timeSec": 270000, "description": "SPS burn for lunar orbit" },
+        { "name": "LM Undocking", "timeSec": 363600, "description": "Eagle separates from Columbia" },
+        { "name": "Powered Descent Initiation", "timeSec": 378000, "description": "PDI - LM descent engine ignition" },
+        { "name": "Lunar Landing", "timeSec": 381600, "description": "Eagle lands at Tranquility Base" },
+        { "name": "First Step", "timeSec": 392400, "description": "Armstrong steps onto lunar surface" },
+        { "name": "EVA Complete", "timeSec": 403200, "description": "Aldrin re-enters LM" },
+        { "name": "LM Ascent", "timeSec": 428400, "description": "Ascent stage lifts off" },
+        { "name": "Rendezvous & Docking", "timeSec": 446400, "description": "Eagle docks with Columbia" },
+        { "name": "Trans-Earth Injection", "timeSec": 518400, "description": "SPS burn for return" },
+        { "name": "Splashdown", "timeSec": 695400, "description": "Pacific Ocean recovery by USS Hornet" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-238", "Apollo 11 Mission Report"]
+    },
+    {
+      "id": "apollo-12",
+      "name": "Apollo 12",
+      "description": "Precision landing near Surveyor 3. Lightning strike during launch.",
+      "destination": "moon",
+      "launchDate": "1969-11-14",
+      "durationDays": 10.2,
+      "crew": ["Charles Conrad Jr.", "Richard Gordon", "Alan Bean"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V struck by lightning twice" },
+        { "name": "Trans-Lunar Injection", "timeSec": 9840, "description": "TLI burn successful" },
+        { "name": "Lunar Landing", "timeSec": 385200, "description": "Intrepid lands near Surveyor 3" },
+        { "name": "EVA 1", "timeSec": 396000, "description": "First EVA - deploy ALSEP" },
+        { "name": "EVA 2", "timeSec": 471600, "description": "Visit Surveyor 3, retrieve parts" },
+        { "name": "Splashdown", "timeSec": 885600, "description": "Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-264", "Apollo 12 Mission Report"]
+    },
+    {
+      "id": "apollo-13",
+      "name": "Apollo 13",
+      "description": "Successful failure. Oxygen tank explosion forced lunar flyby return.",
+      "destination": "moon",
+      "launchDate": "1970-04-11",
+      "durationDays": 5.9,
+      "crew": ["James Lovell Jr.", "John Swigert Jr.", "Fred Haise Jr."],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch" },
+        { "name": "Oxygen Tank Explosion", "timeSec": 324000, "description": "SM tank 2 explodes at 330,000 km" },
+        { "name": "Lunar Flyby", "timeSec": 410400, "description": "Free-return trajectory around Moon" },
+        { "name": "PC+2 Burn", "timeSec": 460800, "description": "LM descent engine for return speedup" },
+        { "name": "Splashdown", "timeSec": 518400, "description": "Safe Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-350", "Apollo 13 Mission Report"]
+    },
+    {
+      "id": "apollo-14",
+      "name": "Apollo 14",
+      "description": "Shepard's return to flight. First golf on the Moon.",
+      "destination": "moon",
+      "launchDate": "1971-01-31",
+      "durationDays": 9.0,
+      "crew": ["Alan Shepard Jr.", "Stuart Roosa", "Edgar Mitchell"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch" },
+        { "name": "Lunar Landing", "timeSec": 385200, "description": "Antares lands at Fra Mauro" },
+        { "name": "EVA 1", "timeSec": 396000, "description": "Deploy ALSEP" },
+        { "name": "EVA 2", "timeSec": 471600, "description": "Cone Crater traverse, golf shots" },
+        { "name": "Splashdown", "timeSec": 777600, "description": "Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-272", "Apollo 14 Mission Report"]
+    },
+    {
+      "id": "apollo-15",
+      "name": "Apollo 15",
+      "description": "First J-mission. First lunar rover (LRV). Hadley Rille exploration.",
+      "destination": "moon",
+      "launchDate": "1971-07-26",
+      "durationDays": 12.3,
+      "crew": ["David Scott", "Alfred Worden", "James Irwin"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch" },
+        { "name": "Lunar Landing", "timeSec": 385200, "description": "Falcon lands at Hadley Rille" },
+        { "name": "LRV Deployment", "timeSec": 396000, "description": "First lunar rover deployed" },
+        { "name": "EVA 1-3", "timeSec": 396000, "description": "Three EVAs, 27.8 km traversed" },
+        { "name": "Genesis Rock", "timeSec": 471600, "description": "Anorthosite sample collected" },
+        { "name": "Splashdown", "timeSec": 1065600, "description": "Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-289", "Apollo 15 Mission Report"]
+    },
+    {
+      "id": "apollo-16",
+      "name": "Apollo 16",
+      "description": "First landing in lunar highlands. Descartes formation.",
+      "destination": "moon",
+      "launchDate": "1972-04-16",
+      "durationDays": 11.1,
+      "crew": ["John Young", "Thomas Mattingly II", "Charles Duke Jr."],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Saturn V launch" },
+        { "name": "Lunar Landing", "timeSec": 385200, "description": "Orion lands at Descartes" },
+        { "name": "EVA 1-3", "timeSec": 396000, "description": "Three EVAs, LRV traverse" },
+        { "name": "Splashdown", "timeSec": 964800, "description": "Pacific recovery" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-315", "Apollo 16 Mission Report"]
+    },
+    {
+      "id": "apollo-17",
+      "name": "Apollo 17",
+      "description": "Final Apollo mission. First scientist-astronaut (Schmitt). Longest stay.",
+      "destination": "moon",
+      "launchDate": "1972-12-07",
+      "durationDays": 12.6,
+      "crew": ["Eugene Cernan", "Ronald Evans", "Harrison Schmitt"],
+      "vehicle": "Saturn V",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Night launch - only Apollo night launch" },
+        { "name": "Lunar Landing", "timeSec": 385200, "description": "Challenger lands at Taurus-Littrow" },
+        { "name": "EVA 1-3", "timeSec": 396000, "description": "Three EVAs, 35.7 km traversed" },
+        { "name": "Orange Soil", "timeSec": 471600, "description": "Volcanic glass beads discovered" },
+        { "name": "Last Steps", "timeSec": 1000800, "description": "Cernan's final words on Moon" },
+        { "name": "Splashdown", "timeSec": 1090800, "description": "Final Apollo splashdown" }
+      ],
+      "trajectoryType": "free-return",
+      "references": ["NASA SP-330", "Apollo 17 Mission Report"]
+    },
+    {
+      "id": "artemis-1",
+      "name": "Artemis I",
+      "description": "First integrated SLS/Orion flight. Uncrewed lunar flyby test.",
+      "destination": "moon",
+      "launchDate": "2022-11-16",
+      "durationDays": 25.5,
+      "crew": [],
+      "vehicle": "SLS Block 1",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "SLS Block 1 maiden flight from LC-39B" },
+        { "name": "Trans-Lunar Injection", "timeSec": 9840, "description": "ICPS RL10 burn for TLI" },
+        { "name": "Lunar Flyby", "timeSec": 259200, "description": "Outbound powered flyby at 130 km" },
+        { "name": "Distant Retrograde Orbit", "timeSec": 345600, "description": "Enter DRO at 70,000 km altitude" },
+        { "name": "Orbit Maintenance", "timeSec": 604800, "description": "Orbit maintenance burns" },
+        { "name": "Departure Burn", "timeSec": 1641600, "description": "Exit DRO, lunar flyby for return" },
+        { "name": "Splashdown", "timeSec": 2207520, "description": "Pacific splashdown off Baja California" }
+      ],
+      "trajectoryType": "distant-retrograde",
+      "references": ["NASA Artemis I Mission Report"]
+    },
+    {
+      "id": "msl-curiosity",
+      "name": "Mars Science Laboratory (Curiosity)",
+      "description": "Skyhook landing of 900 kg rover in Gale Crater.",
+      "destination": "mars",
+      "launchDate": "2011-11-26",
+      "durationDays": 253,
+      "crew": [],
+      "vehicle": "Atlas V 541",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Atlas V 541 launch from CCAFS SLC-41" },
+        { "name": "Cruise Phase", "timeSec": 86400, "description": "8-month interplanetary cruise" },
+        { "name": "Entry Interface", "timeSec": 21772800, "description": "Entry at 125 km, 5.8 km/s" },
+        { "name": "Parachute Deploy", "timeSec": 21773040, "description": "Supersonic parachute at Mach 2" },
+        { "name": "Skyhook Maneuver", "timeSec": 21773140, "description": "Powered descent on 8 MLEs" },
+        { "name": "Touchdown", "timeSec": 21773180, "description": "Bradbury Landing in Gale Crater" },
+        { "name": "Surface Ops Begin", "timeSec": 21773180, "description": "Rover commissioning begins" }
+      ],
+      "trajectoryType": "hohmann",
+      "references": ["NASA MSL Mission Report", "JPL MSL EDL Report"]
+    },
+    {
+      "id": "mars2020-perseverance",
+      "name": "Mars 2020 (Perseverance)",
+      "description": "Advanced skyhook landing with Terrain Relative Navigation in Jezero Crater.",
+      "destination": "mars",
+      "launchDate": "2020-07-30",
+      "durationDays": 203,
+      "crew": [],
+      "vehicle": "Atlas V 541",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Atlas V 541 launch from CCAFS SLC-41" },
+        { "name": "Cruise Phase", "timeSec": 86400, "description": "7-month cruise with trajectory corrections" },
+        { "name": "Entry Interface", "timeSec": 17539200, "description": "Entry at 125 km, 5.5 km/s" },
+        { "name": "TRN Activation", "timeSec": 17539440, "description": "Terrain Relative Navigation active" },
+        { "name": "Parachute Deploy", "timeSec": 17539440, "description": "Range Trigger parachute deploy" },
+        { "name": "Skyhook Landing", "timeSec": 17539540, "description": "Skyhook with TRN divert to safe spot" },
+        { "name": "Touchdown", "timeSec": 17539580, "description": "Landing in Jezero Crater" },
+        { "name": "Ingenuity Deploy", "timeSec": 17625600, "description": "Helicopter deployed" }
+      ],
+      "trajectoryType": "hohmann",
+      "references": ["NASA Mars 2020 Mission Report", "JPL Perseverance EDL"]
+    },
+    {
+      "id": "cassini",
+      "name": "Cassini-Huygens",
+      "description": "13-year Saturn orbiter mission. Grand Finale ring dives.",
+      "destination": "saturn",
+      "launchDate": "1997-10-15",
+      "durationDays": 7048,
+      "crew": [],
+      "vehicle": "Titan IVB/Centaur",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Titan IVB launch from CCAFS SLC-40" },
+        { "name": "Venus Flyby 1", "timeSec": 21384000, "description": "Gravity assist at Venus" },
+        { "name": "Venus Flyby 2", "timeSec": 48384000, "description": "Second Venus flyby" },
+        { "name": "Earth Flyby", "timeSec": 74736000, "description": "Earth gravity assist" },
+        { "name": "Jupiter Flyby", "timeSec": 107136000, "description": "Jupiter gravity assist" },
+        { "name": "Saturn Orbit Insertion", "timeSec": 197136000, "description": "96-min SOI burn" },
+        { "name": "Huygens Release", "timeSec": 205632000, "description": "Probe released for Titan descent" },
+        { "name": "Huygens Titan Landing", "timeSec": 205728000, "description": "First outer solar system landing" },
+        { "name": "Grand Finale", "timeSec": 580608000, "description": "22 ring-gap orbits" },
+        { "name": "Atmospheric Entry", "timeSec": 614880000, "description": "Planned disposal in Saturn atmosphere" }
+      ],
+      "trajectoryType": "gravity-assist",
+      "references": ["NASA Cassini Mission Report"]
+    },
+    {
+      "id": "voyager-1",
+      "name": "Voyager 1",
+      "description": "Interstellar mission. First human-made object in interstellar space.",
+      "destination": "interstellar",
+      "launchDate": "1977-09-05",
+      "durationDays": 17800,
+      "crew": [],
+      "vehicle": "Titan IIIE/Centaur",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Titan IIIE launch from CCAFS SLC-41" },
+        { "name": "Jupiter Flyby", "timeSec": 46656000, "description": "Closest approach 349,000 km" },
+        { "name": "Saturn Flyby", "timeSec": 107136000, "description": "Titan close flyby" },
+        { "name": "Heliopause Crossing", "timeSec": 1138848000, "description": "Entered interstellar space Aug 2012" },
+        { "name": "Current Status", "timeSec": 1500000000, "description": "24+ billion km, still transmitting" }
+      ],
+      "trajectoryType": "gravity-assist",
+      "references": ["NASA Voyager Mission Report"]
+    },
+    {
+      "id": "voyager-2",
+      "name": "Voyager 2",
+      "description": "Only spacecraft to visit Uranus and Neptune. Now in interstellar space.",
+      "destination": "interstellar",
+      "launchDate": "1977-08-20",
+      "durationDays": 17800,
+      "crew": [],
+      "vehicle": "Titan IIIE/Centaur",
+      "keyEvents": [
+        { "name": "Launch", "timeSec": 0, "description": "Titan IIIE launch from CCAFS SLC-41" },
+        { "name": "Jupiter Flyby", "timeSec": 48384000, "description": "Closest approach 570,000 km" },
+        { "name": "Saturn Flyby", "timeSec": 117936000, "description": "Ring plane crossing" },
+        { "name": "Uranus Flyby", "timeSec": 248832000, "description": "First Uranus encounter" },
+        { "name": "Neptune Flyby", "timeSec": 322560000, "description": "First Neptune encounter" },
+        { "name": "Heliopause Crossing", "timeSec": 1166400000, "description": "Entered interstellar space Nov 2018" }
+      ],
+      "trajectoryType": "gravity-assist",
+      "references": ["NASA Voyager Mission Report"]
+    }
+  ]
+}

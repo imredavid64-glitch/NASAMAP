@@ -11,7 +11,16 @@ export function MissionPatch({ design }: { design: MissionDesign }) {
   const [issuedUTC, setIssuedUTC] = useState("");
   useEffect(() => setIssuedUTC(passportIssued()), []);
   const missionId = useMemo(() => passportMissionId(design, issuedUTC), [design, issuedUTC]);
-  const svg = useMemo(() => missionPatchSvg({ design, missionId }), [design, missionId]);
+  const missionName = useMemo(() => {
+    if (design.destination === "mars") return "Mars Surface Mission";
+    return "Artemis Lunar Mission";
+  }, [design.destination]);
+  const svg = useMemo(() => missionPatchSvg({ 
+    design, 
+    missionId, 
+    missionName,
+    vehicleName: design.vehicle.name 
+  }), [design, missionId, missionName]);
 
   function download() {
     const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });

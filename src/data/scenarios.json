@@ -103,26 +103,88 @@
       ],
       "parScore": 80
     },
-    {
-      "id": "lunar-express",
-      "title": "Lunar Express",
-      "lane": "mission-design",
-      "difficulty": "Intermediate",
-      "brief": "A fast crewed dash to the Moon: small crew, short stay, efficient transfer. Speed is the objective — the clock and the Δv both matter.",
-      "destination": "moon",
-      "constraints": {
-        "allowedVehicleIds": ["saturn-v", "sls-block-1"],
-        "crew": { "min": 2, "max": 3 },
-        "surfaceDays": { "min": 0, "max": 3 },
-        "maxRadiationMsv": 600
-      },
-      "objectives": [
-        { "id": "lift-stack", "label": "A lean stack on a lunar rocket" },
-        { "id": "radiation", "label": "Crew dose under 600 mSv" },
-        { "id": "transfer", "label": "An efficient transfer" },
-        { "id": "duration", "label": "A short mission" }
-      ],
-      "parScore": 85
-    }
+{
+    "id": "lunar-express",
+    "title": "Lunar Express",
+    "lane": "mission-design",
+    "difficulty": "Intermediate",
+    "brief": "A fast crewed dash to the Moon: small crew, short stay, efficient transfer. Speed is the objective — the clock and the Δv both matter.",
+    "destination": "moon",
+    "constraints": {
+      "allowedVehicleIds": ["saturn-v", "sls-block-1"],
+      "crew": { "min": 2, "max": 3 },
+      "surfaceDays": { "min": 0, "max": 3 },
+      "maxRadiationMsv": 600
+    },
+    "objectives": [
+      { "id": "lift-stack", "label": "A lean stack on a lunar rocket" },
+      { "id": "radiation", "label": "Crew dose under 600 mSv" },
+      { "id": "transfer", "label": "An efficient transfer" },
+      { "id": "duration", "label": "A short mission" }
+    ],
+    "parScore": 85
+  },
+  {
+    "id": "gateway-assembly",
+    "title": "Gateway Assembly",
+    "lane": "life-support",
+    "difficulty": "Beginner/Youth",
+    "brief": "Build the lunar Gateway station piece by piece. Multiple launches, international modules, and a regenerative life-support system that must work from day one. No crew until the stack closes.",
+    "destination": "moon",
+    "constraints": {
+      "allowedVehicleIds": ["saturn-v", "sls-block-1", "falcon-heavy"],
+      "crew": { "min": 0, "max": 4 },
+      "surfaceDays": { "min": 0, "max": 0 },
+      "maxRadiationMsv": 600
+    },
+    "objectives": [
+      { "id": "lift-stack", "label": "Each module fits its launch vehicle" },
+      { "id": "eclss-loop", "label": "Regenerative life support closes the loop" },
+      { "id": "duration", "label": "Assembly complete in under 365 days" }
+    ],
+    "parScore": 74
+  },
+  {
+    "id": "phobos-first",
+    "title": "Phobos First",
+    "lane": "mission-design",
+    "difficulty": "Intermediate",
+    "brief": "Land on Phobos before Mars. Lower Δv than a Mars landing, natural radiation shelter in Stickney Crater, and a staging point for the surface. A smarter first step to the Red Planet.",
+    "destination": "mars",
+    "constraints": {
+      "allowedVehicleIds": ["starship", "falcon-heavy", "sls-block-1"],
+      "crew": { "min": 4, "max": 6 },
+      "surfaceDays": { "min": 14, "max": 60 },
+      "maxRadiationMsv": 500
+    },
+    "objectives": [
+      { "id": "lift-stack", "label": "The stack fits the launch vehicle" },
+      { "id": "radiation", "label": "Crew dose under 500 mSv (crater shelter)" },
+      { "id": "surface", "label": "At least 14 days on Phobos" },
+      { "id": "duration", "label": "Total mission under 800 days" }
+    ],
+    "parScore": 78
+  },
+  {
+    "id": "cargo-to-surface",
+    "title": "Cargo to Surface",
+    "lane": "mission-design",
+    "difficulty": "Advanced",
+    "brief": "Deliver 100+ tonnes of ISRU gear, habitat modules, and power systems to Mars — uncrewed. Starship-only, fully reusable, proving the logistics chain before humans arrive. The ultimate stress test for entry, descent, and landing.",
+    "destination": "mars",
+    "constraints": {
+      "allowedVehicleIds": ["starship"],
+      "crew": { "min": 0, "max": 0 },
+      "surfaceDays": { "min": 0, "max": 0 },
+      "maxRadiationMsv": 0,
+      "maxTotalDays": 365
+    },
+    "objectives": [
+      { "id": "lift-stack", "label": "100+ tonnes delivered to Mars surface" },
+      { "id": "transfer", "label": "Fast transfer within 200 days" },
+      { "id": "duration", "label": "Campaign complete in under 365 days" }
+    ],
+    "parScore": 88
+  }
   ]
 }

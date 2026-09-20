@@ -58,4 +58,54 @@ body {
   .prose-space p {
     @apply mb-4 text-slate-300;
   }
+
+  /* Accessibility: Focus visible for keyboard navigation */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-space-cyan ring-offset-2 ring-offset-space-950;
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    @apply absolute -top-10 left-4 z-[100] rounded-lg bg-space-cyan px-4 py-2 text-sm font-semibold text-space-950 transition transform;
+  }
+  .skip-link:focus {
+    @apply top-4;
+  }
+
+  /* Reduced motion: disable animations globally */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .glass-panel {
+      @apply border-white/30 bg-white/10;
+    }
+    .badge {
+      @apply border-white/50;
+    }
+  }
+
+  /* PWA install prompt animation */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  .animate-slide-up {
+    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }

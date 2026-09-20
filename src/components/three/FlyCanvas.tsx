@@ -123,14 +123,19 @@ function CameraRig({ state, mode, follow }: { state: InterpolatedState; mode: st
   return null;
 }
 
-function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, onScrub }: {
+function HUD({ state, speed, follow, totalSec, time, onSpeedChange, onFollowChange, onScrub, paused, onTogglePause, onReset, onDownload }: {
   state: InterpolatedState;
   speed: number;
   follow: string;
   totalSec: number;
+  time: number;
   onSpeedChange: (s: number) => void;
   onFollowChange: (f: string) => void;
   onScrub: (t: number) => void;
+  paused: boolean;
+  onTogglePause: () => void;
+  onReset: () => void;
+  onDownload: () => void;
 }) {
   const distEarth = Math.sqrt(
     state.position.x ** 2 + state.position.y ** 2 + state.position.z ** 2
@@ -142,9 +147,9 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
   );
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10">
+    <div className="pointer-events-none absolute inset-0 z-10" role="region" aria-label="Mission flight controls">
       <div className="pointer-events-auto p-4 font-mono text-space-cyan" style={{ fontSize: "11px", lineHeight: "1.6" }}>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-4 mb-4" role="group" aria-label="Mission status">
           <div className="bg-black/60 border border-space-cyan/30 rounded p-3">
             <div className="text-xs text-slate-400">MET</div>
             <div className="text-lg font-bold">{formatMet(state.met)}</div>
@@ -162,7 +167,7 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs" role="group" aria-label="Playback controls">
           <label className="flex items-center gap-2 bg-black/60 border border-white/10 rounded px-2 py-1">
             Speed
             <input
@@ -171,7 +176,9 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
               max="100"
               value={speed}
               onChange={(e) => onSpeedChange(Number(e.target.value))}
-              className="w-32 accent-space-cyan"
+              className="w-32 accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Playback speed"
+              step="1"
             />
             <span className="w-10 text-right">{speed}x</span>
           </label>
@@ -181,7 +188,8 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
             <select
               value={follow}
               onChange={(e) => onFollowChange(e.target.value)}
-              className="bg-space-950 border-white/10 text-white text-xs rounded px-1"
+              className="bg-space-950 border-white/10 text-white text-xs rounded px-1 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Camera follow mode"
             >
               <option value="craft">Follow Craft</option>
               <option value="earth">Track Earth</option>
@@ -199,10 +207,41 @@ function HUD({ state, speed, follow, totalSec, onSpeedChange, onFollowChange, on
               max={totalSec}
               value={state.met}
               onChange={(e) => onScrub(Number(e.target.value))}
-              className="w-64 accent-space-cyan"
+              className="w-64 accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              aria-label="Mission elapsed time scrubber"
+              step="1"
             />
           </div>
         </div>
+      </div>
+
+      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10" role="group" aria-label="Mission actions">
+        <button
+          onClick={onTogglePause}
+          className="px-4 py-2 rounded-lg bg-space-cyan/20 border border-space-cyan/40 text-space-cyan text-sm font-medium hover:bg-space-cyan/30 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label={paused ? "Play simulation" : "Pause simulation"}
+        >
+          {paused ? "▶ Play" : "⏸ Pause"}
+        </button>
+        <button
+          onClick={onReset}
+          className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label="Reset simulation to start"
+        >
+          ⟲ Reset
+        </button>
+
+        <button
+          onClick={onDownload}
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+          aria-label="Download trajectory as CSV"
+        >
+          <Download className="h-4 w-4" aria-hidden="true" /> CSV
+        </button>
+
+        <span className="text-xs text-slate-400 px-2" aria-live="polite">
+          {paused ? "Paused" : `T+${formatMet(time)} / T+${formatMet(totalSec)}`}
+        </span>
       </div>
     </div>
   );
@@ -273,8 +312,48 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
     timeRef.current = t;
     setTime(t);
     setState(stateAt(t));
-    setIndex(Math.floor((t / totalSec) * (samples.length - 1)));
+    setIndex(Math.min(samples.length - 1, Math.floor((t / totalSec) * (samples.length - 1))));
   };
+
+  const handleTogglePause = () => setPaused(!paused);
+  const handleReset = () => { timeRef.current = 0; setTime(0); setState(samples[0]); setIndex(0); setPaused(false); };
+  const handleDownload = () => downloadCsv(mode === "apollo11" ? "nasamap-apollo11.csv" : "nasamap-moon-hohmann.csv", earthMoonTrajectoryCsv(samples));
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          handleTogglePause();
+          break;
+        case "r":
+        case "R":
+          e.preventDefault();
+          handleReset();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setSpeed(Math.min(100, speed + 5));
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          setSpeed(Math.max(0, speed - 5));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setFollow("earth");
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          setFollow("craft");
+          break;
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [paused, speed, follow]);
 
   const markers: Marker[] = [
     { id: "kennedy", latDeg: 28.57, lonDeg: -80.65, label: "KSC" },
@@ -282,7 +361,7 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
   ];
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" role="application" aria-label={`${mode === "apollo11" ? "Apollo 11 replay" : "Hohmann transfer"} simulation`}>
       <Canvas
         dpr={[1, 1.75]}
         camera={{ position: [3, 1, 3], fov: 45 }}
@@ -315,41 +394,15 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
         speed={speed}
         follow={follow}
         totalSec={totalSec}
+        time={time}
         onSpeedChange={setSpeed}
         onFollowChange={(v) => setFollow(v as "craft" | "earth" | "moon" | "free")}
         onScrub={handleScrub}
+        paused={paused}
+        onTogglePause={handleTogglePause}
+        onReset={handleReset}
+        onDownload={handleDownload}
       />
-
-      <div className="pointer-events-auto absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 backdrop-blur rounded-xl border border-white/10">
-        <button
-          onClick={() => setPaused(!paused)}
-          className="px-4 py-2 rounded-lg bg-space-cyan/20 border border-space-cyan/40 text-space-cyan text-sm font-medium hover:bg-space-cyan/30"
-        >
-          {paused ? "▶ Play" : "⏸ Pause"}
-        </button>
-        <button
-          onClick={() => { timeRef.current = 0; setTime(0); setState(samples[0]); setIndex(0); setPaused(false); }}
-          className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
-        >
-          ⟲ Reset
-        </button>
-
-        <button
-          onClick={() =>
-            downloadCsv(
-              mode === "apollo11" ? "nasamap-apollo11.csv" : "nasamap-moon-hohmann.csv",
-              earthMoonTrajectoryCsv(samples),
-            )
-          }
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-300 text-sm font-medium hover:bg-white/20"
-        >
-          <Download className="h-4 w-4" /> CSV
-        </button>
-
-        <span className="text-xs text-slate-400 px-2">
-          {paused ? "Paused" : `T+${formatMet(time)} / T+${formatMet(totalSec)}`}
-        </span>
-      </div>
     </div>
   );
 }

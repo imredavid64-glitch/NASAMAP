@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { scenarioById, clampDesignToScenario } from "@/lib/scenarios";
 import { decodeDesign } from "@/lib/design-link";
 import { MissionPlanner } from "@/app/mission/MissionPlanner";
+import { LeaderboardPanel } from "@/components/mission/leaderboard";
 
 export async function generateMetadata({
   params,
@@ -47,6 +48,8 @@ export default async function PlayScenarioPage({
       <div id="design" className="scroll-mt-20">
         <MissionPlanner initial={initial} scenario={scenario} basePath={`/play/${id}`} />
       </div>
+
+      <LeaderboardPanel />
     </div>
   );
 }
