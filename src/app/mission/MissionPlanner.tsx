@@ -21,6 +21,7 @@ import { CostCard } from "@/components/mission/cost-card";
 import { GlossaryCard } from "@/components/mission/glossary-card";
 import { MissionPassport } from "./MissionPassport";
 import { MissionPatch } from "./MissionPatch";
+import { ISRUWaste } from "@/components/mission/isru-waste";
 import { ShareButton } from "@/components/ui/share-button";
 import { useToast, successToast } from "@/components/ui/toast";
 import { ShowYourWorkPanel } from "@/components/mission/show-your-work";
@@ -534,6 +535,8 @@ export function MissionPlanner({
           <CrewHealthDashboard design={design} scorecard={scorecard} />
 
           <EarthImpact design={design} ops={opsBudget({ destination: design.destination, crew: design.crew, days: design.totalDays })} />
+
+          <ISRUWaste design={{ destination: design.destination, crew: design.crew, totalDays: design.totalDays }} />
 
           <MissionPassport
             design={design}

@@ -21,12 +21,12 @@ const tools = [
     status: "beta",
   },
   {
-    href: "/tools/launch-window",
+    href: "/tools/launch-windows",
     icon: Compass,
-    title: "Launch Window Calculator",
-    desc: "Synodic period calculator for any planet pair. Optimal phasing, stay times, abort windows. Supports Venus, Earth, Mars, Jupiter, Saturn gravity assist chains.",
-    tags: ["Synodic periods", "Phasing", "Abort windows", "Gravity assists", "Multi-planet"],
-    status: "planned",
+    title: "Launch Window Calendar",
+    desc: "Visual calendar of Earth→Mars launch windows over the next 4 years. C₃, TOF, phase angle, and window type for each opportunity. Optimal windows marked with synodic period context.",
+    tags: ["Synodic calendar", "C3/TOF", "Phase angle", "Window types", "4-year outlook"],
+    status: "live",
   },
   {
     href: "/tools/radiation-model",

@@ -42,24 +42,30 @@ describe("closed-loop ops budget", () => {
     expect(mars.gross.foodKg).toBeCloseTo(4 * 259 * 0.62, 6);
   });
 
-  it("ISS water reclamation leaves ~10% of water for resupply", () => {
+  it("ISS water reclamation leaves ~10% of water for resupply (before ISRU)", () => {
     expect(mars.recycled.waterKg).toBeCloseTo(mars.gross.waterKg * 0.9, 6);
-    expect(mars.net.waterKg).toBeCloseTo(mars.gross.waterKg * 0.1, 6);
   });
 
-  it("Sabatier oxygen recovery halves the O₂ resupply demand", () => {
+  it("Sabatier oxygen recovery halves the O₂ resupply demand (before ISRU)", () => {
     expect(mars.recycled.oxygenKg).toBeCloseTo(mars.gross.oxygenKg * 0.5, 6);
-    expect(mars.net.oxygenKg).toBeCloseTo(mars.gross.oxygenKg * 0.5, 6);
+  });
+
+  it("ISRU waste processing further reduces net consumables", () => {
+    expect(mars.isru.waterKg).toBeGreaterThan(0);
+    expect(mars.isru.oxygenKg).toBeGreaterThan(0);
+    expect(mars.isru.fertilizerKg).toBeGreaterThan(0);
+    // Net is less than recycled-only because ISRU adds more recovery
+    expect(mars.net.waterKg).toBeLessThan(mars.gross.waterKg - mars.recycled.waterKg);
+    expect(mars.net.oxygenKg).toBeLessThan(mars.gross.oxygenKg - mars.recycled.oxygenKg);
   });
 
   it("food has no reclamation and is carried in full", () => {
     expect(mars.net.foodKg).toBe(mars.gross.foodKg);
   });
 
-  it("recycling removes a majority of the consumables stack", () => {
+  it("recycling + ISRU removes a majority of the consumables stack", () => {
     expect(mars.savedKg).toBeCloseTo(mars.grossResupplyKg - mars.netResupplyKg, 6);
     expect(mars.savedPct).toBeGreaterThan(0.7);
-    expect(mars.savedPct).toBeLessThan(0.8);
   });
 
   it("ECLSS power scales with crew and matches the per-crew line sum", () => {

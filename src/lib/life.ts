@@ -114,6 +114,27 @@ export const RECYCLING: RecyclingRates = {
   note: "NASA ISS ECLSS recycles ~90% of water (Water Recovery System) and the Sabatier CO₂-reduction assembly recovers ~50% of oxygen; the balance is Earth resupply.",
 };
 
+/**
+ * ISRU waste-to-resource recycling (SpaceTrash Hack: Revolutionizing Recycling on Mars).
+ * In-situ resource utilization of crew waste (urine, feces, packaging, CO2) into water,
+ * oxygen, and fertilizer. Based on NASA TRL 4-5 research (e.g., OSCAR, Waste-to-Base-Materials).
+ */
+export interface ISRURates {
+  wasteToWater: number;
+  wasteToOxygen: number;
+  wasteToFertilizer: number;
+  confidence: Confidence;
+  note: string;
+}
+
+export const ISRU_RECYCLING: ISRURates = {
+  wasteToWater: 0.15, // 15% of solid/liquid waste mass recoverable as water (thermal decomposition, OSCAR-class)
+  wasteToOxygen: 0.05, // 5% recoverable as O2 from CO2 via Sabatier + electrolysis of waste water
+  wasteToFertilizer: 0.6, // 60% of organic waste mass usable as fertilizer/soil amendment
+  confidence: "estimate",
+  note: "ISRU waste-to-resource rates from NASA OSCAR/Heat Melt Compactor studies (TRL 4-5). Urine water recovery already in ECLSS 90%; this adds fecal/packaging waste processing. Fertilizer supports food production loops.",
+};
+
 export interface OpsPowerLine {
   id: string;
   label: string;
@@ -185,6 +206,7 @@ export interface OpsBudget {
   au: number;
   gross: ConsumablesTotals;
   recycled: { waterKg: number; oxygenKg: number };
+  isru: { waterKg: number; oxygenKg: number; fertilizerKg: number };
   net: ConsumablesTotals;
   grossResupplyKg: number;
   netResupplyKg: number;
@@ -196,6 +218,7 @@ export interface OpsBudget {
   arrayEfficiency: number;
   arrayAreaM2: number;
   rates: RecyclingRates;
+  isruRates: ISRURates;
   notes: string[];
 }
 
@@ -213,9 +236,15 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
   const recycledWater = gross.waterKg * RECYCLING.water;
   const recycledOxygen = gross.oxygenKg * RECYCLING.oxygen;
 
+  // ISRU waste-to-resource (applies to fecal/packaging waste, not urine which is already in ECLSS)
+  const wasteMassKg = gross.foodKg + gross.co2Kg * 0.5; // approximate solid waste from food + CO2
+  const isruWater = wasteMassKg * ISRU_RECYCLING.wasteToWater;
+  const isruOxygen = wasteMassKg * ISRU_RECYCLING.wasteToOxygen;
+  const isruFertilizer = wasteMassKg * ISRU_RECYCLING.wasteToFertilizer;
+
   const net: ConsumablesTotals = {
-    oxygenKg: gross.oxygenKg - recycledOxygen,
-    waterKg: gross.waterKg - recycledWater,
+    oxygenKg: gross.oxygenKg - recycledOxygen - isruOxygen,
+    waterKg: gross.waterKg - recycledWater - isruWater,
     foodKg: gross.foodKg,
     co2Kg: gross.co2Kg,
   };
@@ -231,6 +260,7 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
 
   const notes = [
     `Recycling keeps ${savedKg.toFixed(0)} kg (${(savedPct * 100).toFixed(0)}%) of consumables out of the launch stack versus an open-loop mission.`,
+    `ISRU waste processing recovers ${isruWater.toFixed(0)} kg water, ${isruOxygen.toFixed(0)} kg O₂, and ${isruFertilizer.toFixed(0)} kg fertilizer from crew waste.`,
     `At ${au.toFixed(2)} au the Sun delivers ${irradianceKwM2.toFixed(3)} kW/m² (1.361 kW/m² at 1 au); the ${powerKw.toFixed(1)} kW ECLSS load needs ≈${arrayAreaM2.toFixed(1)} m² of ~30%-efficient array.`,
     "CO₂ removal is regenerable on ISS and is therefore excluded from resupply mass.",
   ];
@@ -242,6 +272,7 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
     au,
     gross,
     recycled: { waterKg: recycledWater, oxygenKg: recycledOxygen },
+    isru: { waterKg: isruWater, oxygenKg: isruOxygen, fertilizerKg: isruFertilizer },
     net,
     grossResupplyKg,
     netResupplyKg,
@@ -253,6 +284,7 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
     arrayEfficiency: SOLAR_ARRAY_EFFICIENCY,
     arrayAreaM2,
     rates: RECYCLING,
+    isruRates: ISRU_RECYCLING,
     notes,
   };
 }

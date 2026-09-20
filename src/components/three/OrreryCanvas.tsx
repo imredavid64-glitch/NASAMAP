@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState, useEffect, Suspense } from "react";
+import { useMemo, useState, useEffect, useRef, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { Globe } from "./Globe";
-import { Satellite } from "lucide-react";
+import { Satellite, AlertTriangle } from "lucide-react";
 import { usePrefersReducedMotion } from "@/lib/motion";
 
 const PLANETS = [
@@ -73,6 +73,62 @@ function PlanetOrbit({ semiMajorAxis, eccentricity, inclination, color }: {
   });
 
   return lineRef.current ? <primitive object={lineRef.current} dispose={null} /> : null;
+}
+
+function NEOObject({ neo, scale }: { neo: SimpleNEO; scale: number }) {
+  const neoRef = useRef<THREE.Group>(null);
+  
+  // Position NEO near Earth based on miss distance
+  // Earth is at 1 AU = 30 scene units
+  // Moon is at ~0.00257 AU = 0.077 scene units from Earth
+  // NEOs miss at various distances - scale them to be visible near Earth
+  const EARTH_AU = 1.0;
+  const EARTH_SCENE = toScene(EARTH_AU);
+  const missAu = neo.missKm / 149_597_870.7; // Convert km to AU
+  
+  // Place NEO at Earth position + miss distance (scaled for visibility)
+  // Clamp to reasonable range so they're visible near Earth
+  const maxVisibleMiss = 0.05; // ~7.5M km in AU
+  const clampedMiss = Math.min(missAu, maxVisibleMiss);
+  const angle = Math.random() * Math.PI * 2; // Random angle around Earth for visual distribution
+  
+  const x = EARTH_SCENE + toScene(clampedMiss) * Math.cos(angle);
+  const y = toScene(clampedMiss) * Math.sin(angle);
+  const z = (Math.random() - 0.5) * toScene(0.01); // Small vertical spread
+
+  useFrame(() => {
+    if (neoRef.current) {
+      neoRef.current.position.set(x, z, y);
+    }
+  });
+
+  const isPHA = neo.hazardous;
+  const displayRadius = 0.15 * scale;
+  const color = isPHA ? "#ff4444" : "#ffaa00";
+
+  return (
+    <group
+      ref={neoRef}
+      position={[x, z, y]}
+      onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }}
+      onPointerOut={() => { document.body.style.cursor = "default"; }}
+    >
+      <mesh>
+        <sphereGeometry args={[displayRadius, 8, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.8} />
+      </mesh>
+      <Html
+        position={[0, displayRadius + 0.2, 0]}
+        center
+        distanceFactor={10}
+        style={{ pointerEvents: "none", whiteSpace: "nowrap", userSelect: "none" }}
+      >
+        <div className="rounded bg-black/80 px-1.5 py-0.5 text-[9px] text-white font-mono border border-white/10">
+          {neo.name} {isPHA && <AlertTriangle className="inline h-3 w-3 text-red-400" />}
+        </div>
+      </Html>
+    </group>
+  );
 }
 
 function Planet({
@@ -155,7 +211,13 @@ function Planet({
   );
 }
 
-import { useRef } from "react";
+interface SimpleNEO {
+  name: string;
+  hazardous: boolean;
+  diameterKm: number;
+  missKm: number;
+  velocityKps: number;
+}
 
 export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
   { initialDate?: Date; initialSpeed?: number }) {
@@ -166,15 +228,43 @@ export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
   const [showOrbits, setShowOrbits] = useState(true);
+  const [showNEOs, setShowNEOs] = useState(true);
+  const [neos, setNeos] = useState<SimpleNEO[]>([]);
+  const [neoError, setNeoError] = useState<string | null>(null);
   const dateRef = useRef(date);
 
   useEffect(() => {
     dateRef.current = date;
   }, [date]);
 
+  // Fetch NEO data from API route
   useEffect(() => {
-    if (reduced) setPaused(true);
-  }, [reduced]);
+    let cancelled = false;
+    fetch("/api/live/neo")
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (!cancelled && data.source) {
+          // Convert NeoData objects to SimpleNEO
+          const simpleNeos = data.data.objects.map((o: any) => ({
+            name: o.name,
+            hazardous: o.hazardous,
+            diameterKm: o.diameterKm,
+            missKm: o.missKm,
+            velocityKps: o.velocityKps,
+          }));
+          setNeos(simpleNeos);
+        }
+      })
+      .catch(err => {
+        if (!cancelled) {
+          setNeoError(err.message || "Failed to load NEO data");
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let raf = 0;
@@ -242,6 +332,15 @@ export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
             onClick={setSelectedPlanet}
           />
         ))}
+
+        {/* NEO Overlay */}
+        {showNEOs && neos.length > 0 && (
+          <group>
+            {neos.slice(0, 50).map((neo, i) => (
+              <NEOObject key={neo.name + i} neo={neo} scale={scale} />
+            ))}
+          </group>
+        )}
 
         <OrbitControls
           enablePan
@@ -339,6 +438,17 @@ export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
                 aria-label="Show orbits"
               />
               Orbits
+            </label>
+
+            <label className="inline-flex items-center gap-2 bg-black/60 border border-white/10 rounded px-2 py-1">
+              <input
+                type="checkbox"
+                checked={showNEOs}
+                onChange={(e) => setShowNEOs(e.target.checked)}
+                className="accent-space-cyan focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+                aria-label="Show NEOs"
+              />
+              NEOs ({neos.length})
             </label>
           </div>
         </div>
