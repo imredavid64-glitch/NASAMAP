@@ -1,6 +1,7 @@
 import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
+import { Doc } from "./_generated/dataModel";
 
 export const submitMission = mutation({
   args: {
@@ -51,7 +52,7 @@ export const getMissions = query({
 export const getMission = query({
   args: { missionId: v.string() },
   handler: async (ctx, args) => {
-    const mission = await ctx.db.get(args.missionId as any);
+    const mission = await ctx.db.get(args.missionId as any) as Doc<"missions"> | null;
     return mission;
   },
 });
@@ -59,7 +60,7 @@ export const getMission = query({
 export const upvoteMission = mutation({
   args: { missionId: v.string() },
   handler: async (ctx, args) => {
-    const mission = await ctx.db.get(args.missionId as any);
+    const mission = await ctx.db.get(args.missionId as any) as Doc<"missions"> | null;
     if (!mission) throw new ConvexError("Mission not found");
     
     await ctx.db.patch(args.missionId as any, {
@@ -84,7 +85,7 @@ export const submitComment = mutation({
     });
     
     // Increment comment count on mission
-    const mission = await ctx.db.get(args.missionId as any);
+    const mission = await ctx.db.get(args.missionId as any) as Doc<"missions"> | null;
     if (mission) {
       await ctx.db.patch(args.missionId as any, {
         commentCount: mission.commentCount + 1,
