@@ -19,7 +19,7 @@ npm ci
 npm run dev            # http://localhost:3000
 npm run validate:data  # schema check on every dataset
 npm run lint && npm run typecheck
-npx vitest run         # 249 tests
+npx vitest run         # 250 tests
 npm run build && npm start
 ```
 
