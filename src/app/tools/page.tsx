@@ -1,9 +1,25 @@
-import { Wrench, BarChart2, Globe, Cpu, Compass, Download } from "lucide-react";
+import { Wrench, BarChart2, Globe, Cpu, Compass, Download, Settings, Star, Search, Filter, Target, BarChart, Shuffle } from "lucide-react";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import Link from "next/link";
 
 const tools = [
+  {
+    href: "/tools/rocket-builder",
+    icon: Settings,
+    title: "Rocket Builder",
+    desc: "Design multi-stage rockets from real engines and tanks (Merlin, Raptor, RS-25, RL10, BE-4, F-1, J-2, Vulcain). Live Δv, TWR, payload estimates (LEO/TLI/GTO), and cost. Export to Mission Lab.",
+    tags: ["Multi-stage", "Real engines", "Δv/TWR", "LEO/TLI/GTO payload", "Mission Lab export"],
+    status: "live",
+  },
+  {
+    href: "/commons/exoplanets",
+    icon: Star,
+    title: "Exoplanet Catalog",
+    desc: "Curated catalog of 20+ confirmed exoplanets with habitability assessments. Filter by conservative/optimistic HZ, distance, Earth-similarity. Data from NASA Exoplanet Archive with HZ classifications.",
+    tags: ["Habitable Zone", "Earth-like", "Transit/RV", "Conservative/Optimistic", "NASA Archive"],
+    status: "live",
+  },
   {
     href: "/tools/porkchop",
     icon: Globe,
@@ -47,10 +63,18 @@ const tools = [
   {
     href: "/tools/mission-optimizer",
     icon: Cpu,
-    title: "Mission Optimizer (AI)",
-    desc: "Genetic algorithm + gradient descent for mass-optimal trajectories. Multi-objective: minimize IMLEO, maximize payload, minimize radiation. Pareto front visualization.",
-    tags: ["Genetic algorithm", "Multi-objective", "Pareto front", "Gradient descent", "IMLEO"],
-    status: "planned",
+    title: "Mission Optimizer",
+    desc: "Pre-computed Pareto-optimal Mars architectures. Multi-objective: minimize IMLEO, maximize payload, minimize radiation. NSGA-II + gradient refinement with interactive Pareto front visualization.",
+    tags: ["Pareto front", "NSGA-II", "IMLEO", "Multi-objective", "2028/2031 windows"],
+    status: "live",
+  },
+  {
+    href: "/tools/montecarlo",
+    icon: Shuffle,
+    title: "Monte Carlo Uncertainty",
+    desc: "Run thousands of simulations with parameter uncertainty to compute confidence intervals on IMLEO, payload, radiation, cost, and mission score. Configurable distributions (normal, lognormal, uniform, triangular).",
+    tags: ["Monte Carlo", "Uncertainty", "Confidence intervals", "IMLEO", "Risk"],
+    status: "live",
   },
 ];
 

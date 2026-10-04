@@ -57,6 +57,104 @@ export const getMission = query({
   },
 });
 
+// Presence management for collaborative editing
+export const upsertPresence = mutation({
+  args: {
+    missionId: v.string(),
+    userId: v.string(),
+    userName: v.optional(v.string()),
+    cursorPosition: v.optional(v.object({
+      section: v.string(),
+      field: v.optional(v.string()),
+      value: v.optional(v.string()),
+    })),
+    color: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Check if presence already exists
+    const existing = await ctx.db
+      .query("missionPresence")
+      .withIndex("by_missionId_userId", (q) => 
+        q.eq("missionId", args.missionId).eq("userId", args.userId)
+      )
+      .first();
+    
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        userName: args.userName,
+        cursorPosition: args.cursorPosition,
+        lastActive: Date.now(),
+        color: args.color,
+      });
+      return { updated: true };
+    } else {
+      await ctx.db.insert("missionPresence", {
+        missionId: args.missionId,
+        userId: args.userId,
+        userName: args.userName,
+        cursorPosition: args.cursorPosition,
+        lastActive: Date.now(),
+        color: args.color,
+      });
+      return { created: true };
+    }
+  },
+});
+
+export const removePresence = mutation({
+  args: { missionId: v.string(), userId: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("missionPresence")
+      .withIndex("by_missionId_userId", (q) => 
+        q.eq("missionId", args.missionId).eq("userId", args.userId)
+      )
+      .first();
+    
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return { deleted: true };
+    }
+    return { deleted: false };
+  },
+});
+
+export const getPresence = query({
+  args: { missionId: v.string() },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const fiveMinutesAgo = now - 5 * 60 * 1000;
+    
+    const presence = await ctx.db
+      .query("missionPresence")
+      .withIndex("by_missionId", (q) => q.eq("missionId", args.missionId))
+      .filter((q) => q.gte(q.field("lastActive"), fiveMinutesAgo))
+      .collect();
+    
+    return presence;
+  },
+});
+
+// Cleanup stale presence entries (older than 5 minutes)
+export const cleanupStalePresence = mutation({
+  handler: async (ctx) => {
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    
+    const stale = await ctx.db
+      .query("missionPresence")
+      .withIndex("by_lastActive", (q) => q.lte("lastActive", fiveMinutesAgo))
+      .collect();
+    
+    for (const entry of stale) {
+      await ctx.db.delete(entry._id);
+    }
+    
+    return { cleaned: stale.length };
+  },
+});
+
 export const upvoteMission = mutation({
   args: { missionId: v.string() },
   handler: async (ctx, args) => {

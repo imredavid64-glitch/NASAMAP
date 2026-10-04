@@ -1,0 +1,31 @@
+﻿              )}
+            </button>
+
+            {/* Keyboard help toggle */}
+            <button
+              onClick={toggleKeyboardHelp}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition",
+                showKeyboardHelp
+                  ? "bg-space-cyan/20 text-space-cyan border border-space-cyan/30"
+                  : "bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10"
+              )}
+              aria-label={showKeyboardHelp ? "Hide keyboard shortcuts" : "Show keyboard shortcuts"}
+            >
+              <Info className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-medium">{showKeyboardHelp ? "Hide" : "Show"} Shortcuts</span>
+            </button>
+
+            {/* Controls visibility toggle */}
+            <button
+              onClick={toggleControls}
+              className="p-2 rounded-lg transition hover:bg-white/10 text-slate-400 hover:text-white"
+              aria-label={showControls ? "Hide controls" : "Show controls"}
+            >
+              {showControls ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Keyboard shortcuts help panel */}
+        {showKeyboardHelp ? (

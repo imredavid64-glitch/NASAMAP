@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@vheins/opencode-9router@latest"],
+  "plugin": ["@vheins/opencode-9router@latest", "opencode-auto-continue"],
   "provider": {
     "9router": {
       "npm": "@ai-sdk/openai-compatible",

@@ -49,6 +49,22 @@ export const LANES: RelevanceLane[] = [
       /life support|survival|habitat|recycl|sustainab|potable|\bwater\b|\bfood\b|health monitoring|astronaut health|radiation|\boxygen\b|home in space|eclss/i,
   },
   {
+    id: "agriculture",
+    label: "Agriculture & farming",
+    href: "/commons/farmer",
+    blurb: "Photoperiod planting windows, frost risk, GPS autosteer risk, soil moisture & ET.",
+    pattern:
+      /farm|agricultur|crop|soil|irrigation|photoperiod|frost|gps autosteer|planting|harvest|yield|precision ag|agronomy/i,
+  },
+  {
+    id: "disaster-climate",
+    label: "Disaster & climate",
+    href: "/commons/disaster",
+    blurb: "Fire perimeters, flood stages, tropical cyclones, severe weather, lightning, space weather.",
+    pattern:
+      /fire|wildfire|flood|storm|hurricane|cyclone|tornado|lightning|severe weather|drought|heat wave|geomagnetic|space weather|disaster|emergency|resilience/i,
+  },
+  {
     id: "flight-3d",
     label: "3D flight & visualization",
     href: "/fly",

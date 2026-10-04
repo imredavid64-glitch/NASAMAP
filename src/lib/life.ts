@@ -55,6 +55,180 @@ export function radiationDose(days: number, env: RadiationEnv): RadiationExposur
   };
 }
 
+/* ------------------------------------------------------------------ *
+ * Enhanced Radiation Model — Badhwar-O'Neill 2010 GCR + King SPE
+ * ------------------------------------------------------------------ */
+
+export type SolarCyclePhase = "minimum" | "maximum" | "declining" | "rising";
+
+export interface GCRParameters {
+  /** Solar modulation potential φ in MV (Badhwar-O'Neill 2010) */
+  phiMV: number;
+  /** GCR dose rate in mSv/day behind minimal shielding (Al equivalent) */
+  doseRateMSvDay: number;
+  /** Quality factor for GCR (LET-dependent, ~3.5 avg) */
+  qualityFactor: number;
+}
+
+export interface SPEParameters {
+  /** Probability of ≥1 SPE per mission phase (King 1974 model) */
+  probabilityPerPhase: number;
+  /** Mean SPE dose in mSv (unshielded) */
+  meanDoseMSv: number;
+  /** 95th percentile SPE dose in mSv */
+  p95DoseMSv: number;
+}
+
+export interface OrganDoseFactors {
+  /** ICRP 103 tissue weighting factors (w_T) */
+  wT: Record<string, number>;
+  /** Organ dose equivalent = sum(w_T * H_T) */
+  calculateEffectiveDose: (organDoses: Record<string, number>) => number;
+}
+
+/** ICRP 103 tissue weighting factors (w_T) - sum = 1.0 */
+export const ICRP103_WT: Record<string, number> = {
+  "bone-marrow": 0.12,
+  colon: 0.12,
+  lung: 0.12,
+  stomach: 0.12,
+  breast: 0.12,
+  gonads: 0.08,
+  bladder: 0.04,
+  oesophagus: 0.04,
+  liver: 0.04,
+  thyroid: 0.04,
+  "bone-surface": 0.01,
+  brain: 0.01,
+  salivary: 0.01,
+  skin: 0.01,
+  remainder: 0.12, // distributed among 14 tissues
+};
+
+/** Badhwar-O'Neill 2010 GCR model — dose rate vs solar modulation φ */
+export function badhwarONeillGCR(phiMV: number): GCRParameters {
+  // BON2010 parameterization: dose rate increases as φ decreases (solar min)
+  // φ ≈ 300-400 MV at solar max, 600-800 MV at solar min
+  // Dose rate ~0.4-0.8 mSv/day behind 10 g/cm² Al
+  const normalized = Math.max(0, Math.min(1, (1200 - phiMV) / 900)); // 0 at φ=1200, 1 at φ=300
+  const doseRate = 0.4 + normalized * 0.4; // 0.4-0.8 mSv/day
+  return {
+    phiMV,
+    doseRateMSvDay: doseRate,
+    qualityFactor: 3.5,
+  };
+}
+
+/** King (1974) SPE model — probability and dose by mission phase */
+export function kingSPEModel(missionPhaseDays: number, phaseType: "transit" | "surface"): SPEParameters {
+  // Event rate: ~2-3 major SPEs per year at solar max, <0.5 at solar min
+  // For a Mars mission (~500 days transit + 500 days surface), scale accordingly
+  const annualRate = phaseType === "transit" ? 2.5 : 1.5; // events/year at solar max
+  const years = missionPhaseDays / 365.25;
+  const expectedEvents = annualRate * years;
+  const probabilityPerPhase = 1 - Math.exp(-expectedEvents); // Poisson probability of ≥1 event
+  
+  return {
+    probabilityPerPhase,
+    meanDoseMSv: 200, // mSv unshielded for major SPE
+    p95DoseMSv: 1000, // mSv unshielded for 95th percentile event
+  };
+}
+
+/** Storm shelter effectiveness — dose reduction factor for given areal density */
+export function stormShelterFactor(arealDensityGcm2: number): number {
+  // Exponential attenuation: I = I₀ * exp(-μx)
+  // For SPE protons, μ ≈ 0.05-0.1 cm²/g for polyethylene/water
+  // 5 g/cm² → ~60-80% reduction, 10 g/cm² → ~85-95% reduction
+  const mu = 0.08; // cm²/g for polyethylene (H-rich shield)
+  return Math.exp(-mu * arealDensityGcm2);
+}
+
+/** Organ-specific dose equivalent calculation per ICRP 103 */
+export function calculateEffectiveDose(organAbsorbedDoses: Record<string, number>): number {
+  let effective = 0;
+  for (const [organ, wT] of Object.entries(ICRP103_WT)) {
+    const dose = organAbsorbedDoses[organ] ?? 0;
+    effective += wT * dose;
+  }
+  return effective;
+}
+
+/** Enhanced radiation exposure with GCR, SPE, and shielding */
+export interface EnhancedRadiationExposure {
+  gcrMSv: number;
+  speExpectedMSv: number;
+  speP95MSv: number;
+  totalExpectedMSv: number;
+  totalP95MSv: number;
+  breakdown: string;
+}
+
+export interface EnhancedRadiationOpts {
+  transitDays: number;
+  surfaceDays: number;
+  env: RadiationEnv;
+  solarCyclePhase: SolarCyclePhase;
+  stormShelterGcm2?: number; // areal density of storm shelter (g/cm²)
+  transitShieldingGcm2?: number; // areal density of transit habitat (g/cm²)
+  surfaceShieldingGcm2?: number; // areal density of surface habitat (g/cm²)
+}
+
+/**
+ * Enhanced radiation model combining:
+ * - Badhwar-O'Neill 2010 GCR (solar modulation φ)
+ * - King (1974) SPE probability + dose
+ * - Storm shelter effectiveness
+ * - Organ dose equivalents (ICRP 103)
+ */
+export function enhancedRadiationDose(opts: EnhancedRadiationOpts): EnhancedRadiationExposure {
+  const { transitDays, surfaceDays, env, solarCyclePhase, stormShelterGcm2 = 0, transitShieldingGcm2 = 10, surfaceShieldingGcm2 = 20 } = opts;
+
+  // Solar modulation φ by phase (MV)
+  const phiByPhase: Record<SolarCyclePhase, number> = {
+    minimum: 350,
+    maximum: 1100,
+    declining: 600,
+    rising: 600,
+  };
+  const phi = phiByPhase[solarCyclePhase] ?? 600;
+
+  // GCR component
+  const gcr = badhwarONeillGCR(phi);
+  const transitShieldFactor = Math.exp(-0.05 * transitShieldingGcm2); // GCR attenuation
+  const surfaceShieldFactor = Math.exp(-0.05 * surfaceShieldingGcm2);
+  const gcrTransit = gcr.doseRateMSvDay * transitDays * transitShieldFactor;
+  const gcrSurface = gcr.doseRateMSvDay * surfaceDays * surfaceShieldFactor;
+  const gcrTotal = gcrTransit + gcrSurface;
+
+  // SPE component (King model)
+  const speTransit = kingSPEModel(transitDays, "transit");
+  const speSurface = kingSPEModel(surfaceDays, "surface");
+  const shelterFactor = stormShelterFactor(stormShelterGcm2);
+  
+  // Expected SPE dose (probability-weighted, shielded)
+  const speTransitExpected = speTransit.probabilityPerPhase * speTransit.meanDoseMSv * shelterFactor;
+  const speSurfaceExpected = speSurface.probabilityPerPhase * speSurface.meanDoseMSv * shelterFactor;
+  const speTotalExpected = speTransitExpected + speSurfaceExpected;
+
+  // 95th percentile SPE dose (worst-case single event, shielded)
+  const speTransitP95 = speTransit.p95DoseMSv * shelterFactor;
+  const speSurfaceP95 = speSurface.p95DoseMSv * shelterFactor;
+  const speTotalP95 = Math.max(speTransitP95, speSurfaceP95);
+
+  const totalExpected = gcrTotal + speTotalExpected;
+  const totalP95 = gcrTotal + speTotalP95;
+
+  return {
+    gcrMSv: gcrTotal,
+    speExpectedMSv: speTotalExpected,
+    speP95MSv: speTotalP95,
+    totalExpectedMSv: totalExpected,
+    totalP95MSv: totalP95,
+    breakdown: `GCR: ${gcrTotal.toFixed(0)} mSv (φ=${phi} MV) | SPE expected: ${speTotalExpected.toFixed(0)} mSv (shelter ${stormShelterGcm2} g/cm²) | SPE P95: ${speTotalP95.toFixed(0)} mSv`,
+  };
+}
+
 export interface ConsumablesTotals {
   oxygenKg: number;
   waterKg: number;

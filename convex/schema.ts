@@ -38,4 +38,20 @@ export default defineSchema({
     picture: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),
+
+  // Collaborative editing presence
+  missionPresence: defineTable({
+    missionId: v.string(),
+    userId: v.string(),
+    userName: v.optional(v.string()),
+    cursorPosition: v.optional(v.object({
+      section: v.string(),
+      field: v.optional(v.string()),
+      value: v.optional(v.string()),
+    })),
+    lastActive: v.number(),
+    color: v.string(),
+  }).index("by_missionId", ["missionId"])
+    .index("by_missionId_userId", ["missionId", "userId"])
+    .index("by_lastActive", ["lastActive"]),
 });

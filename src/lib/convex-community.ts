@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery, useMutation, ConvexReactClient } from "convex/react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { useState, useEffect } from "react";
 
 export interface CommunityMission {
   _id: Id<"missions">;
@@ -35,6 +35,21 @@ export interface MissionComment {
   createdAt: number;
 }
 
+export interface PresenceEntry {
+  _id: Id<"missionPresence">;
+  _creationTime: number;
+  missionId: string;
+  userId: string;
+  userName?: string;
+  cursorPosition?: {
+    section: string;
+    field?: string;
+    value?: string;
+  };
+  lastActive: number;
+  color: string;
+}
+
 function getAuthorId(): string {
   if (typeof window === "undefined") return "anonymous";
   let id = localStorage.getItem("nasamap-author-id");
@@ -48,6 +63,27 @@ function getAuthorId(): string {
 function getAuthorName(): string | undefined {
   if (typeof window === "undefined") return undefined;
   return localStorage.getItem("nasamap-author-name") || undefined;
+}
+
+// Generate a consistent color for a user based on their ID
+function getUserColor(userId: string): string {
+  const colors = [
+    "#22d3ee", // cyan
+    "#a78bfa", // violet
+    "#f472b6", // pink
+    "#4ade80", // green
+    "#fbbf24", // amber
+    "#fb923c", // orange
+    "#f87171", // red
+    "#60a5fa", // blue
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+    hash |= 0;
+  }
+  return colors[Math.abs(hash) % colors.length];
 }
 
 export function useCommunityMissions(destination?: "moon" | "mars", limit = 20) {
@@ -86,4 +122,64 @@ export function useAuthor() {
   };
 
   return { authorId, authorName, updateName };
+}
+
+// Collaborative presence hooks
+export function useMissionPresence(missionId: string) {
+  return useQuery(api.missions.getPresence as any, { missionId });
+}
+
+export function useUpsertPresence() {
+  return useMutation(api.missions.upsertPresence as any);
+}
+
+export function useRemovePresence() {
+  return useMutation(api.missions.removePresence as any);
+}
+
+export function useUserColor(): string {
+  const { authorId } = useAuthor();
+  return getUserColor(authorId);
+}
+
+// Auto-update presence every 30 seconds to keep it alive
+export function useAutoPresence(missionId: string, cursorPosition?: { section: string; field?: string; value?: string }) {
+  const { authorId, authorName } = useAuthor();
+  const color = getUserColor(authorId);
+  const upsertPresence = useUpsertPresence();
+  const removePresence = useRemovePresence();
+
+  useEffect(() => {
+    if (!missionId) return;
+
+    const updatePresence = () => {
+      upsertPresence({
+        missionId,
+        userId: authorId,
+        userName: authorName,
+        cursorPosition,
+        color,
+      });
+    };
+
+    // Initial update
+    updatePresence();
+
+    // Update every 30 seconds to keep presence alive
+    const interval = setInterval(updatePresence, 30000);
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(interval);
+      removePresence({ missionId, userId: authorId });
+    };
+  }, [missionId, authorId, authorName, cursorPosition, upsertPresence]);
+}
+
+// Get all active users in a mission (excluding self)
+export function useActiveCollaborators(missionId: string) {
+  const presence = useMissionPresence(missionId);
+  const { authorId } = useAuthor();
+
+  return presence?.filter((p: { userId: string }) => p.userId !== authorId) ?? [];
 }

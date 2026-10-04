@@ -207,6 +207,113 @@
         { "id": "transfer", "label": "Efficient free-return trajectory" }
       ],
       "parScore": 85
+    },
+    {
+      "id": "zero-waste-mars",
+      "title": "Zero-Waste Mars",
+      "lane": "life-support",
+      "difficulty": "Advanced",
+      "brief": "Achieve 90% consumable closure using ISS ECLSS + ISRU waste processing. Every gram counts — the SpaceTrash Hack challenge demands a truly circular economy on Mars.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["starship"],
+        "crew": { "min": 4, "max": 6 },
+        "surfaceDays": { "min": 180, "max": 365 },
+        "maxRadiationMsv": 800
+      },
+      "objectives": [
+        { "id": "eclss-loop", "label": "≥90% consumables recycled (ECLSS + ISRU)" },
+        { "id": "surface", "label": "Long surface campaign for ISRU ops" },
+        { "id": "duration", "label": "Mission under 700 days" },
+        { "id": "budget", "label": "Cost-effective with ISRU offset" }
+      ],
+      "parScore": 88
+    },
+    {
+      "id": "planetary-defense-intercept",
+      "title": "Planetary Defense Intercept",
+      "lane": "flight-3d",
+      "difficulty": "Advanced",
+      "brief": "A near-Earth object is on a collision course. Design a kinetic impactor mission to deflect it. Fast transfer, precision targeting, and minimal Δv — the NEO Orrery challenge brought to life.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["falcon-heavy", "starship", "sls-block-1"],
+        "crew": { "min": 0, "max": 0 },
+        "surfaceDays": { "min": 0, "max": 0 },
+        "maxRadiationMsv": 0,
+        "maxTotalDays": 365
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "Impactor + propulsion fits the vehicle" },
+        { "id": "transfer", "label": "Fast intercept trajectory (< 180 days)" },
+        { "id": "duration", "label": "Mission under 365 days" },
+        { "id": "budget", "label": "Cost under $500M" }
+      ],
+      "parScore": 86
+    },
+    {
+      "id": "inflatable-habitat-layout",
+      "title": "Inflatable Habitat Layout",
+      "lane": "life-support",
+      "difficulty": "Intermediate",
+      "brief": "Design a lightweight inflatable habitat for Mars. Volume, mass, radiation shielding, and ECLSS integration — the Habitat Layout Creator challenge meets real engineering constraints.",
+      "destination": "mars",
+      "constraints": {
+        "allowedVehicleIds": ["starship", "falcon-heavy"],
+        "crew": { "min": 4, "max": 6 },
+        "surfaceDays": { "min": 30, "max": 180 },
+        "maxRadiationMsv": 700
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "Inflatable habitat fits vehicle fairing" },
+        { "id": "eclss-loop", "label": "ECLSS integrated with habitat volume" },
+        { "id": "surface", "label": "Habitable volume ≥ 50 m³ per crew" },
+        { "id": "radiation", "label": "Crew dose under 700 mSv with shielding" }
+      ],
+      "parScore": 80
+    },
+    {
+      "id": "gateway-assembly-logistics",
+      "title": "Gateway Assembly Logistics",
+      "lane": "mission-design",
+      "difficulty": "Advanced",
+      "brief": "Multi-launch campaign to assemble the lunar Gateway. Coordinate international modules (HALO, I-HAB, ESPRIT) across SLS, Falcon Heavy, and commercial launches. The Lunar Gateway challenge — logistics as mission design.",
+      "destination": "moon",
+      "constraints": {
+        "allowedVehicleIds": ["sls-block-1", "falcon-heavy", "starship"],
+        "crew": { "min": 0, "max": 4 },
+        "surfaceDays": { "min": 0, "max": 0 },
+        "maxRadiationMsv": 600,
+        "maxTotalDays": 730
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "All modules fit assigned launch vehicles" },
+        { "id": "duration", "label": "Assembly complete in under 730 days" },
+        { "id": "budget", "label": "Total campaign under $4B" },
+        { "id": "transfer", "label": "Efficient NRHO transfers for each module" }
+      ],
+      "parScore": 82
+    },
+    {
+      "id": "artemis-science-return",
+      "title": "Artemis Science Return",
+      "lane": "mission-design",
+      "difficulty": "Intermediate",
+      "brief": "Maximize scientific return from an Artemis surface mission. Crew time, rover range, sample mass, and instrument deployment — the ISS 25th / Artemis challenge focused on science yield per dollar.",
+      "destination": "moon",
+      "constraints": {
+        "allowedVehicleIds": ["sls-block-1"],
+        "crew": { "min": 2, "max": 4 },
+        "surfaceDays": { "min": 7, "max": 30 },
+        "maxRadiationMsv": 600
+      },
+      "objectives": [
+        { "id": "lift-stack", "label": "Science payload + crew fits SLS TLI" },
+        { "id": "surface", "label": "≥7 days for science operations" },
+        { "id": "radiation", "label": "Crew dose under 600 mSv" },
+        { "id": "budget", "label": "Science return per dollar optimized" }
+      ],
+      "parScore": 84
     }
   ]
 }

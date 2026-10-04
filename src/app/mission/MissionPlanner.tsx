@@ -27,7 +27,10 @@ import { useToast, successToast } from "@/components/ui/toast";
 import { ShowYourWorkPanel } from "@/components/mission/show-your-work";
 import { CrewHealthDashboard } from "@/components/mission/crew-health";
 import { EarthImpact } from "@/components/mission/earth-impact";
-import { useSubmitMission, useAuthor } from "@/lib/convex-community";
+import { useSubmitMission, useAuthor, useAutoPresence, useActiveCollaborators, useUserColor } from "@/lib/convex-community";
+import { AdvisorChat } from "./AdvisorChat";
+import { HistoricalValidationTab } from "@/components/mission/historical-validation";
+
 
 type Destination = "moon" | "mars";
 
@@ -117,11 +120,16 @@ export function MissionPlanner({
   const [best, setBest] = useState<BestRecord | null>(null);
   const [newBest, setNewBest] = useState(false);
 
+  // Collaborative presence
+  const missionId = encodeDesignQuery({ destination, vehicleId, crew, surfaceDays });
+  useAutoPresence(missionId, { section: "mission-planner" });
+  const collaborators = useActiveCollaborators(missionId);
+  const userColor = useUserColor();
+
   // Community sharing
   const submitMission = useSubmitMission();
   const { authorId, authorName } = useAuthor();
   const [submittingCommunity, setSubmittingCommunity] = useState(false);
-  const [communityToast, setCommunityToast] = useState<{ type: "success" | "error"; title: string } | null>(null);
 
   const handleShareToCommunity = async () => {
     if (submittingCommunity) return;
@@ -142,11 +150,18 @@ export function MissionPlanner({
         authorId,
         authorName,
       });
-      setCommunityToast({ type: "success", title: "Mission shared to community!" });
-      toast({ type: "success", title: "Mission shared to community!" });
+      const missionLink = `/community/${encodeDesignQuery({ destination, vehicleId, crew, surfaceDays })}`;
+      toast({
+        type: "success",
+        title: "Mission shared to community!",
+        description: `View it in the gallery`,
+        action: {
+          label: "View",
+          onClick: () => window.location.href = missionLink,
+        },
+      });
     } catch (e) {
       console.error("Failed to share mission", e);
-      setCommunityToast({ type: "error", title: "Failed to share mission" });
       toast({ type: "error", title: "Failed to share mission" });
     }
     setSubmittingCommunity(false);
@@ -253,6 +268,32 @@ export function MissionPlanner({
           The URL encodes your design — bookmark it, or challenge someone to beat your grade.
         </span>
       </div>
+
+      {/* Collaborative Presence Indicator */}
+      {collaborators.length > 0 && (
+        <div className="mt-4 flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-slate-400">Collaborating:</span>
+          {collaborators.map((collab: { userId: string; userName?: string; color: string; cursorPosition?: { section: string; field?: string; value?: string } }) => (
+            <span
+              key={collab.userId}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 border border-white/10 text-xs"
+              title={collab.userName || collab.userId}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: collab.color }}
+              />
+              <span className="text-slate-300">{collab.userName || collab.userId.slice(0, 8)}</span>
+              {collab.cursorPosition && (
+                <span className="text-[10px] text-slate-500">
+                  @ {collab.cursorPosition.section}
+                  {collab.cursorPosition.field && `: ${collab.cursorPosition.field}`}
+                </span>
+              )}
+            </span>
+          ))}
+        </div>
+      )}
 
       {!scenario && (
         <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -546,7 +587,18 @@ export function MissionPlanner({
           <div id="patch" className="scroll-mt-20">
             <MissionPatch design={design} />
           </div>
-        </div>
+
+          {/* AI Mission Advisor */}
+          <div className="scroll-mt-20 lg:w-96">
+            <AdvisorChat design={design} scorecard={scorecard} />
+          </div>
+
+          {/* Historical Validation */}
+          <div className="scroll-mt-20">
+            <HistoricalValidationTab />
+          </div>
+
+          </div>
       </div>
     </section>
   );

@@ -5,7 +5,7 @@
 
 import { hohmannTransfer } from "@/lib/rocket";
 import { lightTime } from "@/lib/comm";
-import { missionConsumables, radiationDose, type ConsumablesTotals, type RadiationEnv } from "@/lib/life";
+import { missionConsumables, radiationDose, enhancedRadiationDose, type ConsumablesTotals, type RadiationEnv } from "@/lib/life";
 import constants from "@/data/constants.json";
 import launchVehicles from "@/data/launch-vehicles.json";
 
@@ -16,6 +16,20 @@ export interface MissionDesignOptions {
   vehicleId: string;
   crew: number;
   surfaceDays: number;
+  /** Optional: use enhanced radiation + parametric habitat models (default: false for backward compat) */
+  useEnhancedModels?: boolean;
+  /** Optional: areal density of storm shelter (g/cm²) */
+  stormShelterGcm2?: number;
+  /** Optional: transit habitat shielding (g/cm²) */
+  transitShieldingGcm2?: number;
+  /** Optional: surface habitat shielding (g/cm²) */
+  surfaceShieldingGcm2?: number;
+  /** Optional: solar cycle phase for radiation model */
+  solarCyclePhase?: "minimum" | "maximum" | "declining" | "rising";
+  /** Optional: ECLSS closure level (0-1, default 0.5 for ISS-class) */
+  eclssClosureLevel?: number;
+  /** Optional: radiation shielding level ("minimal" | "standard" | "enhanced") */
+  radiationShielding?: "minimal" | "standard" | "enhanced";
 }
 
 export interface LaunchVehicleLite {
@@ -38,16 +52,70 @@ const VEHICLES = launchVehicles as unknown as LaunchVehicleLite[];
 /** Documented Apollo-class translunar coast (launch to lunar orbit insertion). NASA. */
 export const MOON_TRANSFER_DAYS = 3.17;
 
-/** Assumed pressurized module dry mass per mission — design assumption, NASA-class values not exact. */
-export const HABITATION_MODULE_KG: Record<Destination, number> = {
-  moon: 10_000,
-  mars: 30_000,
-};
-
 /** Moon TLI departure burn magnitude (Apollo-class, documented ≈3.0–3.2 km/s). */
 export const MOON_TLI_DV_KM_S = 3.1;
 
 export const MARS_SYNODIC_DAYS = 779.94; // = 1/(1/365.25 − 1/686.98), 26-month launch cadence
+
+/** Shielding areal density presets (g/cm²) */
+export const SHIELDING_PRESETS: Record<"minimal" | "standard" | "enhanced", { transit: number; surface: number; storm: number }> = {
+  minimal: { transit: 5, surface: 10, storm: 0 },
+  standard: { transit: 10, surface: 20, storm: 5 },
+  enhanced: { transit: 20, surface: 30, storm: 10 },
+};
+
+/**
+ * Parametric habitation module mass model.
+ * Based on NASA TransHab, Bigelow BA-330, and ISS heritage.
+ * 
+ * @param crew - Crew size (1-6)
+ * @param destination - "moon" or "mars"
+ * @param shieldingLevel - "minimal" | "standard" | "enhanced"
+ * @param eclssLevel - ECLSS closure fraction (0-1, default 0.5 for ISS-class)
+ * @returns Dry mass in kg
+ */
+export function calculateHabMass(
+  crew: number,
+  destination: Destination,
+  shieldingLevel: "minimal" | "standard" | "enhanced" = "standard",
+  eclssLevel: number = 0.5
+): number {
+  // Base pressure vessel mass (TransHab/BA-330 heritage: ~1.5 t per 100 m³)
+  // Volume: ~50 m³ per crew for Mars, ~30 m³ per crew for Moon
+  const volumePerCrew = destination === "mars" ? 50 : 30;
+  const totalVolume = crew * volumePerCrew;
+  
+  // Pressure vessel: ~15 kg/m³ for inflatable (Vectran/Kevlar) + restraint layer
+  const vesselMass = totalVolume * 15;
+  
+  // ECLSS hardware mass (scales with crew and closure level)
+  // ISS WPA ~500 kg, CDRA ~400 kg, OGS ~500 kg, Sabatier ~300 kg for 6 crew
+  const baseEclssPerCrew = 300; // kg per crew for basic ECLSS
+  const eclssMass = crew * baseEclssPerCrew * (1 + eclssLevel); // more closure = more hardware
+  
+  // Radiation shielding (areal density * surface area * density)
+  const habitatRadius = Math.cbrt(3 * totalVolume / (4 * Math.PI)); // spherical approximation
+  const surfaceArea = 4 * Math.PI * habitatRadius * habitatRadius;
+  const shielding = SHIELDING_PRESETS[shieldingLevel];
+  // Average of transit + surface shielding for combined habitat
+  const avgShielding = (shielding.transit + shielding.surface) / 2;
+  const shieldingMass = surfaceArea * 10000 * avgShielding * 1.2; // cm²→m², *1.2 g/cm³ for polyethylene
+  
+  // Internal outfitting (racks, wiring, plumbing, ~20% of dry mass)
+  const outfittingMass = (vesselMass + eclssMass + shieldingMass) * 0.2;
+  
+  // Margin (20% for growth)
+  const subtotal = vesselMass + eclssMass + shieldingMass + outfittingMass;
+  const margin = subtotal * 0.2;
+  
+  return Math.round(subtotal + margin);
+}
+
+/** Legacy fixed masses for backward compatibility */
+export const HABITATION_MODULE_KG: Record<Destination, number> = {
+  moon: 10_000,
+  mars: 30_000,
+};
 
 export interface MissionDesign {
   destination: Destination;
@@ -89,11 +157,20 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   const surfaceDays = Math.max(0, opts.surfaceDays);
   const notes: string[] = [];
 
-  let transferDays: number;
-  let totalDeltaVKmS: number;
-  let transitEnv: RadiationEnv;
-  let surfaceEnv: RadiationEnv;
-  let arrivalLt: { oneWayLabel: string; oneWaySec: number; roundTripLabel: string };
+  // Defaults for optional params
+  const stormShelterGcm2 = opts.stormShelterGcm2 ?? SHIELDING_PRESETS[opts.radiationShielding ?? "standard"].storm;
+  const transitShieldingGcm2 = opts.transitShieldingGcm2 ?? SHIELDING_PRESETS[opts.radiationShielding ?? "standard"].transit;
+  const surfaceShieldingGcm2 = opts.surfaceShieldingGcm2 ?? SHIELDING_PRESETS[opts.radiationShielding ?? "standard"].surface;
+  const solarCyclePhase = opts.solarCyclePhase ?? "declining";
+  const eclssLevel = opts.eclssClosureLevel ?? 0.5;
+  const radiationShielding = opts.radiationShielding ?? "standard";
+
+  // Compute transfer parameters
+  let transferDays = 0;
+  let totalDeltaVKmS = 0;
+  let transitEnv: RadiationEnv = "cislunar";
+  let surfaceEnv: RadiationEnv = "moon-surface";
+  let arrivalLt = { oneWayLabel: "", oneWaySec: 0, roundTripLabel: "" };
 
   if (opts.destination === "mars") {
     const h = hohmannTransfer(
@@ -128,14 +205,44 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   }
 
   const totalDays = transferDays + surfaceDays;
-  const transitDose = radiationDose(transferDays, transitEnv);
-  const surfaceDose = radiationDose(surfaceDays, surfaceEnv);
-  const radiationMsvTotal = transitDose.mSvTotal + surfaceDose.mSvTotal;
-  const radiationNote = `transit ${transitEnv} (${transitDose.benchmarkNote}) + surface ${surfaceEnv} (${surfaceDose.benchmarkNote})`;
+
+  // Use enhanced models only when explicitly requested (default: false for backward compat)
+  const useEnhanced = opts.useEnhancedModels ?? false;
+
+  let radiationMsvTotal: number;
+  let radiationNote: string;
+  let habitationModuleKg: number;
+  let radResult: ReturnType<typeof enhancedRadiationDose> | null = null;
+
+  if (useEnhanced) {
+    // Enhanced radiation model (Badhwar-O'Neill GCR + King SPE + storm shelter)
+    radResult = enhancedRadiationDose({
+      transitDays: transferDays,
+      surfaceDays,
+      env: opts.destination === "mars" ? TRANSIT_MARS : TRANSIT_MOON,
+      solarCyclePhase,
+      stormShelterGcm2,
+      transitShieldingGcm2,
+      surfaceShieldingGcm2,
+    });
+    radiationMsvTotal = radResult.totalExpectedMSv;
+    radiationNote = radResult.breakdown;
+
+    // Parametric habitation mass
+    habitationModuleKg = calculateHabMass(crew, opts.destination, radiationShielding, 0.5);
+  } else {
+    // Legacy fixed radiation model
+    const transitDose = radiationDose(transferDays, transitEnv);
+    const surfaceDose = radiationDose(surfaceDays, surfaceEnv);
+    radiationMsvTotal = transitDose.mSvTotal + surfaceDose.mSvTotal;
+    radiationNote = `transit ${transitEnv} (${transitDose.benchmarkNote}) + surface ${surfaceEnv} (${surfaceDose.benchmarkNote})`;
+
+    // Legacy fixed habitation mass
+    habitationModuleKg = HABITATION_MODULE_KG[opts.destination];
+  }
 
   const consumables = missionConsumables(crew, totalDays);
   const consumablesTotalKg = consumables.oxygenKg + consumables.waterKg + consumables.foodKg;
-  const habitationModuleKg = HABITATION_MODULE_KG[opts.destination];
   const requiredMassKg = consumablesTotalKg + habitationModuleKg;
 
   // Launch gate: the vehicle must be documented to lift the whole stack to orbit,
@@ -163,6 +270,14 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     );
   }
 
+  // Add radiation and habitat notes
+  if (useEnhanced) {
+    notes.push(
+      `Radiation: ${radResult!.gcrMSv.toFixed(0)} mSv GCR + ${radResult!.speExpectedMSv.toFixed(0)} mSv SPE (expected) | P95: ${radResult!.totalP95MSv.toFixed(0)} mSv. Storm shelter: ${stormShelterGcm2} g/cm².`,
+      `Habitat: ${(habitationModuleKg / 1000).toFixed(1)} t dry mass (${radiationShielding} shielding, ${(eclssLevel * 100).toFixed(0)}% ECLSS closure).`,
+    );
+  }
+
   return {
     destination: opts.destination,
     vehicle,
@@ -172,8 +287,8 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     transferDays,
     transferHours: transferDays * 24,
     arrivalLt: { oneWayLabel: `${arrivalLt.oneWayLabel}`, oneWaySec: arrivalLt.oneWaySec, roundTripLabel: arrivalLt.roundTripLabel },
-    transitEnv,
-    surfaceEnv,
+    transitEnv: opts.destination === "mars" ? TRANSIT_MARS : TRANSIT_MOON,
+    surfaceEnv: opts.destination === "mars" ? MARS_ENV : MOON_ENV,
     radiationMsvTotal,
     radiationNote,
     consumables,
