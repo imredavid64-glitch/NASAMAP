@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal, Users, Send } from "lucide-react";
+import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal, Users, Send, Download } from "lucide-react";
 import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
 import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
 import { scoreMission, RADIATION_LIMIT_MSV, type PlayMode } from "@/lib/score";
 import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
 import { clampDesignToScenario, applyScenarioDefaults, type Scenario } from "@/lib/scenarios";
 import { opsBudget } from "@/lib/life";
+import { createMissionExport, downloadMissionJson } from "@/lib/export";
+import { getHohmannSamples, getApollo11Samples, interpolateApollo11, type InterpolatedState, type MarsTransferState } from "@/lib/trajectory";
 import launchVehicles from "@/data/launch-vehicles.json";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,9 +32,6 @@ import { EarthImpact } from "@/components/mission/earth-impact";
 import { useSubmitMission, useAuthor, useAutoPresence, useActiveCollaborators, useUserColor } from "@/lib/convex-community";
 import { AdvisorChat } from "./AdvisorChat";
 import { HistoricalValidationTab } from "@/components/mission/historical-validation";
-
-
-type Destination = "moon" | "mars";
 
 const VEHICLES = launchVehicles as unknown as {
   id: string;
@@ -83,7 +82,7 @@ export function MissionPlanner({
   basePath?: string;
 }) {
   const seed = useMemo(() => (scenario ? clampDesignToScenario(scenario, initial) : initial), [scenario, initial]);
-  const [destination, setDestination] = useState<Destination>(seed.destination);
+  const [destination, setDestination] = useState<DesignInput["destination"]>(seed.destination);
   const [vehicleId, setVehicleId] = useState<string>(seed.vehicleId);
   const [crew, setCrew] = useState(seed.crew);
   const [surfaceDays, setSurfaceDays] = useState(seed.surfaceDays);
@@ -210,6 +209,28 @@ export function MissionPlanner({
       ? `exceeds NASA career limit (${RADIATION_LIMIT_MSV} mSv)`
       : `within NASA career limit (${RADIATION_LIMIT_MSV} mSv)`;
 
+  const handleExportAll = () => {
+    // Get trajectory samples based on destination
+    let trajectoryMode = "hohmann";
+    let trajectorySamples: (InterpolatedState | MarsTransferState)[] = [];
+
+    if (destination === "moon") {
+      trajectoryMode = "apollo11";
+      trajectorySamples = getApollo11Samples(500);
+    } else {
+      trajectoryMode = "mars";
+      // For Mars, we'd need the actual trajectory samples from the fly view
+      // For now, use a placeholder
+      trajectorySamples = [];
+    }
+
+    const ops = opsBudget({ destination: design.destination, crew: design.crew, days: design.totalDays });
+    const exportData = createMissionExport(design, scorecard, trajectoryMode, trajectorySamples, ops);
+
+    const filename = `nasamap-${destination}-${vehicleId}-c${crew}-s${surfaceDays}-${new Date().toISOString().slice(0, 10)}.json`;
+    downloadMissionJson(filename, exportData);
+  };
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
       <SectionHeading kicker="Act 1 · PLAN" title="Design your mission" />
@@ -225,6 +246,15 @@ export function MissionPlanner({
           size="sm"
           showLabel={true}
         />
+        <Button
+          type="button"
+          onClick={handleExportAll}
+          variant="outline"
+          size="sm"
+          className="bg-space-cyan/20 border-space-cyan/40 text-space-cyan hover:bg-space-cyan/30"
+        >
+          <Download className="h-3.5 w-3.5" /> Export All Data
+        </Button>
         {!scenario && (
           <Button
             type="button"
@@ -590,7 +620,22 @@ export function MissionPlanner({
 
           {/* AI Mission Advisor */}
           <div className="scroll-mt-20 lg:w-96">
-            <AdvisorChat design={design} scorecard={scorecard} />
+            <AdvisorChat 
+              design={design} 
+              scorecard={scorecard} 
+              currentDesignInput={{
+                destination,
+                vehicleId,
+                crew,
+                surfaceDays,
+              }}
+              onApplyDesignChange={(updates) => {
+                if (updates.destination) setDestination(updates.destination);
+                if (updates.vehicleId) setVehicleId(updates.vehicleId);
+                if (updates.crew) setCrew(updates.crew);
+                if (updates.surfaceDays) setSurfaceDays(updates.surfaceDays);
+              }}
+            />
           </div>
 
           {/* Historical Validation */}

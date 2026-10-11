@@ -22,7 +22,7 @@ export const ECLSS: EclssBenchmarks = {
   orionCO2KgPerPersonDay: 0.75, // Orion CO2 scrubber benchmark
 };
 
-export type RadiationEnv = "leo" | "cislunar" | "transit-mars" | "mars-surface" | "moon-surface";
+export type RadiationEnv = "leo" | "cislunar" | "transit-mars" | "mars-surface" | "moon-surface" | "interstellar";
 
 export interface RadiationProfile {
   mSvPerDay: number;
@@ -36,6 +36,7 @@ export const RADIATION_MSV_DAY: Record<RadiationEnv, RadiationProfile> = {
   "transit-mars": { mSvPerDay: 0.66, sourceNote: "MSL RAD cruise average" },
   "mars-surface": { mSvPerDay: 0.7, sourceNote: "MSL RAD Mars-surface average (0.7 mSv/day)" },
   "moon-surface": { mSvPerDay: 0.4, sourceNote: "LRO/CRaTER-informed estimate" },
+  "interstellar": { mSvPerDay: 1.0, sourceNote: "GCR-dominated interstellar medium estimate (Badhwar-O'Neill 2010)" },
 };
 
 export interface RadiationExposure {
@@ -261,12 +262,13 @@ export function weightOn(massKg: number, surfaceGravityMs2: number): number {
  * ------------------------------------------------------------------ */
 
 export type Confidence = "documented" | "derived" | "estimate";
-export type OpsDestination = "moon" | "mars";
+export type OpsDestination = "moon" | "mars" | "exoplanet";
 
 /** Heliocentric distance of each destination (au). NASA planetary fact sheet. */
 export const DESTINATION_AU: Record<OpsDestination, number> = {
   moon: constants.orbitAu.earth,
   mars: constants.orbitAu.mars,
+  exoplanet: 1.0, // Not applicable for interstellar; placeholder for array sizing
 };
 
 export interface RecyclingRates {
@@ -411,10 +413,11 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
   const recycledOxygen = gross.oxygenKg * RECYCLING.oxygen;
 
   // ISRU waste-to-resource (applies to fecal/packaging waste, not urine which is already in ECLSS)
+  // For exoplanet, ISRU is not applicable (no local resources)
   const wasteMassKg = gross.foodKg + gross.co2Kg * 0.5; // approximate solid waste from food + CO2
-  const isruWater = wasteMassKg * ISRU_RECYCLING.wasteToWater;
-  const isruOxygen = wasteMassKg * ISRU_RECYCLING.wasteToOxygen;
-  const isruFertilizer = wasteMassKg * ISRU_RECYCLING.wasteToFertilizer;
+  const isruWater = opts.destination === "exoplanet" ? 0 : wasteMassKg * ISRU_RECYCLING.wasteToWater;
+  const isruOxygen = opts.destination === "exoplanet" ? 0 : wasteMassKg * ISRU_RECYCLING.wasteToOxygen;
+  const isruFertilizer = opts.destination === "exoplanet" ? 0 : wasteMassKg * ISRU_RECYCLING.wasteToFertilizer;
 
   const net: ConsumablesTotals = {
     oxygenKg: gross.oxygenKg - recycledOxygen - isruOxygen,
@@ -429,13 +432,27 @@ export function opsBudget(opts: { destination: OpsDestination; crew: number; day
   const savedPct = grossResupplyKg > 0 ? savedKg / grossResupplyKg : 0;
 
   const powerKw = ECLSS_POWER.reduce((sum, line) => sum + line.kWPerCrew * crew, 0);
-  const irradianceKwM2 = constants.solarConstantKwPerM2 / (au * au);
-  const arrayAreaM2 = powerKw / (irradianceKwM2 * SOLAR_ARRAY_EFFICIENCY);
+  let irradianceKwM2 = 0;
+  let arrayAreaM2 = 0;
+  let arrayNote = "";
+
+  if (opts.destination === "exoplanet") {
+    // For interstellar, no solar array - use nuclear power
+    irradianceKwM2 = 0;
+    arrayAreaM2 = 0;
+    arrayNote = "Interstellar mission: solar arrays not viable; nuclear power assumed for ECLSS.";
+  } else {
+    irradianceKwM2 = constants.solarConstantKwPerM2 / (au * au);
+    arrayAreaM2 = powerKw / (irradianceKwM2 * SOLAR_ARRAY_EFFICIENCY);
+    arrayNote = `At ${au.toFixed(2)} au the Sun delivers ${irradianceKwM2.toFixed(3)} kW/m² (1.361 kW/m² at 1 au); the ${powerKw.toFixed(1)} kW ECLSS load needs ≈${arrayAreaM2.toFixed(1)} m² of ~30%-efficient array.`;
+  }
 
   const notes = [
     `Recycling keeps ${savedKg.toFixed(0)} kg (${(savedPct * 100).toFixed(0)}%) of consumables out of the launch stack versus an open-loop mission.`,
-    `ISRU waste processing recovers ${isruWater.toFixed(0)} kg water, ${isruOxygen.toFixed(0)} kg O₂, and ${isruFertilizer.toFixed(0)} kg fertilizer from crew waste.`,
-    `At ${au.toFixed(2)} au the Sun delivers ${irradianceKwM2.toFixed(3)} kW/m² (1.361 kW/m² at 1 au); the ${powerKw.toFixed(1)} kW ECLSS load needs ≈${arrayAreaM2.toFixed(1)} m² of ~30%-efficient array.`,
+    opts.destination === "exoplanet"
+      ? "Interstellar mission: ISRU not applicable (no local resources); all consumables must be carried or recycled."
+      : `ISRU waste processing recovers ${isruWater.toFixed(0)} kg water, ${isruOxygen.toFixed(0)} kg O₂, and ${isruFertilizer.toFixed(0)} kg fertilizer from crew waste.`,
+    arrayNote,
     "CO₂ removal is regenerable on ISS and is therefore excluded from resupply mass.",
   ];
 

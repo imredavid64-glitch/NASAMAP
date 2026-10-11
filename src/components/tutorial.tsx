@@ -143,11 +143,30 @@ const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
   ],
 };
 
-export function TutorialProvider({ children }: { children: React.ReactNode }) {
+export function TutorialProvider({ children, scenarioId: providedScenarioId }: { children: React.ReactNode; scenarioId?: string }) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
+
+  // Auto-start tutorial on first visit for the given scenario
+  useEffect(() => {
+    if (providedScenarioId && !completed.has(providedScenarioId)) {
+      const storageKey = `tutorial-completed-${providedScenarioId}`;
+      const hasCompleted = localStorage.getItem(storageKey);
+      if (!hasCompleted) {
+        // Small delay to let the page render
+        const timer = setTimeout(() => {
+          setScenarioId(providedScenarioId);
+          setCurrentStep(0);
+          setIsActive(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        setCompleted(prev => new Set(prev).add(providedScenarioId));
+      }
+    }
+  }, [providedScenarioId, completed]);
 
   const steps = scenarioId ? TUTORIAL_STEPS[scenarioId] || [] : [];
 
@@ -170,7 +189,10 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      setCompleted(prev => new Set(prev).add(scenarioId || ""));
+      if (scenarioId) {
+        localStorage.setItem(`tutorial-completed-${scenarioId}`, "true");
+        setCompleted(prev => new Set(prev).add(scenarioId));
+      }
       setIsActive(false);
       setScenarioId(null);
       setCurrentStep(0);
@@ -184,10 +206,14 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   }, [currentStep]);
 
   const skipTutorial = useCallback(() => {
+    if (scenarioId) {
+      localStorage.setItem(`tutorial-completed-${scenarioId}`, "true");
+      setCompleted(prev => new Set(prev).add(scenarioId));
+    }
     setIsActive(false);
     setScenarioId(null);
     setCurrentStep(0);
-  }, []);
+  }, [scenarioId]);
 
   if (!isActive || steps.length === 0) {
     return <>{children}</>;

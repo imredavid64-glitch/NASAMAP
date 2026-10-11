@@ -55,6 +55,18 @@ const DESTINATION_THEMES = {
     bodyColor: "#e2683f",
     bodyAccent: "#fb923c",
   },
+  exoplanet: {
+    primary: "#a855f7",
+    secondary: "#7c3aed",
+    accent: "#fbbf24",
+    fieldStart: "#1e1b4b",
+    fieldMid: "#111827",
+    fieldEnd: "#030712",
+    rimStops: ["#ede9fe", "#a855f7", "#6d28d9"],
+    emblem: "starship",
+    bodyColor: "#c084fc",
+    bodyAccent: "#fbbf24",
+  },
 } as const;
 
 function esc(text: string | number): string {
@@ -224,7 +236,7 @@ export function missionPatchSvg(data: PatchData): string {
   const { design, missionId, missionName, vehicleName } = data;
   const theme = DESTINATION_THEMES[design.destination];
   const gate = GATE_COLOR[design.launchGate];
-  const dest = design.destination === "mars" ? "MARS" : "MOON";
+  const dest = design.destination === "mars" ? "MARS" : design.destination === "exoplanet" ? "EXOPLANET" : "MOON";
   const topRocker = missionName ? esc(missionName).toUpperCase() : `${dest} CREWED TRANSFER`;
   const bottomRocker = vehicleName ? `${esc(vehicleName).toUpperCase()} · NASA SPACE APPS 2026` : "THE NEXT FRONTIER · NASA SPACE APPS 2026";
 

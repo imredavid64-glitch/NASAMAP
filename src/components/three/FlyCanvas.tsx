@@ -366,6 +366,7 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
         dpr={[1, 1.75]}
         camera={{ position: [3, 1, 3], fov: 45 }}
         gl={{ antialias: true, alpha: true }}
+        tabIndex={0}
       >
         <ambientLight intensity={0.4} />
         <directionalLight position={[8, 4, 6]} intensity={1.8} />
@@ -388,6 +389,13 @@ export function FlyCanvas({ mode = "apollo11", initialSpeed = 10 }: FlyCanvasPro
         <CameraRig state={state} mode={mode} follow={follow} />
         <OrbitControls enablePan={true} minDistance={0.5} maxDistance={80} />
       </Canvas>
+
+      <p className="sr-only">
+        {mode === "apollo11"
+          ? "Apollo 11 mission replay. Spacebar to play/pause. Arrow left/right to adjust speed. Arrow up/down to change camera. R to reset."
+          : "Hohmann transfer to the Moon simulation. Spacebar to play/pause. Arrow left/right to adjust speed. Arrow up/down to change camera. R to reset."}
+        Keyboard accessible controls in the HUD below.
+      </p>
 
       <HUD
         state={state}

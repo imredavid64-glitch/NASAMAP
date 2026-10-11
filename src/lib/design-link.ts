@@ -1,6 +1,7 @@
 import launchVehicles from "@/data/launch-vehicles.json";
+import { type Destination } from "@/lib/mission";
 
-export type Destination = "moon" | "mars";
+export { type Destination } from "@/lib/mission";
 
 export interface DesignInput {
   destination: Destination;
@@ -47,7 +48,7 @@ export function decodeDesign(raw: Record<string, string | string[] | undefined>)
   };
 
   const destRaw = pick("d");
-  const destination: Destination = destRaw === "moon" || destRaw === "mars" ? destRaw : DEFAULT_DESIGN.destination;
+  const destination: Destination = destRaw === "moon" || destRaw === "mars" || destRaw === "exoplanet" ? destRaw : DEFAULT_DESIGN.destination;
 
   const vehicleRaw = pick("v");
   const vehicleId = vehicleRaw && VEHICLE_IDS.includes(vehicleRaw) ? vehicleRaw : DEFAULT_DESIGN.vehicleId;

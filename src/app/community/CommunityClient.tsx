@@ -31,6 +31,18 @@ export function CommunityClient() {
     pageSize * 3 // Fetch more for client-side filtering
   );
 
+  // Handle case where Convex client isn't ready (during SSR/prerendering)
+  if (missions === undefined && !isLoading) {
+    return (
+      <div className="pt-28 mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <SectionHeading kicker="Community" title="Mission Gallery" />
+        <div className="mt-8 flex justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-space-cyan/30 border-t-space-cyan" />
+        </div>
+      </div>
+    );
+  }
+
   const filteredMissions = useMemo(() => {
     if (!missions) return [];
     

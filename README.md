@@ -141,11 +141,14 @@ node scripts/extract-challenges.mjs   # writes src/data/challenges-2026.json fro
 node scripts/check-challenges.mjs     # human-readable listing
 ```
 
-`src/lib/challenges.ts` matches every title against six **relevance lanes** that mirror the four acts.
-The result is a live `/challenges` page — **37 of 86 challenges (43%)** are served by a shipped capability,
+`src/lib/challenges.ts` matches every title against ten **relevance lanes** that mirror the four acts.
+The result is a live `/challenges` page — **43 of 86 challenges (50%)** are served by a shipped capability,
 each badge deep-linking to the feature that does the work. The lanes NASAMAP is purpose-built for include:
 
 - **Space Mission Design Game** — a real game layer at `/play`: six mission briefs with constraints, objectives, 0–3 star grading and local progress, built on the **S–D mission rating**, Δv, mass budget and GO / NO-GO gate (`/mission`)
+- **Rocket Builder & Launch Vehicle Design** — design custom rockets from 12 real engines and 15 tanks. Live Δv, TWR, payload (LEO/TLI/GTO), cost. Export to Mission Lab (`/tools/rocket-builder`)
+- **Mission Optimizer & Pareto Fronts** — pre-computed Pareto-optimal Mars architectures (2028/2031). Multi-objective: minimize IMLEO, maximize payload, minimize radiation. NSGA-II + gradient refinement (`/tools/mission-optimizer`)
+- **Collaborative Mission Design** — browse shared missions with filters, view full scorecards, deep-link to Fly, upvote & comment (`/community`)
 - **Interplanetary Survival Guide: Martian Map** — radiation, consumables, ECLSS, transfer geometry (`/mission#ops`)
 - **SpaceTrash Hack: Revolutionizing Recycling on Mars** — closed-loop recycling and array sizing (`/mission#ops`)
 - **Your Home in Space: The Habitat Layout Creator** — habitat mass budgets and surface stay (`/mission`)

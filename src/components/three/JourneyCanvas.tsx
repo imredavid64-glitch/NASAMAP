@@ -18,19 +18,26 @@ export function JourneyCanvas({
   cameraDistance?: number;
 }) {
   const reduced = usePrefersReducedMotion();
+  const bodyName = bodyId === "earth" ? "Earth" : bodyId === "moon" ? "the Moon" : bodyId === "mars" ? "Mars" : bodyId;
   return (
-    <Canvas
-      dpr={[1, 1.75]}
-      camera={{ position: [cameraDistance, 0.6, cameraDistance], fov: 45 }}
-      gl={{ antialias: true, alpha: true }}
-    >
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[8, 4, 6]} intensity={1.6} />
-      <Stars radius={70} depth={40} count={3500} factor={3} saturation={0} fade speed={reduced ? 0 : 0.6} />
-      <Suspense fallback={null}>
-        <Globe bodyId={bodyId} radiusKm={radiusKm} markers={markers} />
-      </Suspense>
-      <OrbitControls enablePan={false} minDistance={1.2} maxDistance={7} />
-    </Canvas>
+    <div role="img" aria-label={`Interactive 3D globe of ${bodyName} with orbital markers`}>
+      <Canvas
+        dpr={[1, 1.75]}
+        camera={{ position: [cameraDistance, 0.6, cameraDistance], fov: 45 }}
+        gl={{ antialias: true, alpha: true }}
+        tabIndex={0}
+      >
+        <ambientLight intensity={0.55} />
+        <directionalLight position={[8, 4, 6]} intensity={1.6} />
+        <Stars radius={70} depth={40} count={3500} factor={3} saturation={0} fade speed={reduced ? 0 : 0.6} />
+        <Suspense fallback={null}>
+          <Globe bodyId={bodyId} radiusKm={radiusKm} markers={markers} />
+        </Suspense>
+        <OrbitControls enablePan={false} minDistance={1.2} maxDistance={7} />
+      </Canvas>
+      <p className="sr-only">
+        Use mouse or touch to rotate the globe. Scroll to zoom. Keyboard: arrow keys to rotate, +/- to zoom.
+      </p>
+    </div>
   );
 }

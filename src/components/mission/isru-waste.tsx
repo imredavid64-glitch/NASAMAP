@@ -7,12 +7,46 @@ import { opsBudget, type OpsBudget, type ISRURates } from "@/lib/life";
 import { cn } from "@/lib/cn";
 
 interface ISRUWasteProps {
-  design: { destination: "moon" | "mars"; crew: number; totalDays: number };
+  design: { destination: "moon" | "mars" | "exoplanet"; crew: number; totalDays: number };
 }
 
 export function ISRUWaste({ design }: ISRUWasteProps) {
   const ops = opsBudget({ destination: design.destination, crew: design.crew, days: design.totalDays });
   const isru = ops.isru;
+
+  // For exoplanet missions, ISRU is not applicable
+  if (design.destination === "exoplanet") {
+    return (
+      <Card className="glass-panel">
+        <CardBody>
+          <CardTitle className="flex items-center gap-2">
+            <Recycle className="h-4 w-4 text-space-emerald" />
+            ISRU Waste-to-Resource (SpaceTrash Hack)
+          </CardTitle>
+          <p className="mt-2 text-xs text-slate-400">
+            Interstellar missions carry all resources — no local materials to utilize. ISRU is not applicable.
+          </p>
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+            <h4 className="font-semibold text-white mb-2">Why ISRU doesn't apply</h4>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li className="flex gap-2">
+                <span className="h-4 w-4 shrink-0 text-space-cyan">★</span>
+                <span>No planetary surface to mine — interstellar transit only.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="h-4 w-4 shrink-0 text-space-cyan">★</span>
+                <span>All consumables must be carried or recycled onboard.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="h-4 w-4 shrink-0 text-space-cyan">★</span>
+                <span>ECLSS closed-loop recycling (90% water, 50% O₂) is the only option.</span>
+              </li>
+            </ul>
+          </div>
+        </CardBody>
+      </Card>
+    );
+  }
 
   return (
     <Card className="glass-panel">

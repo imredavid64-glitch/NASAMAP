@@ -41,6 +41,30 @@ export const LANES: RelevanceLane[] = [
       /mission design|space mission|mission plan|interplanetary|orbital|trajectory|transfer|hohmann|delta-?v|\brocket\b|\blaunch\b/i,
   },
   {
+    id: "rocket-builder",
+    label: "Rocket builder & launch vehicle design",
+    href: "/tools/rocket-builder",
+    blurb: "Design custom rockets from 12 real engines (Merlin, Raptor, RS-25, etc.) and 15 tanks. Live Δv, TWR, payload (LEO/TLI/GTO), cost. Export to Mission Lab.",
+    pattern:
+      /rocket|launch vehicle|engine|propulsion|propellant|tank|booster|stage|merlin|raptor|rs-25|rl10|be-4|f-1|j-2|vulcain/i,
+  },
+  {
+    id: "trajectory-optimization",
+    label: "Trajectory optimization & Pareto fronts",
+    href: "/tools/mission-optimizer",
+    blurb: "Pre-computed Pareto-optimal Mars architectures. Multi-objective: minimize IMLEO, maximize payload, minimize radiation. NSGA-II + gradient refinement with interactive Pareto front visualization.",
+    pattern:
+      /porkchop|pork chop|lambert|porkchop|trajectory optim|pareto|multi-objective|optimization|imleo|porkchop plot|launch window|porkchop/i,
+  },
+  {
+    id: "collaborative-design",
+    label: "Collaborative mission design",
+    href: "/community",
+    blurb: "Browse shared missions with filters (destination, grade), view full scorecards, deep-link to Fly for trajectory replay, upvote & comment.",
+    pattern:
+      /collaborative|community|shared|gallery|browse|showcase|portfolio|social|vote|upvote|comment/i,
+  },
+  {
     id: "life-support",
     label: "Life support & ECLSS",
     href: "/mission#ops",

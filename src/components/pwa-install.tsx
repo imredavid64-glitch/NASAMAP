@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Download, WifiOff, Wifi, CheckCircle2, X, MonitorSmartphone } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Download, WifiOff, Wifi, CheckCircle2, X, MonitorSmartphone, Clock, Bell } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export function PWAInstallPrompt() {
@@ -57,13 +57,25 @@ export function PWAInstallPrompt() {
     window.addEventListener("offline", handleOffline);
     setIsOnline(navigator.onLine);
 
+    // Keyboard shortcut to show install prompt manually (Cmd/Ctrl + Shift + I)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "I") {
+        e.preventDefault();
+        if (deferredPrompt && !isInstalled) {
+          setShowPrompt(true);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [deferredPrompt, isInstalled]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -75,16 +87,28 @@ export function PWAInstallPrompt() {
     }
   };
 
-  const handleDismiss = () => {
+  const handleDismiss = useCallback((remindTomorrow = false) => {
     setShowPrompt(false);
-    // Don't show again for this session
-    sessionStorage.setItem("pwa-prompt-dismissed", "true");
-  };
+    if (remindTomorrow) {
+      // Show again tomorrow
+      localStorage.setItem("pwa-prompt-dismissed-until", String(Date.now() + 24 * 60 * 60 * 1000));
+    } else {
+      // Don't show again for this session
+      sessionStorage.setItem("pwa-prompt-dismissed", "true");
+    }
+  }, []);
 
-  // Don't show if dismissed this session
+  // Don't show if dismissed this session or dismissed until tomorrow
   useEffect(() => {
-    if (sessionStorage.getItem("pwa-prompt-dismissed") === "true") {
+    const sessionDismissed = sessionStorage.getItem("pwa-prompt-dismissed") === "true";
+    const tomorrowDismissed = localStorage.getItem("pwa-prompt-dismissed-until");
+    const dismissUntil = tomorrowDismissed ? Number(tomorrowDismissed) : 0;
+    
+    if (sessionDismissed || (dismissUntil > 0 && Date.now() < dismissUntil)) {
       setShowPrompt(false);
+    } else if (dismissUntil > 0 && Date.now() >= dismissUntil) {
+      // Dismissal period expired, clear it
+      localStorage.removeItem("pwa-prompt-dismissed-until");
     }
   }, []);
 
@@ -111,7 +135,7 @@ export function PWAInstallPrompt() {
       {isOnline && isOfflineMode && !showPrompt && (
         <div className="fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 backdrop-blur px-2.5 py-1.5 text-[10px] font-medium text-emerald-300">
           <Wifi className="h-3 w-3 shrink-0" />
-          <span className="hidden sm:inline">PWA ready</span>
+          <span className="hidden sm:inline">PWA ready — works offline</span>
         </div>
       )}
 
@@ -136,28 +160,40 @@ export function PWAInstallPrompt() {
                 </div>
               </div>
               <button
-                onClick={handleDismiss}
+                onClick={() => handleDismiss(false)}
                 className="shrink-0 p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
                 aria-label="Dismiss"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-col gap-2">
               <button
                 onClick={handleInstall}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-space-cyan px-4 py-2.5 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/90 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-space-cyan px-4 py-2.5 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/90 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
               >
                 <Download className="h-4 w-4" />
                 Install
               </button>
               <button
-                onClick={handleDismiss}
-                className="flex-1 inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10"
+                onClick={() => handleDismiss(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm font-medium text-amber-300 transition hover:bg-amber-500/20"
+              >
+                <Clock className="h-4 w-4" />
+                Remind me tomorrow
+              </button>
+              <button
+                onClick={() => handleDismiss(false)}
+                className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10"
               >
                 Later
               </button>
             </div>
+            <p className="mt-3 text-center text-[10px] text-slate-500">
+              <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/10 text-slate-400 font-mono">
+                {typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+Shift+I
+              </kbd> to reopen
+            </p>
           </div>
         </div>
       )}

@@ -121,7 +121,12 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
-export function JudgeTourProvider({ children }: { children: ReactNode }) {
+interface JudgeTourProviderProps {
+  children: ReactNode;
+  autoStart?: boolean;
+}
+
+export function JudgeTourProvider({ children, autoStart = false }: JudgeTourProviderProps) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -232,13 +237,14 @@ export function JudgeTourProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMounted(true);
     const params = new URLSearchParams(window.location.search);
-    if (params.get("tour") === "judge") {
+    const shouldAutoStart = autoStart || params.get("tour") === "judge" || params.get("judge") === "1";
+    if (shouldAutoStart) {
       setIsActive(true);
       // Start at step 1 (skip landing page auto-nav)
       setCurrentStep(1);
       setIsPlaying(true);
     }
-  }, []);
+  }, [autoStart]);
 
   const startTour = useCallback(() => {
     setIsActive(true);
@@ -254,6 +260,7 @@ export function JudgeTourProvider({ children }: { children: ReactNode }) {
     // Remove tour param from URL
     const url = new URL(window.location.href);
     url.searchParams.delete("tour");
+    url.searchParams.delete("judge");
     window.history.replaceState({}, "", url.toString());
   }, []);
 
@@ -353,7 +360,7 @@ export function JudgeTourProvider({ children }: { children: ReactNode }) {
     }
   }, [narrationEnabled, isActive, currentStep, speakNarration, stopNarration]);
 
-const toggleControls = useCallback(() => {
+  const toggleControls = useCallback(() => {
     setShowControls((prev) => !prev);
   }, []);
 

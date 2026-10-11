@@ -34,7 +34,7 @@ export default async function PlayScenarioPage({
   const hasTutorial = TUTORIAL_STEPS[id] !== undefined;
 
   return (
-    <TutorialProvider>
+    <TutorialProvider scenarioId={id}>
       <div className="pt-28">
         <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
           <Link

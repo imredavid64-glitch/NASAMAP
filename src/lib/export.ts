@@ -278,3 +278,44 @@ export function consumablesTimelineCsv(ops: OpsBudget, designLabel: string): str
 
   return toCsv(header, rows);
 }
+
+/** Export complete mission design as JSON — design, scorecard, trajectory samples, ops budget, and metadata. */
+export interface MissionExportData {
+  version: number;
+  exportedAt: string;
+  design: any;
+  scorecard: any;
+  trajectory: {
+    mode: string;
+    samples: any[];
+  };
+  opsBudget: any;
+  notes: string[];
+}
+
+/** Create a complete mission export object. */
+export function createMissionExport(
+  design: any,
+  scorecard: any,
+  trajectoryMode: string,
+  trajectorySamples: any[],
+  opsBudget: any
+): MissionExportData {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    design,
+    scorecard,
+    trajectory: {
+      mode: trajectoryMode,
+      samples: trajectorySamples,
+    },
+    opsBudget,
+    notes: design.notes || [],
+  };
+}
+
+/** Trigger a browser download of the complete mission export as JSON. */
+export function downloadMissionJson(filename: string, data: MissionExportData): void {
+  downloadFile(filename, JSON.stringify(data, null, 2), "application/json");
+}

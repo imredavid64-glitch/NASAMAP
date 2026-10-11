@@ -1,12 +1,10 @@
 import { Suspense } from "react";
-import { CommunityClient } from "./CommunityClient";
-
-export const dynamic = "force-dynamic";
+import { CommunityClientWrapper } from "./CommunityClientWrapper";
 
 export default function CommunityPage() {
   return (
     <Suspense fallback={<CommunitySkeleton />}>
-      <CommunityClient />
+      <CommunityClientWrapper />
     </Suspense>
   );
 }

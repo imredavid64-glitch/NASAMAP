@@ -1,36 +1,81 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Send, X, Sparkles, Loader2, Copy, Check } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Send, X, Sparkles, Loader2, Copy, Check, Mic, MicOff, Bell, Zap, Shield, ArrowUpRight } from "lucide-react";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format as formatDate } from "date-fns";
 
-import { adviseMission, answerQuestion, type AdvisorResponse, type Insight, type Recommendation } from "@/lib/advisor";
+import { 
+  answerQuestionEnhanced, 
+  type ConversationMessage, 
+  type ProactiveSuggestion,
+  formatConversationHistory,
+  createMessage,
+  saveConversation,
+  loadConversation,
+  generateProactiveSuggestions
+} from "@/lib/advisor-enhanced";
 import { designMission, type MissionDesign } from "@/lib/mission";
-import { type Scorecard } from "@/lib/score";
+import { scoreMission, type Scorecard } from "@/lib/score";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  insights?: Insight[];
-  recommendations?: Recommendation[];
+// Type for SpeechRecognition
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
 }
 
 interface AdvisorChatProps {
   design: MissionDesign | null;
   scorecard: Scorecard | null;
+  currentDesignInput: any;
+  onApplyDesignChange?: (updates: Partial<any>) => void;
 }
 
-export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function AdvisorChat({ design, scorecard, currentDesignInput, onApplyDesignChange }: AdvisorChatProps) {
+  const [messages, setMessages] = useState<ConversationMessage[]>(() => loadConversation());
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [proactiveSuggestions, setProactiveSuggestions] = useState<ProactiveSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,63 +85,135 @@ export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
+  // Generate proactive suggestions when design/scorecard changes
+  useEffect(() => {
+    if (design && scorecard) {
+      const suggestions = generateProactiveSuggestions(design, scorecard, (apply) => {
+        // Apply the suggestion by calling onApplyDesignChange
+        apply();
+      });
+      setProactiveSuggestions(suggestions);
+    }
+  }, [design, scorecard, onApplyDesignChange]);
+
+  // Speech recognition setup
+  useEffect(() => {
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0].transcript)
+          .join("");
+        setInput(transcript);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
+    const userMessage = createMessage("user", input);
+    setMessages((prev) => {
+      const updated = [...prev, userMessage];
+      saveConversation(updated);
+      return updated;
+    });
 
-    setMessages((prev) => [...prev, userMessage]);
     const currentInput = input;
     setInput("");
     setShowWelcome(false);
     setIsLoading(true);
 
     try {
-      // Check if we have a mission design to analyze
       if (design && scorecard) {
-        const advice = answerQuestion(currentInput, { design, scorecard });
-        
-        const assistantMessage: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: advice,
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, assistantMessage]);
+        const answer = answerQuestionEnhanced(currentInput, {
+          design,
+          scorecard,
+          conversationHistory: messages,
+          currentDesignInput,
+        });
+
+        const assistantMessage = createMessage("assistant", answer);
+        setMessages((prev) => {
+          const updated = [...prev, assistantMessage];
+          saveConversation(updated);
+          return updated;
+        });
+
+        // If the response contains a design change proposal, offer to apply it
+        if (answer.includes("Would you like me to apply these changes?")) {
+          // We'll handle this via a special metadata flag
+        }
       } else {
-        const assistantMessage: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "I need a mission design to analyze. Please build a mission in the Mission Lab first, then I can help you optimize it!",
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, assistantMessage]);
+        const assistantMessage = createMessage("assistant", 
+          "I need a mission design to analyze. Please build a mission in the Mission Lab first, then I can help you optimize it!"
+        );
+        setMessages((prev) => {
+          const updated = [...prev, assistantMessage];
+          saveConversation(updated);
+          return updated;
+        });
       }
     } catch (error) {
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: "I encountered an error analyzing your question. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      const assistantMessage = createMessage("assistant", 
+        "I encountered an error analyzing your question. Please try again."
+      );
+      setMessages((prev) => {
+        const updated = [...prev, assistantMessage];
+        saveConversation(updated);
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [design, scorecard, messages, currentDesignInput]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleVoiceInput = () => {
+    if (recognitionRef.current && !isListening) {
+      setIsListening(true);
+      recognitionRef.current.start();
+    } else if (recognitionRef.current && isListening) {
+      setIsListening(false);
+      recognitionRef.current.stop();
+    }
+  };
+
+  const handleQuickQuestion = (question: string) => {
+    setInput(question);
+    handleSend();
+  };
+
+  const handleApplySuggestion = (suggestion: ProactiveSuggestion) => {
+    if (suggestion.action && onApplyDesignChange) {
+      suggestion.action.apply();
+    }
+    // Dismiss this suggestion
+    setProactiveSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
+  };
+
+  const handleDismissSuggestion = (id: string) => {
+    setProactiveSuggestions(prev => prev.filter(s => s.id !== id));
   };
 
   const quickQuestions = [
@@ -108,11 +225,6 @@ export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
     "How do I lower mission cost?",
   ];
 
-  const handleQuickQuestion = (question: string) => {
-    setInput(question);
-    handleSend();
-  };
-
   return (
     <Card className="h-full flex flex-col">
       <CardBody className="flex flex-col h-full p-4">
@@ -120,8 +232,58 @@ export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
           <CardTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-space-cyan" /> Mission Advisor
           </CardTitle>
-          <span className="text-xs text-slate-400">AI-powered analysis</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">AI-powered analysis</span>
+          </div>
         </div>
+
+        {/* Proactive Suggestions Banner */}
+        {proactiveSuggestions.length > 0 && showSuggestions && (
+          <div className="mb-4 space-y-2" role="region" aria-label="Proactive suggestions">
+            {proactiveSuggestions.map((suggestion) => (
+              <div
+                key={suggestion.id}
+                className={`flex items-start gap-3 p-3 rounded-xl border ${
+                  suggestion.priority === "high" 
+                    ? "border-red-500/30 bg-red-500/10"
+                    : suggestion.priority === "medium"
+                    ? "border-amber-500/30 bg-amber-500/10"
+                    : "border-space-cyan/30 bg-space-cyan/10"
+                }`}
+                role="alert"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {suggestion.priority === "high" && <Shield className="h-3.5 w-3.5 text-red-400" />}
+                    {suggestion.priority === "medium" && <Zap className="h-3.5 w-3.5 text-amber-400" />}
+                    {suggestion.priority === "low" && <Sparkles className="h-3.5 w-3.5 text-space-cyan" />}
+                    <span className="text-xs font-medium text-slate-300 capitalize">{suggestion.priority} priority</span>
+                  </div>
+                  <p className="text-xs text-slate-300">{suggestion.message}</p>
+                  {suggestion.action && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 text-xs"
+                      onClick={() => handleApplySuggestion(suggestion)}
+                    >
+                      {suggestion.action.label}
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 p-1"
+                  onClick={() => handleDismissSuggestion(suggestion.id)}
+                  aria-label="Dismiss suggestion"
+                >
+                  <X className="h-3.5 w-3.5 text-slate-400" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex-1 min-h-0 pr-2 overflow-y-auto">
           <div className="space-y-4">
@@ -148,7 +310,7 @@ export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
 
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   message.role === "user"
                     ? "bg-space-cyan/20 text-white"
                     : "bg-white/5 border border-white/10 text-slate-300"
@@ -192,12 +354,28 @@ export function AdvisorChat({ design, scorecard }: AdvisorChatProps) {
 
         {/* Input Area */}
         <div className="mt-4 border-t border-white/10 pt-4">
+          {/* Voice input button */}
+          <div className="flex items-center gap-2 mb-2">
+            <Button
+              variant={isListening ? "default" : "outline"}
+              size="sm"
+              onClick={handleVoiceInput}
+              disabled={isLoading || !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)}
+              className={isListening ? "bg-red-500/20 border-red-500/40 text-red-400" : ""}
+              aria-label={isListening ? "Stop voice input" : "Start voice input"}
+            >
+              {isListening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+              <span className="hidden sm:inline">{isListening ? "Listening..." : "Voice"}</span>
+            </Button>
+            <span className="text-[10px] text-slate-500">Click to speak your question</span>
+          </div>
+
           <div className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about radiation, Δv, mass, ECLSS, cost, or timeline..."
+              placeholder="Ask about radiation, Δv, mass, ECLSS, cost, or timeline... or say 'Design a Mars mission for 4 crew'..."
               disabled={isLoading}
               className="flex-1"
             />

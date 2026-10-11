@@ -25,6 +25,7 @@ export const RADIATION_WAIVER_MSV = 800;
 export const DV_REFERENCE_KM_S: Record<MissionDesign["destination"], number> = {
   moon: 3.2,
   mars: 6.0,
+  exoplanet: 10000, // Interstellar missions have vastly higher Δv requirements
 };
 
 export interface ObjectiveResult {

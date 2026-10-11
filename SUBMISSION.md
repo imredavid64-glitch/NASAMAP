@@ -32,7 +32,7 @@ npm run build && npm start
 5. **`/fly`** — Apollo 11 replay, Moon Hohmann, Earth→Mars Kepler solve; export trajectory to **CSV**.
 6. **`/live`** — real ISS pass/ground-track with **KML export** (opens in Google Earth), Voyager distances, APOD, NEO, solar weather — all with snapshot fallback.
 7. **`/tools/mission-optimizer`** — Pre-computed Pareto-optimal Mars architectures (2028/2031 windows). Interactive Pareto front: IMLEO vs payload vs radiation vs cost. NSGA-II + gradient refinement.
-8. **`/library`, `/commons`, `/challenges`** — articles, persona cards (farmer on Mars…), search, and the **Challenge Aligner** with annotated coverage map for 42/86 official 2026 challenges (49%).
+8. **`/library`, `/commons`, `/challenges`** — articles, persona cards (farmer on Mars…), search, and the **Challenge Aligner** with annotated coverage map for 43/86 official 2026 challenges (50%).
 
 ## Evidence map (route → engineering)
 - Design engine & scoring: `src/lib/mission.ts`, `src/lib/score.ts` (7 weighted objectives; S–D curve; GO/NO-GO gate)

@@ -6,10 +6,12 @@
 import { hohmannTransfer } from "@/lib/rocket";
 import { lightTime } from "@/lib/comm";
 import { missionConsumables, radiationDose, enhancedRadiationDose, type ConsumablesTotals, type RadiationEnv } from "@/lib/life";
+import { designInterstellarMission, type InterstellarDesign, type ExoplanetTarget } from "@/lib/interstellar";
 import constants from "@/data/constants.json";
 import launchVehicles from "@/data/launch-vehicles.json";
+import { EXOPLANETS } from "@/data/exoplanets";
 
-export type Destination = "moon" | "mars";
+export type Destination = "moon" | "mars" | "exoplanet";
 
 export interface MissionDesignOptions {
   destination: Destination;
@@ -30,6 +32,22 @@ export interface MissionDesignOptions {
   eclssClosureLevel?: number;
   /** Optional: radiation shielding level ("minimal" | "standard" | "enhanced") */
   radiationShielding?: "minimal" | "standard" | "enhanced";
+  /** Optional: exoplanet target ID (required when destination === "exoplanet") */
+  exoplanetTargetId?: string;
+  /** Optional: interstellar propulsion type */
+  interstellarPropulsion?: "constant-acceleration" | "laser-sail" | "fusion-rocket" | "antimatter-rocket" | "orion-pulse";
+  /** Optional: constant acceleration in g (for constant-acceleration propulsion) */
+  accelerationG?: number;
+  /** Optional: laser power in GW (for laser-sail propulsion) */
+  laserPowerGW?: number;
+  /** Optional: sail area in km² (for laser-sail propulsion) */
+  sailAreaKm2?: number;
+  /** Optional: sail areal density in g/cm² (for laser-sail propulsion) */
+  sailArealDensityGcm2?: number;
+  /** Optional: fusion exhaust velocity in km/s (for fusion-rocket propulsion) */
+  fusionExhaustVelocityKmS?: number;
+  /** Optional: fusion mass ratio (for fusion-rocket propulsion) */
+  fusionMassRatio?: number;
 }
 
 export interface LaunchVehicleLite {
@@ -81,8 +99,8 @@ export function calculateHabMass(
   eclssLevel: number = 0.5
 ): number {
   // Base pressure vessel mass (TransHab/BA-330 heritage: ~1.5 t per 100 m³)
-  // Volume: ~50 m³ per crew for Mars, ~30 m³ per crew for Moon
-  const volumePerCrew = destination === "mars" ? 50 : 30;
+  // Volume: ~50 m³ per crew for Mars, ~30 m³ per crew for Moon, ~100 m³ per crew for exoplanet (long duration)
+  const volumePerCrew = destination === "mars" ? 50 : destination === "exoplanet" ? 100 : 30;
   const totalVolume = crew * volumePerCrew;
   
   // Pressure vessel: ~15 kg/m³ for inflatable (Vectran/Kevlar) + restraint layer
@@ -115,6 +133,7 @@ export function calculateHabMass(
 export const HABITATION_MODULE_KG: Record<Destination, number> = {
   moon: 10_000,
   mars: 30_000,
+  exoplanet: 50_000,
 };
 
 export interface MissionDesign {
@@ -138,6 +157,25 @@ export interface MissionDesign {
   launchGate: "pass" | "fail" | "unknown";
   totalDeltaVKmS: number;
   notes: string[];
+  // Interstellar fields (populated when destination === "exoplanet")
+  interstellar?: {
+    targetId: string;
+    targetName: string;
+    distanceLy: number;
+    propulsion: string;
+    transitTimeYears: number;
+    transitTimeShipYears: number;
+    maxVelocityC: number;
+    deltaVTotalKmS: number;
+    totalMassKg: number;
+    energyRequiredJ: number;
+    feasibilityFlags: {
+      physicsPlausible: boolean;
+      engineeringPlausible: boolean;
+      energyFeasible: boolean;
+    };
+    propulsionParams: Record<string, number>;
+  };
 }
 
 function findVehicle(vehicleId: string): LaunchVehicleLite {
@@ -150,6 +188,9 @@ const MOON_ENV: RadiationEnv = "moon-surface";
 const MARS_ENV: RadiationEnv = "mars-surface";
 const TRANSIT_MOON: RadiationEnv = "cislunar";
 const TRANSIT_MARS: RadiationEnv = "transit-mars";
+
+/** Exoplanet radiation environment for interstellar transit */
+const INTERSTELLAR_ENV: RadiationEnv = "transit-mars";
 
 export function designMission(opts: MissionDesignOptions): MissionDesign {
   const vehicle = findVehicle(opts.vehicleId);
@@ -165,18 +206,77 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   const eclssLevel = opts.eclssClosureLevel ?? 0.5;
   const radiationShielding = opts.radiationShielding ?? "standard";
 
-  // Compute transfer parameters
   let transferDays = 0;
   let totalDeltaVKmS = 0;
   let transitEnv: RadiationEnv = "cislunar";
   let surfaceEnv: RadiationEnv = "moon-surface";
   let arrivalLt = { oneWayLabel: "", oneWaySec: 0, roundTripLabel: "" };
+  let interstellar: MissionDesign["interstellar"] | undefined;
 
-  if (opts.destination === "mars") {
+  if (opts.destination === "exoplanet") {
+    if (!opts.exoplanetTargetId) {
+      throw new Error("exoplanetTargetId is required when destination === 'exoplanet'");
+    }
+    const target = EXOPLANETS.find((p) => p.id === opts.exoplanetTargetId);
+    if (!target) {
+      throw new Error(`Unknown exoplanet target: ${opts.exoplanetTargetId}`);
+    }
+
+    const interstellarDesign = designInterstellarMission(
+      {
+        targetId: target.id,
+        propulsion: opts.interstellarPropulsion ?? "fusion-rocket",
+        crew,
+        payloadMassKg: 50_000,
+        accelerationG: opts.accelerationG,
+        laserPowerGW: opts.laserPowerGW,
+        sailAreaKm2: opts.sailAreaKm2,
+        sailArealDensityGcm2: opts.sailArealDensityGcm2,
+        fusionExhaustVelocityKmS: opts.fusionExhaustVelocityKmS,
+        fusionMassRatio: opts.fusionMassRatio,
+        useEnhancedModels: opts.useEnhancedModels,
+      },
+      target
+    );
+
+    transferDays = interstellarDesign.transitTimeShipYears * 365.25;
+    totalDeltaVKmS = interstellarDesign.deltaVTotalKmS;
+    transitEnv = INTERSTELLAR_ENV;
+    surfaceEnv = INTERSTELLAR_ENV;
+    arrivalLt = {
+      oneWayLabel: `${interstellarDesign.distanceLy.toFixed(2)} ly`,
+      oneWaySec: interstellarDesign.distanceLy * constants.lightYearKm / constants.speedOfLightKmS,
+      roundTripLabel: `${(interstellarDesign.distanceLy * 2).toFixed(2)} ly`,
+    };
+
+    notes.push(
+      `Interstellar mission to ${target.name} (${target.distanceLy} ly) via ${interstellarDesign.propulsion}.`,
+      `Ship time: ${interstellarDesign.transitTimeShipYears.toFixed(1)} years; Earth time: ${interstellarDesign.transitTimeYears.toFixed(1)} years.`,
+      `Max velocity: ${(interstellarDesign.maxVelocityC * 100).toFixed(1)}% c.`,
+      `Total Δv: ${interstellarDesign.deltaVTotalKmS.toFixed(0)} km/s.`,
+      `Total wet mass: ${(interstellarDesign.totalMassKg / 1000).toFixed(0)} t.`,
+      ...interstellarDesign.notes,
+    );
+
+    interstellar = {
+      targetId: interstellarDesign.targetId,
+      targetName: interstellarDesign.targetName,
+      distanceLy: interstellarDesign.distanceLy,
+      propulsion: interstellarDesign.propulsion,
+      transitTimeYears: interstellarDesign.transitTimeYears,
+      transitTimeShipYears: interstellarDesign.transitTimeShipYears,
+      maxVelocityC: interstellarDesign.maxVelocityC,
+      deltaVTotalKmS: interstellarDesign.deltaVTotalKmS,
+      totalMassKg: interstellarDesign.totalMassKg,
+      energyRequiredJ: interstellarDesign.energyRequiredJ,
+      feasibilityFlags: interstellarDesign.feasibilityFlags,
+      propulsionParams: interstellarDesign.propulsionParams,
+    };
+  } else if (opts.destination === "mars") {
     const h = hohmannTransfer(
       constants.mu.sun,
       constants.astronomicalUnitKm,
-      constants.astronomicalUnitKm * 1.524, // Mars mean orbit (NASA Fact Sheet)
+      constants.astronomicalUnitKm * 1.524,
     );
     transferDays = h.transferDays;
     totalDeltaVKmS = h.totalDeltaVKmS;
@@ -206,7 +306,6 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
 
   const totalDays = transferDays + surfaceDays;
 
-  // Use enhanced models only when explicitly requested (default: false for backward compat)
   const useEnhanced = opts.useEnhancedModels ?? false;
 
   let radiationMsvTotal: number;
@@ -215,11 +314,10 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   let radResult: ReturnType<typeof enhancedRadiationDose> | null = null;
 
   if (useEnhanced) {
-    // Enhanced radiation model (Badhwar-O'Neill GCR + King SPE + storm shelter)
     radResult = enhancedRadiationDose({
       transitDays: transferDays,
       surfaceDays,
-      env: opts.destination === "mars" ? TRANSIT_MARS : TRANSIT_MOON,
+      env: opts.destination === "mars" ? TRANSIT_MARS : opts.destination === "exoplanet" ? INTERSTELLAR_ENV : TRANSIT_MOON,
       solarCyclePhase,
       stormShelterGcm2,
       transitShieldingGcm2,
@@ -227,17 +325,12 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     });
     radiationMsvTotal = radResult.totalExpectedMSv;
     radiationNote = radResult.breakdown;
-
-    // Parametric habitation mass
-    habitationModuleKg = calculateHabMass(crew, opts.destination, radiationShielding, 0.5);
+    habitationModuleKg = calculateHabMass(crew, opts.destination, radiationShielding, eclssLevel);
   } else {
-    // Legacy fixed radiation model
     const transitDose = radiationDose(transferDays, transitEnv);
     const surfaceDose = radiationDose(surfaceDays, surfaceEnv);
     radiationMsvTotal = transitDose.mSvTotal + surfaceDose.mSvTotal;
     radiationNote = `transit ${transitEnv} (${transitDose.benchmarkNote}) + surface ${surfaceEnv} (${surfaceDose.benchmarkNote})`;
-
-    // Legacy fixed habitation mass
     habitationModuleKg = HABITATION_MODULE_KG[opts.destination];
   }
 
@@ -245,8 +338,12 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   const consumablesTotalKg = consumables.oxygenKg + consumables.waterKg + consumables.foodKg;
   const requiredMassKg = consumablesTotalKg + habitationModuleKg;
 
-  // Launch gate: the vehicle must be documented to lift the whole stack to orbit,
-  // and (for the Moon) throw it on to TLI.
+  // For exoplanet, the required mass is the interstellar total mass
+  const finalRequiredMassKg = opts.destination === "exoplanet" && interstellar
+    ? interstellar.totalMassKg
+    : requiredMassKg;
+
+  // Launch gate: the vehicle must be documented to lift the whole stack to orbit
   const payloadCapacityKg =
     opts.destination === "moon"
       ? vehicle.payloadTLIKg > 0
@@ -255,25 +352,27 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
       : vehicle.payloadLEOKg;
 
   let launchGate: MissionDesign["launchGate"];
-  if (payloadCapacityKg == null) {
+  if (opts.destination === "exoplanet") {
+    launchGate = "unknown";
+    notes.push(`Interstellar missions require in-space assembly; launch gate not applicable.`);
+  } else if (payloadCapacityKg == null) {
     launchGate = "unknown";
     notes.push(`No documented TLI payload published for ${vehicle.name}; translunar capability is unverified.`);
-  } else if (payloadCapacityKg >= requiredMassKg) {
+  } else if (payloadCapacityKg >= finalRequiredMassKg) {
     launchGate = "pass";
     notes.push(
-      `Mass budget ${(requiredMassKg / 1000).toFixed(1)} t fits within ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload.`,
+      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t fits within ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload.`,
     );
   } else {
     launchGate = "fail";
     notes.push(
-      `Mass budget ${(requiredMassKg / 1000).toFixed(1)} t exceeds ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload — stack won't leave the pad.`,
+      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t exceeds ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload — stack won't leave the pad.`,
     );
   }
 
-  // Add radiation and habitat notes
-  if (useEnhanced) {
+  if (useEnhanced && radResult) {
     notes.push(
-      `Radiation: ${radResult!.gcrMSv.toFixed(0)} mSv GCR + ${radResult!.speExpectedMSv.toFixed(0)} mSv SPE (expected) | P95: ${radResult!.totalP95MSv.toFixed(0)} mSv. Storm shelter: ${stormShelterGcm2} g/cm².`,
+      `Radiation: ${radResult.gcrMSv.toFixed(0)} mSv GCR + ${radResult.speExpectedMSv.toFixed(0)} mSv SPE (expected) | P95: ${radResult.totalP95MSv.toFixed(0)} mSv. Storm shelter: ${stormShelterGcm2} g/cm².`,
       `Habitat: ${(habitationModuleKg / 1000).toFixed(1)} t dry mass (${radiationShielding} shielding, ${(eclssLevel * 100).toFixed(0)}% ECLSS closure).`,
     );
   }
@@ -287,17 +386,18 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     transferDays,
     transferHours: transferDays * 24,
     arrivalLt: { oneWayLabel: `${arrivalLt.oneWayLabel}`, oneWaySec: arrivalLt.oneWaySec, roundTripLabel: arrivalLt.roundTripLabel },
-    transitEnv: opts.destination === "mars" ? TRANSIT_MARS : TRANSIT_MOON,
-    surfaceEnv: opts.destination === "mars" ? MARS_ENV : MOON_ENV,
+    transitEnv: opts.destination === "mars" ? TRANSIT_MARS : opts.destination === "exoplanet" ? INTERSTELLAR_ENV : TRANSIT_MOON,
+    surfaceEnv: opts.destination === "mars" ? MARS_ENV : opts.destination === "exoplanet" ? INTERSTELLAR_ENV : MOON_ENV,
     radiationMsvTotal,
     radiationNote,
     consumables,
     consumablesTotalKg,
     habitationModuleKg,
-    requiredMassKg,
-    payloadCapacityKg,
+    requiredMassKg: finalRequiredMassKg,
+    payloadCapacityKg: opts.destination === "exoplanet" ? null : payloadCapacityKg,
     launchGate,
     totalDeltaVKmS,
     notes,
+    interstellar,
   };
 }
