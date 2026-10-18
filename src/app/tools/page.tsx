@@ -3,6 +3,9 @@ import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import Link from "next/link";
 
+// Force dynamic rendering to avoid static generation issues with useSearchParams in Nav
+export const dynamic = 'force-dynamic';
+
 const tools = [
   {
     href: "/tools/rocket-builder",

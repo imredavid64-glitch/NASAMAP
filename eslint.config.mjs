@@ -5,7 +5,7 @@ import hooksPlugin from "eslint-plugin-react-hooks";
 
 export default defineConfig([
   {
-    ignores: [".next/**", "out/**", "node_modules/**", "next-env.d.ts", "package-lock.json"],
+    ignores: [".next/**", "out/**", "node_modules/**", "next-env.d.ts", "package-lock.json", "convex/_generated/**"],
   },
   {
     plugins: { "@next/next": nextPlugin, react: reactPlugin, "react-hooks": hooksPlugin },

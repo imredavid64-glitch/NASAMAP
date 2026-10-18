@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
   description: "Compare two mission designs side by side. See the differences in Δv, mass, radiation, life support, and score.",
 };
 
+// Force static generation
+export const dynamic = 'force-static';
+
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   const { a, b } = await searchParams;
 
@@ -30,7 +34,9 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         The diff highlights what changed and how it affects the score.
       </p>
 
-      <MissionCompare designA={designA} designB={designB} />
+      <Suspense fallback={<div className="text-center py-12 text-slate-400">Loading mission compare...</div>}>
+        <MissionCompare designA={designA} designB={designB} />
+      </Suspense>
     </section>
   );
 }

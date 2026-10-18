@@ -1,9 +1,17 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Rocket } from "lucide-react";
 import { NAV_LINKS } from "@/lib/nav-links";
 import { MobileNav } from "./mobile-nav";
 
 export function Nav() {
+  const searchParams = useSearchParams();
+  const isJudgeMode = searchParams.get("judge") === "1" || searchParams.get("tour") === "judge";
+
+  const visibleLinks = NAV_LINKS.filter((l) => !l.judgeOnly || isJudgeMode);
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-space-950/70 backdrop-blur-md" role="banner">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -16,7 +24,7 @@ export function Nav() {
           </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex" role="navigation" aria-label="Main navigation">
-          {NAV_LINKS.map((l) => (
+          {visibleLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}

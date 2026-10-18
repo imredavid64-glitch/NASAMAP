@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SpaceCanvas } from "@/components/space-canvas";
 import { LiveRibbon } from "./LiveRibbon";
 import { CanvasErrorBoundary } from "@/components/ui/error-boundary";
 
 export const metadata: Metadata = { title: "Live Frontier" };
+
+// Force static generation
+export const dynamic = 'force-static';
 
 const markers = [
   { id: "jsc", latDeg: 29.5603, lonDeg: -95.0858, label: "NASA Johnson" },
@@ -32,7 +36,9 @@ export default function LivePage() {
       </div>
 
       <CanvasErrorBoundary canvasName="Live Frontier Ribbon">
-        <LiveRibbon />
+        <Suspense fallback={<div className="text-center py-12 text-slate-400">Loading live ribbon...</div>}>
+          <LiveRibbon />
+        </Suspense>
       </CanvasErrorBoundary>
     </div>
   );

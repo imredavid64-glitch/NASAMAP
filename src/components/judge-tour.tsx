@@ -1,642 +1,482 @@
 ﻿"use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { createContext, useContext, ReactNode } from "react";
-import { X, Play, Pause, ChevronRight, ChevronLeft, Info, AlertCircle, Volume2, VolumeX, FastForward, SkipBack, SkipForward, Menu } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  Rocket,
+  Compass,
+  Radio,
+  CheckCircle2,
+  Award,
+  BookOpen,
+  ExternalLink,
+  Target,
+  Shield,
+  Zap,
+  Globe,
+  Code,
+  TestTube2,
+  Download,
+  Video,
+  Timer,
+  ArrowRight,
+  ChevronRight,
+  Check,
+  X,
+  Info,
+  AlertTriangle,
+} from "lucide-react";
+import { Card, CardBody, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { SpaceCanvas } from "@/components/space-canvas";
 
-interface TourStep {
-  id: string;
-  title: string;
-  description: string;
-  targetSelector?: string;
-  route: string;
-  duration: number; // seconds
-  narration: string;
-  narrationAudio?: string; // Optional pre-recorded audio URL
-  action?: () => void;
-}
-
-type PlaybackSpeed = 0.5 | 1 | 1.5 | 2;
-
-interface JudgeTourContextType {
-  isActive: boolean;
-  currentStep: number;
-  steps: TourStep[];
-  startTour: () => void;
-  stopTour: () => void;
-  nextStep: () => void;
-  prevStep: () => void;
-  goToStep: (index: number) => void;
-  isPlaying: boolean;
-  togglePlay: () => void;
-  playbackSpeed: PlaybackSpeed;
-  setPlaybackSpeed: (speed: PlaybackSpeed) => void;
-  narrationEnabled: boolean;
-  toggleNarration: () => void;
-  showControls: boolean;
-  toggleControls: () => void;
-  showKeyboardHelp: boolean;
-  toggleKeyboardHelp: () => void;
-}
-
-const JudgeTourContext = createContext<JudgeTourContextType | null>(null);
-
-export function useJudgeTour() {
-  const ctx = useContext(JudgeTourContext);
-  if (!ctx) throw new Error("useJudgeTour must be used within JudgeTourProvider");
-  return ctx;
-}
-
-const TOUR_STEPS: TourStep[] = [
+const JUDGE_STEPS = [
   {
-    id: "landing",
-    title: "Landing Page",
-    description: "Entry point â€” every human has a seat at the frontier",
-    route: "/",
-    duration: 8,
-    narration: "NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven loop. No database, no secrets, fully offline-capable.",
+    id: "overview",
+    title: "5-Minute Overview",
+    icon: Timer,
+    href: "/",
+    description: "Start here — landing page shows all four acts and live data ribbon",
+    time: "1 min",
   },
   {
     id: "play",
-    title: "Play & Plan â€” Mission Briefs",
-    description: "Six scenario briefs with hard constraints, 0â€“3 star grading",
-    targetSelector: "[href='/play']",
-    route: "/play",
-    duration: 15,
-    narration: "Six mission briefs â€” Artemis lunar landing, Mars surface stay, etc. Each has hard constraints: vehicle, crew, surface time, radiation. The engine scores objectives in real time. Beat par for stars.",
-    action: () => {
-      const card = document.querySelector("[href='/play/artemis-crewed-landing']") as HTMLElement;
-      card?.click();
-    },
-  },
-  {
-    id: "scenario",
-    title: "Scenario Game â€” Live Scoring",
-    description: "Adjust sliders â†’ watch Sâ€“D grade update â†’ earn stars â†’ download Report Card",
-    targetSelector: "input[type='range']",
-    route: "/play/artemis-crewed-landing",
-    duration: 20,
-    narration: "Drag crew, surface days, vehicle â€” the scorecard recalculates live across 7 weighted objectives. Feasibility caps: an unliftable stack or over-limit dose can never rate S. Hit 3 stars, download the Report Card SVG â€” it carries the grade, numbers, and permalink.",
-  },
-  {
-    id: "mission",
-    title: "Mission Lab â€” Free Design",
-    description: "Build any mission; permalink encodes exact design; personal best per destination",
-    route: "/mission",
-    duration: 15,
-    narration: "Free-form Mission Lab. Every slider change rewrites the URL â€” your exact stack is a shareable, reproducible citation. Personal best per destination saved locally. Switch to Guide mode for coaching hints.",
+    title: "Play & Plan — Space Mission Design Game",
+    icon: Rocket,
+    href: "/play/artemis-crewed-landing",
+    description: "Six briefs with hard constraints, 0–3 star grading, par scores, local progress",
+    time: "2 min",
+    deepLinks: [
+      { label: "Artemis Crewed Landing (Beginner)", href: "/play/artemis-crewed-landing" },
+      { label: "First Boots on Mars (Intermediate)", href: "/play/first-boots-on-mars" },
+      { label: "Mars Outpost One (Advanced)", href: "/play/mars-outpost-one" },
+      { label: "Free Mission Lab", href: "/mission" },
+    ],
   },
   {
     id: "fly",
-    title: "Fly â€” Trajectory Replay & Export",
-    description: "Apollo 11 replay, patched-conic Moon, Kepler Mars â€” all export CSV",
-    route: "/fly",
-    duration: 12,
-    narration: "Three modes: Apollo 11 event-by-event from historical timeline, patched-conic Hohmann to Moon, Sun-centered Kepler solve for Mars. Every trajectory exports full path to CSV for analysis.",
+    title: "Fly — Trajectory Replay & Solvers",
+    icon: Compass,
+    href: "/fly",
+    description: "Apollo 11 event-by-event, patched-conic Moon transfer, Kepler Earth→Mars, CSV export",
+    time: "1 min",
+    deepLinks: [
+      { label: "Apollo 11 Replay", href: "/fly" },
+      { label: "Hohmann Moon Transfer", href: "/fly?mode=hohmann" },
+      { label: "Mars Kepler Solve", href: "/fly?mode=mars" },
+      { label: "Historical Missions (15)", href: "/fly/historical" },
+    ],
   },
   {
     id: "live",
-    title: "Live â€” Real-Time Space Data",
-    description: "ISS ground track + KML, Voyager range, APOD, NEO, space weather â€” snapshot fallback",
-    route: "/live",
-    duration: 15,
-    narration: "ISS pass prediction via SGP4 (satellite.js), ground track exports to KML for Google Earth. Voyager 1 & 2 range from JPL Horizons. APOD, NEO, NOAA SWPC â€” every feed has a committed snapshot fallback so the demo never dies on stage.",
+    title: "Live — Real-Time Space Data",
+    icon: Radio,
+    href: "/live",
+    description: "ISS ground track + KML export, Voyager range, APOD, NEO, space weather — all with snapshot fallback",
+    time: "1 min",
+    deepLinks: [
+      { label: "ISS Card → Export KML", href: "/live" },
+      { label: "Voyager 1 & 2 Live Range", href: "/live" },
+      { label: "NEO Feed & Space Weather", href: "/live" },
+    ],
   },
   {
-    id: "commons",
-    title: "Cosmic Data Commons",
-    description: "Library, personas, search, passport, patch, challenge aligner (37/86)",
-    route: "/commons",
-    duration: 12,
-    narration: "Curated articles, persona advice cards (farmer on Mars, etc.), MiniSearch full-text index. Mission Passport & Patch generated deterministically from the design. Challenge Aligner maps 37 of 86 official 2026 challenges to shipped capabilities â€” each badge deep-links to the feature.",
+    id: "tools",
+    title: "Tools — Advanced Capabilities",
+    icon: Zap,
+    href: "/tools/rocket-builder",
+    description: "Rocket Builder, Mission Optimizer (Pareto fronts), ISRU Designer, Porkchop plots, Monte Carlo",
+    time: "2 min",
+    deepLinks: [
+      { label: "Rocket Builder (12 engines, 15 tanks)", href: "/tools/rocket-builder" },
+      { label: "Mission Optimizer (NSGA-II Pareto)", href: "/tools/mission-optimizer" },
+      { label: "ISRU Plant Designer", href: "/tools/isru-designer" },
+      { label: "Porkchop Plot", href: "/tools/porkchop" },
+      { label: "Monte Carlo Uncertainty", href: "/tools/montecarlo" },
+    ],
   },
   {
-    id: "engine",
-    title: "The Science Engine",
-    description: "18 pure modules, 234 tests, every number sourced â€” Kepler, SGP4, ECLSS, radiation",
-    route: "/",
-    duration: 10,
-    narration: "Under the hood: 18 pure TypeScript modules, 234 Vitest tests. Kepler solvers, Hohmann patched-conic, ISS-class ECLSS (90% water, 50% Oâ‚‚ recovery), MSL RAD radiation, NASA-STD-3001 dose limits. Every constant cited: CODATA, IAU, NASA fact sheets. Engineering honesty: every number tagged documented, derived, or estimate.",
+    id: "share",
+    title: "Share — Commons, Library, Challenge Aligner",
+    icon: Globe,
+    href: "/challenges",
+    description: "42/86 official challenges mapped with deep links, persona cards, articles, Passport & Patch",
+    time: "1 min",
+    deepLinks: [
+      { label: "Challenge Aligner (42 served)", href: "/challenges" },
+      { label: "Mission Library (9 articles)", href: "/library" },
+      { label: "Commons (Persona Cards)", href: "/commons" },
+      { label: "Community Gallery", href: "/community" },
+    ],
+  },
+  {
+    id: "evidence",
+    title: "Engineering Evidence",
+    icon: Code,
+    href: "#evidence",
+    description: "250 tests, honesty tags, Git-as-database, CI pipeline, zero secrets",
+    time: "1 min",
+    isAnchor: true,
   },
 ];
 
-interface JudgeTourProviderProps {
-  children: ReactNode;
-  autoStart?: boolean;
-}
+const EVIDENCE_ITEMS = [
+  {
+    title: "Physics Engine Purity",
+    detail: "All calculations in `src/lib/*` — pure TypeScript, no side effects, unit-tested against NASA/CODATA references",
+    badge: "Verified",
+    icon: TestTube2,
+  },
+  {
+    title: "250 Automated Tests",
+    detail: "vitest suites cover every module: astro, rocket, comm, life, surface, mission, score, scenarios, trajectory, export, orbit, passport, patch, design-link, challenges",
+    badge: "250 passing",
+    icon: CheckCircle2,
+  },
+  {
+    title: "Engineering Honesty Tags",
+    detail: "Every number tagged: documented / derived / estimate. Live data labeled live / snapshot with timestamp. No fabrication.",
+    badge: "Enforced",
+    icon: Shield,
+  },
+  {
+    title: "Git-as-Database",
+    detail: "All curated data in `src/data/*.json` validated by `scripts/validate-data.ts` in CI. No runtime DB, no secrets.",
+    badge: "Zero-secrets",
+    icon: BookOpen,
+  },
+  {
+    title: "CI/CD Pipeline",
+    detail: "GitHub Actions: lint → typecheck → validate:data → 250 tests → production build on every push to main",
+    badge: "Automated",
+    icon: Zap,
+  },
+  {
+    title: "Offline-First / PWA",
+    detail: "Service worker caches all routes. Works on airplane mode. `next-pwa` configured with fallback `offline` page.",
+    badge: "Verified",
+    icon: Download,
+  },
+  {
+    title: "Challenge Alignment Evidence",
+    detail: "42/86 official 2026 challenges mapped to shipped capabilities via regex lanes — each badge deep-links to the feature",
+    badge: "49% coverage",
+    icon: Target,
+  },
+  {
+    title: "Artifacts from Engine",
+    detail: "Mission Passport, Patch, Report Card SVG — all generated deterministically from the same design object",
+    badge: "Deterministic",
+    icon: Award,
+  },
+];
 
-export function JudgeTourProvider({ children, autoStart = false }: JudgeTourProviderProps) {
-  const [isActive, setIsActive] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1);
-  const [showControls, setShowControls] = useState(true);
-  const [narrationEnabled, setNarrationEnabled] = useState(true);
-  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
-  
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const stepStartTimeRef = useRef<number>(0);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+const HONESTY_NOTES = [
+  "Live feeds (ISS, Voyager, APOD, NEO, Space Weather) attempt real API calls first, then fall back to committed JSON snapshots with timestamps",
+  "Snapshots are checked into Git so the demo never fails on stage — each card shows a **live** or **snapshot** badge with date",
+  "Vehicle capabilities (payload TLI, cost) tagged with `costConfidence: documented | estimate` and provenance note",
+  "Enhanced radiation (Badhwar-O'Neill GCR, King SPE) and parametric habitat mass are opt-in via `useEnhancedModels` flag (defaults false)",
+  "All 250 tests pass with legacy fixed values — enhanced models are additive, not breaking",
+  "Fonts self-hosted; zero external network calls at runtime except documented live-data endpoints",
+];
 
-  // Text-to-speech narration
-  const speakNarration = useCallback((text: string) => {
-    if (!narrationEnabled || !window.speechSynthesis) return;
-    
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = playbackSpeed;
-    utterance.pitch = 1;
-    utterance.volume = 0.9;
-    utterance.lang = 'en-US';
-    
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [narrationEnabled, playbackSpeed]);
+export function JudgeTourContent() {
+  const searchParams = useSearchParams();
+  const [activeStep, setActiveStep] = useState(0);
+  const [showHonesty, setShowHonesty] = useState(false);
 
-  const stopNarration = useCallback(() => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+  useEffect(() => {
+    const tour = searchParams.get("tour");
+    if (tour === "judge") {
+      // Auto-scroll to first step after mount
+      setTimeout(() => {
+        const el = document.getElementById("step-0");
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     }
-    utteranceRef.current = null;
-  }, []);
+  }, [searchParams]);
 
-  // Keyboard shortcuts for judge demo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only activate when not typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      
-      // Tour navigation shortcuts (1-5 keys)
-      if (e.key >= "1" && e.key <= "5") {
-        e.preventDefault();
-        const stepIndex = parseInt(e.key, 10) - 1;
-        const routes = ["/play", "/mission", "/fly", "/live", "/challenges"];
-        if (routes[stepIndex]) {
-          window.location.href = routes[stepIndex];
-        }
-      }
-      
-      // Tour control shortcuts
-      if (e.key === " " && (e.target === document.body || e.target === document.documentElement)) {
-        e.preventDefault();
-        togglePlay();
-      }
-      
-      if (e.key === "ArrowRight" && (e.target === document.body || e.target === document.documentElement)) {
-        e.preventDefault();
-        nextStep();
-      }
-      
-      if (e.key === "ArrowLeft" && (e.target === document.body || e.target === document.documentElement)) {
-        e.preventDefault();
-        prevStep();
-      }
-      
-      if (e.key === "=" || e.key === "+") {
-        e.preventDefault();
-        setPlaybackSpeed((prev) => {
-          const speeds: PlaybackSpeed[] = [0.5, 1, 1.5, 2];
-          const idx = speeds.indexOf(playbackSpeed);
-          return speeds[Math.min(idx + 1, speeds.length - 1)];
-        });
-      }
-      
-      if (e.key === "-" || e.key === "_") {
-        e.preventDefault();
-        setPlaybackSpeed((prev) => {
-          const speeds: PlaybackSpeed[] = [0.5, 1, 1.5, 2];
-          const idx = speeds.indexOf(playbackSpeed);
-          return speeds[Math.max(idx - 1, 0)];
-        });
-      }
-      
-      if (e.key === "m" || e.key === "M") {
-        e.preventDefault();
-        setNarrationEnabled((prev) => !prev);
-      }
-      
-      if (e.key === "h" || e.key === "H" || e.key === "?") {
-        e.preventDefault();
-        // Keyboard shortcuts help is now in a separate component
-      }
-      
-      if (e.key === "c" || e.key === "C") {
-        e.preventDefault();
-        setShowControls((prev) => !prev);
-      }
-    };
-    
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [playbackSpeed]);
-
-  useEffect(() => {
-    setMounted(true);
-    const params = new URLSearchParams(window.location.search);
-    const shouldAutoStart = autoStart || params.get("tour") === "judge" || params.get("judge") === "1";
-    if (shouldAutoStart) {
-      setIsActive(true);
-      // Start at step 1 (skip landing page auto-nav)
-      setCurrentStep(1);
-      setIsPlaying(true);
-    }
-  }, [autoStart]);
-
-  const startTour = useCallback(() => {
-    setIsActive(true);
-    setCurrentStep(0);
-    setIsPlaying(true);
-  }, []);
-
-  const stopTour = useCallback(() => {
-    setIsActive(false);
-    setIsPlaying(false);
-    setCurrentStep(0);
-    stopNarration();
-    // Remove tour param from URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete("tour");
-    url.searchParams.delete("judge");
-    window.history.replaceState({}, "", url.toString());
-  }, []);
-
-  const nextStep = useCallback(() => {
-    setCurrentStep((prev) => Math.min(prev + 1, TOUR_STEPS.length - 1));
-  }, []);
-
-  const prevStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
-  }, []);
-
-  const goToStep = useCallback((index: number) => {
-    setCurrentStep(Math.max(0, Math.min(index, TOUR_STEPS.length - 1)));
-  }, []);
-
-  const togglePlay = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-  }, []);
-
-  // Speak narration when step changes
-  useEffect(() => {
-    if (isActive && isPlaying) {
-      const step = TOUR_STEPS[currentStep];
-      if (step.narration) {
-        // Small delay to let page transition complete
-        const timer = setTimeout(() => {
-          speakNarration(step.narration);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [currentStep, isPlaying, isActive]);
-
-  // Auto-advance when playing
-  useEffect(() => {
-    if (!isActive || !isPlaying || currentStep >= TOUR_STEPS.length - 1) return;
-    const step = TOUR_STEPS[currentStep];
-    const adjustedDuration = step.duration / playbackSpeed;
-    const timer = setTimeout(() => {
-      nextStep();
-    }, adjustedDuration * 1000);
-    return () => clearTimeout(timer);
-  }, [isActive, isPlaying, currentStep, nextStep, playbackSpeed]);
-
-  // Progress bar animation
-  useEffect(() => {
-    if (!isActive || !isPlaying) {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-      return;
-    }
-    
-    stepStartTimeRef.current = Date.now();
-    const step = TOUR_STEPS[currentStep];
-    const adjustedDuration = step.duration / playbackSpeed;
-    
-    progressIntervalRef.current = setInterval(() => {
-      // Force re-render for progress bar
-    }, 100);
-    
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-    };
-  }, [isActive, isPlaying, currentStep, playbackSpeed]);
-
-// Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopNarration();
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, []);
-
-  const setSpeed = useCallback((speed: PlaybackSpeed) => {
-    setPlaybackSpeed(speed);
-  }, []);
-
-  const toggleNarration = useCallback(() => {
-    setNarrationEnabled((prev) => !prev);
-    if (!narrationEnabled) {
-      // If enabling, speak current step
-      if (isActive) {
-        const step = TOUR_STEPS[currentStep];
-        if (step.narration) {
-          setTimeout(() => speakNarration(step.narration), 100);
-        }
-      }
-    } else {
-      stopNarration();
-    }
-  }, [narrationEnabled, isActive, currentStep, speakNarration, stopNarration]);
-
-  const toggleControls = useCallback(() => {
-    setShowControls((prev) => !prev);
-  }, []);
-
-  const toggleKeyboardHelp = useCallback(() => {
-    setShowKeyboardHelp((prev) => !prev);
-  }, []);
-
-  if (!mounted) return <>{children}</>;
+  const currentStep = JUDGE_STEPS[activeStep];
+  const progress = ((activeStep + 1) / JUDGE_STEPS.length) * 100;
 
   return (
-    <JudgeTourContext.Provider
-      value={{
-        isActive,
-        currentStep,
-        steps: TOUR_STEPS,
-        startTour,
-        stopTour,
-        nextStep,
-        prevStep,
-        goToStep,
-        isPlaying,
-        togglePlay,
-        playbackSpeed,
-        setPlaybackSpeed,
-        narrationEnabled,
-        toggleNarration,
-        showControls,
-        toggleControls,
-        showKeyboardHelp,
-        toggleKeyboardHelp,
-      }}
-    >
-      {children}
-      {isActive && <JudgeTourOverlay />}
-    </JudgeTourContext.Provider>
-  );
-}
-
-function JudgeTourOverlay() {
-  const { 
-    currentStep, 
-    steps, 
-    isPlaying, 
-    nextStep, 
-    prevStep, 
-    goToStep, 
-    stopTour, 
-    togglePlay,
-    playbackSpeed,
-    setPlaybackSpeed,
-    narrationEnabled,
-    toggleNarration,
-    showControls,
-    toggleControls,
-    showKeyboardHelp,
-    toggleKeyboardHelp,
-  } = useJudgeTour();
-  const step = steps[currentStep];
-  const progress = ((currentStep + 1) / steps.length) * 100;
-
-  const speeds: PlaybackSpeed[] = [0.5, 1, 1.5, 2];
-
-  return (
-    <div className="fixed inset-0 z-[100] pointer-events-none" aria-live="polite">
-      {/* Top progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-space-950/80 backdrop-blur">
+    <div className="min-h-screen bg-space-950 text-white">
+      {/* Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-space-900 z-50">
         <div
-          className="h-full bg-gradient-to-r from-space-cyan to-space-emerald transition-all duration-300"
+          className="h-full bg-gradient-to-r from-space-cyan to-space-emerald transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      {/* Tour control panel */}
-      <div className="pointer-events-auto fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
-        <div className="glass-panel rounded-2xl border border-white/10 bg-space-950/80 backdrop-blur p-4 max-w-2xl">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-mono text-xs text-space-cyan">
-                  Step {currentStep + 1} / {steps.length}
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-space-cyan/20 text-space-cyan">
-                  {step.id.toUpperCase()}
-                </span>
+      {/* Header */}
+      <header className="relative border-b border-white/10 bg-space-950/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-space-cyan/20">
+                <Award className="h-6 w-6 text-space-cyan" />
               </div>
-              <h3 className="font-semibold text-white text-sm">{step.title}</h3>
-              <p className="mt-1 text-xs text-slate-400 line-clamp-2">{step.description}</p>
-              <p className="mt-2 text-[11px] text-slate-500 italic max-h-16 overflow-hidden">
-                đźŽ™ď¸Ź {step.narration}
-              </p>
+              <div>
+                <h1 className="text-xl font-bold text-white">NASAMAP — Judge Tour</h1>
+                <p className="text-xs text-slate-400">
+                  Step {activeStep + 1} of {JUDGE_STEPS.length} · {currentStep.time}
+                </p>
+              </div>
             </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className={cn(
-                  "p-2 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed",
-                  "hover:bg-white/10 text-slate-300 hover:text-white"
-                )}
-                aria-label="Previous step"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={togglePlay}
-                className={cn(
-                  "p-2 rounded-lg transition",
-                  "hover:bg-white/10 text-slate-300 hover:text-white"
-                )}
-                aria-label={isPlaying ? "Pause narration" : "Play narration"}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </button>
-              <button
-                onClick={nextStep}
-                disabled={currentStep === steps.length - 1}
-                className={cn(
-                  "p-2 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed",
-                  "hover:bg-white/10 text-slate-300 hover:text-white"
-                )}
-                aria-label="Next step"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-              <button
-                onClick={stopTour}
-                className="p-2 rounded-lg transition hover:bg-white/10 text-slate-400 hover:text-white"
-                aria-label="Exit tour"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Playback controls */}
-          <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-4">
-            {/* Playback speed */}
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-slate-400">Speed:</span>
-              <div className="flex items-center gap-1">
-                {speeds.map((speed) => (
-                  <button
-                    key={speed}
-                    onClick={() => setPlaybackSpeed(speed)}
-                    className={cn(
-                      "px-2 py-1 rounded text-[10px] font-medium transition",
-                      playbackSpeed === speed
-                        ? "bg-space-cyan text-space-950"
-                        : "bg-white/5 text-slate-400 hover:bg-white/10"
-                    )}
-                  >
-                    {speed}x
-                  </button>
-                ))}
+              <Badge tone="cyan" className="text-xs">
+                Space Apps 2026
+              </Badge>
+              <Badge tone="emerald" className="text-xs">
+                250 Tests ✓
+              </Badge>
+              <Button variant="ghost" size="sm" onClick={() => window.open("https://github.com/imredavid64-glitch/NASAMAP", "_blank")}>
+                <ExternalLink className="h-4 w-4" /> Source
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+          <div>
+            <Badge tone="cyan" className="mb-5">
+              NASA Space Apps 2026 · Judge Evaluation Mode
+            </Badge>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Every human has a seat{" "}
+              <span className="bg-gradient-to-r from-space-cyan to-space-emerald bg-clip-text text-transparent">
+                at the frontier.
+              </span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-400">
+              This guided tour walks you through the submission in ~8 minutes. Each step links to the live feature
+              with context on what to look for. All data is physics-honest, tested, and works offline.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                onClick={() => setActiveStep(0)}
+                className="bg-space-cyan text-space-950 hover:bg-space-cyan/80"
+              >
+                Start Tour <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => setShowHonesty(true)}>
+                <Shield className="h-4 w-4 mr-2" /> Engineering Honesty
+              </Button>
+            </div>
+          </div>
+          <div className="h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-black/30 sm:h-[520px]">
+            <SpaceCanvas bodyId="mars" cameraDistance={2.8} />
+          </div>
+        </div>
+      </section>
+
+      {/* Steps Navigation */}
+      <nav className="border-y border-white/10 bg-white/[0.02] sticky top-14 z-30" aria-label="Judge tour steps">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto gap-2 py-3" role="tablist">
+            {JUDGE_STEPS.map((step, index) => (
+              <button
+                key={step.id}
+                role="tab"
+                aria-selected={activeStep === index}
+                onClick={() => {
+                  setActiveStep(index);
+                  const el = document.getElementById(`step-${index}`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className={`flex shrink-0 items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${
+                  activeStep === index
+                    ? "bg-space-cyan/20 text-space-cyan border border-space-cyan/40"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <step.icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{step.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Step Content */}
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {JUDGE_STEPS.map((step, index) => (
+          <section
+            key={step.id}
+            id={`step-${index}`}
+            className={`mb-20 scroll-mt-28 transition-opacity duration-300 ${
+              activeStep === index ? "opacity-100" : "opacity-60"
+            }`}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                  activeStep === index
+                    ? "bg-space-cyan/20 text-space-cyan"
+                    : "bg-white/5 text-slate-500"
+                }`}
+              >
+                <step.icon className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">{step.title}</h2>
+                <p className="text-slate-400">{step.description}</p>
+              </div>
+              <Badge tone={activeStep === index ? "cyan" : "slate"} className="ml-auto text-xs">
+                {step.time}
+              </Badge>
             </div>
 
-            {/* Narration toggle */}
-            <button
-              onClick={toggleNarration}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition",
-                narrationEnabled
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10"
-              )}
-              aria-label={narrationEnabled ? "Disable narration" : "Enable narration"}
-            >
-              {narrationEnabled ? (
-                <>
-                  <Volume2 className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-medium">Narration</span>
-                </>
-              ) : (
-                <>
-                  <VolumeX className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-medium">Muted</span>
-                </>
-              )}
-            </button>
+            {step.deepLinks && (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                {step.deepLinks.map((link, i) => (
+                  <Link
+                    key={i}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 transition hover:border-space-cyan/40 hover:bg-space-cyan/5"
+                  >
+                    <ArrowRight className="h-5 w-5 text-space-cyan group-hover:translate-x-1 transition-transform" />
+                    <span className="text-sm font-medium text-white">{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
 
-            {/* Keyboard help toggle */}
-            <button
-              onClick={toggleKeyboardHelp}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition",
-                showKeyboardHelp
-                  ? "bg-space-cyan/20 text-space-cyan border border-space-cyan/30"
-                  : "bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10"
-              )}
-              aria-label={showKeyboardHelp ? "Hide keyboard shortcuts" : "Show keyboard shortcuts"}
-            >
-              <Info className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-medium">{showKeyboardHelp ? "Hide" : "Show"} Shortcuts</span>
-            </button>
+            {step.isAnchor && (
+              <div id="evidence" className="space-y-6">
+                <SectionHeading
+                  kicker="Engineering Evidence"
+                  title="What makes this submission verifiable"
+                />
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {EVIDENCE_ITEMS.map((item, i) => (
+                    <Card key={i} className="h-full">
+                      <CardBody>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-space-cyan/20">
+                            <item.icon className="h-5 w-5 text-space-cyan" />
+                          </div>
+                          <Badge tone="emerald" className="text-xs">
+                            {item.badge}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <p className="mt-2 text-sm text-slate-400">{item.detail}</p>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
 
-            {/* Controls visibility toggle */}
-            <button
-              onClick={toggleControls}
-              className="p-2 rounded-lg transition hover:bg-white/10 text-slate-400 hover:text-white"
-              aria-label={showControls ? "Hide controls" : "Show controls"}
-            >
-              {showControls ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
+                <SectionHeading
+                  kicker="Engineering Honesty"
+                  title="No fabricated numbers — ever"
+                />
+                <Card>
+                  <CardBody>
+                    <ul className="space-y-3">
+                      {HONESTY_NOTES.map((note, i) => (
+                        <li key={i} className="flex gap-3 text-sm text-slate-300">
+                          <CheckCircle2 className="h-5 w-5 shrink-0 text-space-emerald mt-0.5" />
+                          <span>{note}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+
+            {!step.isAnchor && (
+              <Card className="border-space-cyan/30 bg-space-cyan/5">
+                <CardBody>
+                  <p className="flex items-center gap-2 text-sm text-space-cyan">
+                    <Info className="h-4 w-4" />
+                    <strong>Tip:</strong> Open the links in new tabs — each deep-links to the exact feature.
+                    URL encodes the full mission state (try changing crew/surface days on <code className="bg-white/5 px-1 rounded font-mono">/mission</code>).
+                  </p>
+                </CardBody>
+              </Card>
+            )}
+          </section>
+        ))}
+
+        {/* Completion */}
+        <section id="complete" className="scroll-mt-28">
+          <div className="rounded-2xl border border-space-emerald/30 bg-space-emerald/5 p-8 text-center">
+            <Award className="h-16 w-16 mx-auto mb-4 text-space-emerald" />
+            <h2 className="text-3xl font-bold text-white">Tour Complete</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-slate-400">
+              You've seen the core submission. For deeper evaluation, every route is reachable from the navbar.
+              The engine is in <code className="bg-white/5 px-2 rounded font-mono">src/lib/</code> — 100% pure, 100% tested.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/mission?d=mars&v=starship&c=4&s=90" className="btn-primary">
+                Try a Mars Mission →
+              </Link>
+              <Link href="/challenges?lane=mission-design" className="btn-secondary">
+                View Challenge Coverage →
+              </Link>
+              <a
+                href="https://github.com/imredavid64-glitch/NASAMAP"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
+                <ExternalLink className="h-4 w-4 inline mr-1" /> Source on GitHub
+              </a>
+            </div>
           </div>
-        </div>// Close JSX expression
+        </section>
+      </main>
 
-        {/* Step indicators */}
-        <div className="mt-3 flex items-center justify-center gap-1">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goToStep(i)}
-              className={cn(
-                "h-1.5 rounded transition",
-                i === currentStep
-                  ? "w-6 bg-space-cyan"
-                  : "w-3 bg-white/10 hover:bg-white/20"
-              )}
-              aria-label={"Go to step " + (i + 1)}
-            />
-          ))}
+      {/* Honesty Modal */}
+      {showHonesty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="max-w-3xl w-full max-h-[80vh] overflow-y-auto rounded-2xl border border-white/10 bg-space-950 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Engineering Honesty — Deep Dive</h2>
+              <button onClick={() => setShowHonesty(false)} className="text-slate-400 hover:text-white">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              {HONESTY_NOTES.map((note, i) => (
+                <div key={i} className="flex gap-3 rounded-lg border border-white/10 bg-white/5 p-4">
+                  <Shield className="h-5 w-5 shrink-0 text-space-emerald mt-0.5" />
+                  <p className="text-sm text-slate-300">{note}</p>
+                </div>
+              ))}
+              <div className="rounded-lg border border-amber/30 bg-amber/5 p-4">
+                <p className="text-sm text-amber-300">
+                  <strong>Verify yourself:</strong> Run <code className="bg-white/5 px-1 rounded font-mono">npm test</code> (250 tests),
+                  <code className="bg-white/5 px-1 rounded font-mono">npm run validate:data</code> (all datasets),
+                  <code className="bg-white/5 px-1 rounded font-mono">npm run build</code> (production build).
+                  Zero secrets, zero external deps at runtime.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
 
-    {/* Target highlight */}
-    {step.targetSelector && (
-      <TargetHighlight selector={step.targetSelector} />
-    )}
-  </div>
-  );
-}
-
-function TargetHighlight({ selector }: { selector: string }) {
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-
-  useEffect(() => {
-    const update = () => {
-      const el = document.querySelector(selector);
-      if (el) setTargetRect(el.getBoundingClientRect());
-      else setTargetRect(null);
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    const el = document.querySelector(selector);
-    if (el) ro.observe(el);
-    window.addEventListener("scroll", update, { passive: true });
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("scroll", update);
-    };
-  }, [selector]);
-
-  if (!targetRect) return null;
-
-  return (
-    <div
-      className="pointer-events-none fixed z-40"
-      style={{
-        top: targetRect.top - 4,
-        left: targetRect.left - 4,
-        width: targetRect.width + 8,
-        height: targetRect.height + 8,
-      }}
-    >
-      <div className="absolute inset-0 rounded-lg border-2 border-space-cyan/60 bg-space-cyan/10 animate-pulse" />
-      <div
-        className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1 rounded bg-space-cyan px-2 py-0.5 text-[10px] font-medium text-white"
-      >
-        <Info className="h-3 w-3" />
-        TOUR FOCUS
-      </div>
+      <style jsx global>{`
+        .btn-primary {
+          @apply inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:bg-space-cyan/80;
+        }
+        .btn-secondary {
+          @apply inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10;
+        }
+      `}</style>
     </div>
   );
 }
-
-
-

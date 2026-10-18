@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ScenarioBoard } from "../ScenarioBoard";
 
 export const metadata: Metadata = { title: "Custom Mission — Space Mission Design Game" };
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export default function CustomPlayPage() {
   return (

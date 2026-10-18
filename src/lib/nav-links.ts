@@ -1,9 +1,11 @@
-import { Rocket, Compass, Radio, Library, Search, Orbit, Trophy, Gamepad2, Wrench, Users, BookOpen, type LucideIcon } from "lucide-react";
+import { Rocket, Compass, Radio, Library, Search, Orbit, Trophy, Gamepad2, Wrench, Users, BookOpen, Award, type LucideIcon } from "lucide-react";
 
 export interface NavLink {
   href: string;
   label: string;
   icon: LucideIcon;
+  /** Only show in judge mode (?judge=1 or ?tour=judge) */
+  judgeOnly?: boolean;
 }
 
 export const NAV_LINKS: NavLink[] = [
@@ -18,4 +20,5 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/library", label: "Library", icon: Library },
   { href: "/search", label: "Search", icon: Search },
   { href: "/community", label: "Community", icon: Users },
+  { href: "/judge", label: "Judge Tour", icon: Award, judgeOnly: true },
 ];

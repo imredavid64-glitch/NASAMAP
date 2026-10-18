@@ -26,6 +26,9 @@ export async function generateMetadata({ params }: NarrativePageProps) {
   };
 }
 
+// Force dynamic rendering to avoid static generation issues with params
+export const dynamic = 'force-dynamic';
+
 const PERSONA_ICONS = {
   farmer: Leaf,
   geologist: Award,

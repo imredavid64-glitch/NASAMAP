@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { CommunityClientWrapper } from "./CommunityClientWrapper";
 
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
+
 export default function CommunityPage() {
   return (
     <Suspense fallback={<CommunitySkeleton />}>

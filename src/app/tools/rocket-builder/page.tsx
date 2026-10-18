@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { RocketBuilder } from "@/components/tools/rocket-builder/RocketBuilder";
 
 export const metadata: Metadata = { title: "Rocket Builder — Design & Analyze Launch Vehicles" };
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams in Nav
+export const dynamic = 'force-dynamic';
 
 export default function RocketBuilderPage() {
   return (

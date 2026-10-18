@@ -4,26 +4,55 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  quality:
+  quality-gate:
+    name: Quality Gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run validate:data
-      - run: npx vitest run --reporter=dot
-      - run: npm run build
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  # Deploy preview on PRs (optional - requires Vercel integration)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate Data
+        run: npm run validate:data
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: nextjs-build
+          path: .next/
+          retention-days: 1
+
+  # Optional: Deploy preview on PR (requires Vercel integration)
   # deploy-preview:
-  #   needs: quality
+  #   needs: quality-gate
   #   if: github.event_name == 'pull_request'
   #   runs-on: ubuntu-latest
   #   steps:

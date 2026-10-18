@@ -3,8 +3,12 @@ import { FlyStage, type FlyMode } from "@/components/fly-stage";
 import { FlyModeTabs } from "@/components/fly-mode-tabs";
 import { Rocket, RotateCcw, Info, Clock, Sun, Globe, History, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata = { title: "Fly — Apollo 11 Replay & Trajectory Theater" };
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
 
 interface FlyPageProps {
   searchParams: Promise<{ mode?: string }>;

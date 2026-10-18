@@ -14,6 +14,9 @@ import {
 
 export const metadata: Metadata = { title: "Challenge aligner — 2026" };
 
+// Force dynamic rendering to avoid static generation issues
+export const dynamic = 'force-dynamic';
+
 const LANE_ICON = {
   "mission-design": Rocket,
   "life-support": Recycle,

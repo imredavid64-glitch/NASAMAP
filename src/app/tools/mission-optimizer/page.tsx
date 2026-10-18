@@ -6,6 +6,9 @@ export const metadata = {
   description: "Explore pre-computed Pareto-optimal Mars mission architectures for 2028 and 2031 launch windows. Multi-objective optimization across IMLEO, payload, radiation, and cost.",
 };
 
+// Force dynamic rendering to avoid static generation issues with useSearchParams in Nav
+export const dynamic = 'force-dynamic';
+
 export default function MissionOptimizerPage() {
   return (
     <div className="pt-28">

@@ -2,6 +2,9 @@ import { Printer, Download, BookOpen, FileText, GraduationCap, Award, Target } f
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 
+// Force static generation for this page
+export const dynamic = 'force-static';
+
 export const metadata = {
   title: "Space Mission Design — Classroom Resources",
   description: "NGSS-aligned lesson plans, printable worksheets, and teacher guide for systems engineering with real NASA data.",

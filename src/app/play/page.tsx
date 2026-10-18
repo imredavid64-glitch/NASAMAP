@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ScenarioBoard } from "./ScenarioBoard";
 
 export const metadata: Metadata = { title: "Play — Space Mission Design Game" };
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams in Nav
+export const dynamic = 'force-dynamic';
 
 export default function PlayPage() {
   return (
@@ -16,7 +20,9 @@ export default function PlayPage() {
           use. Earn up to three stars per mission: meet the constraints, clear the objectives, then beat the par score.
           Your progress stays in this browser.
         </p>
-        <ScenarioBoard />
+        <Suspense fallback={<div className="text-center py-12 text-slate-400">Loading mission scenarios...</div>}>
+          <ScenarioBoard />
+        </Suspense>
       </div>
     </div>
   );

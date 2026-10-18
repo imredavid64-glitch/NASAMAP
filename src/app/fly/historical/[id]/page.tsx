@@ -1,17 +1,29 @@
 import { Metadata } from "next";
 import { ChevronLeft } from "lucide-react";
 import { HistoricalPlayer } from "@/components/mission/historical-player-v2";
-import { getHistoricalMission } from "@/lib/historical-missions";
+import { HistoricalMission, getHistoricalMission } from "@/lib/historical-missions";
 import Link from "next/link";
+import { Suspense } from "react";
 
 interface HistoricalMissionPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateStaticParams() {
-  const missions = await import("@/data/historical-missions.json");
-  return missions.missions.map((m: any) => ({ id: m.id }));
+interface StaticParams {
+  id: string;
+  mission: HistoricalMission;
 }
+
+export async function generateStaticParams(): Promise<StaticParams[]> {
+  const missions = await import("@/data/historical-missions.json");
+  return (missions as any).missions.map((m: any) => ({ 
+    id: m.id,
+    mission: m 
+  }));
+}
+
+// Force static generation for this page
+export const dynamic = 'force-static';
 
 export async function generateMetadata({ params }: HistoricalMissionPageProps): Promise<Metadata> {
   const { id } = await params;
@@ -23,14 +35,7 @@ export async function generateMetadata({ params }: HistoricalMissionPageProps): 
   };
 }
 
-async function getMissionData(id: string) {
-  return getHistoricalMission(id);
-}
-
-export default async function HistoricalMissionPage({ params }: HistoricalMissionPageProps) {
-  const { id } = await params;
-  const mission = getMissionData(id);
-  
+function HistoricalMissionContent({ mission }: { mission: HistoricalMission | undefined }) {
   if (!mission) {
     return (
       <div className="pt-28 pb-16 text-center">
@@ -48,5 +53,18 @@ export default async function HistoricalMissionPage({ params }: HistoricalMissio
         <HistoricalPlayer mission={mission} />
       </div>
     </div>
+  );
+}
+
+// During static generation, params is already resolved, so we can use it synchronously
+export default function HistoricalMissionPage({ params }: HistoricalMissionPageProps) {
+  // Type assertion: during static generation, params is already resolved
+  const { id } = params as unknown as { id: string };
+  const mission = getHistoricalMission(id);
+  
+  return (
+    <Suspense fallback={<div className="pt-28 pb-16 text-center"><p className="text-slate-400">Loading mission...</p></div>}>
+      <HistoricalMissionContent mission={mission} />
+    </Suspense>
   );
 }

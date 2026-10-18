@@ -5,6 +5,9 @@ import { Suspense } from "react";
 
 export const metadata = { title: "Monte Carlo Uncertainty Analysis — Mission Optimizer" };
 
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
+
 interface MonteCarloPageProps {
   searchParams: Promise<{ design?: string }>;
 }

@@ -8,6 +8,9 @@ import { MissionPlanner } from "./MissionPlanner";
 
 export const metadata: Metadata = { title: "Mission — Plan the frontier" };
 
+// Force dynamic rendering to avoid static generation issues with searchParams and useSearchParams in Nav
+export const dynamic = 'force-dynamic';
+
 const acts = [
   {
     n: "01",

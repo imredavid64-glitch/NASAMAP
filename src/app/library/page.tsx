@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { BookOpen, Tag, Clock, Calendar } from "lucide-react";
 
+// Force static generation for this page
+export const dynamic = 'force-static';
+
 export const metadata = { title: "Library — Mission Briefs & Science Notes" };
 
 const cats = [...new Set(articles.map((a) => a.category))].sort();

@@ -1,6 +1,10 @@
+import { Suspense } from "react";
 import ExoplanetCatalog from "./ExoplanetCatalog";
 
 export const metadata = { title: "Exoplanet Catalog — Orrery Extension" };
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export default function ExoplanetCatalogPage() {
   return (

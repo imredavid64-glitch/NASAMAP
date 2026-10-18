@@ -4,7 +4,7 @@ import "./globals.css";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { ToastProvider } from "@/components/ui/toast";
-import { JudgeTourProvider } from "@/components/judge-tour";
+import { JudgeTourProvider } from "@/components/judge-tour-provider";
 import { PWAInstallPrompt } from "@/components/pwa-install";
 import { ConvexProvider } from "@/components/convex-provider";
 

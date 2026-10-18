@@ -13,14 +13,18 @@ export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
 }
 
+// Force static generation for this page
+export const dynamic = 'force-static';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = articles.find((a) => a.slug === slug);
   return { title: article ? `${article.title} — Library` : "Article not found" };
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
+// During static generation, params is already resolved
+export default function ArticlePage({ params }: Props) {
+  const { slug } = params as unknown as { slug: string };
   const article = articles.find((a) => a.slug === slug);
   if (!article) notFound();
 
