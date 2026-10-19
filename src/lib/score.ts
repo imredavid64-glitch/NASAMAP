@@ -1,10 +1,10 @@
 ﻿/**
- * Mission scoring engine â€” the "game layer" over the design engine.
+ * Mission scoring engine — the "game layer" over the design engine.
  *
- * Turns a MissionDesign into a set of judged objectives with a 0â€“100 score and
+ * Turns a MissionDesign into a set of judged objectives with a 0–100 score and
  * a letter grade, so the planner has a win condition and replay value. Every
  * threshold is anchored to a published reference (NASA-STD-3001, NASA ISS
- * ECLSS, Apollo-class Î”v). Pure and unit-tested in tests/score.test.ts.
+ * ECLSS, Apollo-class Δv). Pure and unit-tested in tests/score.test.ts.
  */
 
 import { type MissionDesign } from "@/lib/mission";
@@ -21,7 +21,7 @@ export const RADIATION_LIMIT_MSV = 600;
 /** Above the career limit a mission needs an agency waiver. */
 export const RADIATION_WAIVER_MSV = 800;
 
-/** Reference total Î”v (km/s) above which a transfer is penalised. */
+/** Reference total Δv (km/s) above which a transfer is penalised. */
 export const DV_REFERENCE_KM_S: Record<MissionDesign["destination"], number> = {
   moon: 3.2,
   mars: 6.0,
@@ -105,7 +105,7 @@ const OBJECTIVES: Objective[] = [
     id: "eclss-loop",
     label: "Close the life-support loop",
     detail: "An ISS-class regenerative ECLSS should carry most of the consumable load.",
-    reference: "NASA ISS ECLSS (~90% water, ~50% Oâ‚‚ recovery)",
+    reference: "NASA ISS ECLSS (~90% water, ~50% O₂ recovery)",
     weight: 13,
     judge: (d) => {
       const ops = opsBudget({ destination: d.destination, crew: d.crew, days: d.totalDays });
@@ -120,18 +120,18 @@ const OBJECTIVES: Objective[] = [
     id: "comms",
     label: "Keep a workable comms window",
     detail: "One-way light-lag must stay inside remote-operations tolerance.",
-    reference: "Speed of light over mean Earthâ€“Mars distance",
+    reference: "Speed of light over mean Earth–Mars distance",
     weight: 8,
     judge: (d) => ({
       status: tier(d.arrivalLt.oneWaySec, 1300, 2400),
       actual: `${d.arrivalLt.oneWayLabel} one-way`,
-      target: "â‰¤ 21.7 min",
+      target: "≤ 21.7 min",
     }),
   },
   {
     id: "transfer",
     label: "Fly an efficient transfer",
-    detail: "Total Î”v should sit near the Hohmann / Apollo-class optimum for the destination.",
+    detail: "Total Δv should sit near the Hohmann / Apollo-class optimum for the destination.",
     reference: "Hohmann transfer & Apollo-class TLI (rocket.ts)",
     weight: 13,
     judge: (d) => {
@@ -139,7 +139,7 @@ const OBJECTIVES: Objective[] = [
       return {
         status: tier(d.totalDeltaVKmS, ref, ref * 1.3),
         actual: `${d.totalDeltaVKmS.toFixed(2)} km/s`,
-        target: `â‰¤ ${ref.toFixed(2)} km/s`,
+        target: `≤ ${ref.toFixed(2)} km/s`,
       };
     },
   },
