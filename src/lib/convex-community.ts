@@ -86,16 +86,29 @@ function getUserColor(userId: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
+/**
+ * Convex's `useQuery` returns the data itself (and `undefined` while loading),
+ * but our views destructure `{ data, isLoading, error }`. Wrap the raw hook so
+ * the shape is stable — destructuring `undefined` is what crashed /community.
+ */
+function shapeQuery<T>(value: T | undefined): { data: T | undefined; isLoading: boolean; error: Error | null } {
+  return {
+    data: value,
+    isLoading: value === undefined,
+    error: null,
+  };
+}
+
 export function useCommunityMissions(destination?: "moon" | "mars", limit = 20) {
-  return useQuery(api.missions.getMissions as any, { destination, limit });
+  return shapeQuery(useQuery(api.missions.getMissions as any, { destination, limit }));
 }
 
 export function useMission(missionId: string) {
-  return useQuery(api.missions.getMission as any, { missionId });
+  return shapeQuery(useQuery(api.missions.getMission as any, { missionId }));
 }
 
 export function useComments(missionId: string) {
-  return useQuery(api.missions.getComments as any, { missionId });
+  return shapeQuery(useQuery(api.missions.getComments as any, { missionId }));
 }
 
 export function useSubmitMission() {

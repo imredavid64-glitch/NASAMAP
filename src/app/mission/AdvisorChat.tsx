@@ -72,6 +72,7 @@ export function AdvisorChat({ design, scorecard, currentDesignInput, onApplyDesi
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<ProactiveSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,9 +97,11 @@ export function AdvisorChat({ design, scorecard, currentDesignInput, onApplyDesi
     }
   }, [design, scorecard, onApplyDesignChange]);
 
-  // Speech recognition setup
+  // Speech recognition setup. `speechSupported` starts false so the server render
+  // never touches `window` (SSR has no window) and hydration stays consistent.
   useEffect(() => {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      setSpeechSupported(true);
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
@@ -360,7 +363,7 @@ export function AdvisorChat({ design, scorecard, currentDesignInput, onApplyDesi
               variant={isListening ? "default" : "outline"}
               size="sm"
               onClick={handleVoiceInput}
-              disabled={isLoading || !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)}
+              disabled={isLoading || !speechSupported}
               className={isListening ? "bg-red-500/20 border-red-500/40 text-red-400" : ""}
               aria-label={isListening ? "Stop voice input" : "Start voice input"}
             >

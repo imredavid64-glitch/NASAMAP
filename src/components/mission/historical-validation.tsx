@@ -4,8 +4,33 @@ import { useMemo, useState } from "react";
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { designMission, type MissionDesignOptions } from "@/lib/mission";
+import { designMission } from "@/lib/mission";
 import historicalMissions from "@/data/historical-missions.json";
+import launchVehicles from "@/data/launch-vehicles.json";
+
+/** Catalog ids the engine knows about — building a design with anything else throws. */
+const CATALOG_IDS = new Set((launchVehicles as { id: string }[]).map((v) => v.id));
+
+/** Historical vehicle names that have no exact catalog entry → nearest analog. */
+const VEHICLE_ANALOGS: Record<string, string> = {
+  "atlas v 541": "falcon-heavy", // heavy-lift stand-in for Mars-bound launchers
+  "atlas v": "falcon-heavy",
+  "falcon 9": "falcon-9",
+};
+
+/**
+ * Historical missions name vehicles by their real-world name ("Atlas V 541"),
+ * but the design engine only accepts catalog ids ("saturn-v"). Slugify and fall
+ * back to the nearest analog (then a destination-safe default) so a missing
+ * entry can never crash the page with "Unknown launch vehicle".
+ */
+function resolveVehicleId(vehicleName: string, destination: string): string {
+  const slug = vehicleName.toLowerCase().replace(/\s+/g, "-");
+  if (CATALOG_IDS.has(slug)) return slug;
+  const analog = VEHICLE_ANALOGS[vehicleName.toLowerCase()];
+  if (analog && CATALOG_IDS.has(analog)) return analog;
+  return destination === "mars" ? "starship" : "saturn-v";
+}
 
 interface ValidationResult {
   missionId: string;
@@ -63,12 +88,19 @@ export function HistoricalValidationTab() {
       // Create a design that matches the historical mission as closely as possible
       const designOpts: any = {
         destination: hist.destination as "moon" | "mars",
-        vehicleId: hist.vehicle.toLowerCase().replace(/\s+/g, "-"),
+        vehicleId: resolveVehicleId(hist.vehicle, hist.destination),
         crew: hist.crew?.length || 0,
         surfaceDays: hist.durationDays * 0.5, // rough estimate
       };
 
-      const design = designMission(designOpts);
+      // Degrade to a skipped row instead of crashing the whole tab if the
+      // engine rejects a historical mission's data.
+      let design: ReturnType<typeof designMission>;
+      try {
+        design = designMission(designOpts);
+      } catch {
+        return null;
+      }
 
       const checks: any[] = [];
 
