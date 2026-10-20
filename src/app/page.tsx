@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { HomeContent } from "@/components/home-content";
+import { JudgeQuickstart } from "@/components/judge-quickstart";
 
 export const metadata = {
   title: "NASAMAP — Every human has a seat at the frontier",
@@ -13,6 +14,7 @@ export const dynamic = 'force-dynamic';
 export default function HomePage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-space-950"><div className="h-12 w-12 animate-spin rounded-full border-4 border-space-cyan/30 border-t-space-cyan" /></div>}>
+      <JudgeQuickstart />
       <HomeContent />
     </Suspense>
   );

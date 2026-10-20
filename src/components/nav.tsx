@@ -22,6 +22,7 @@ export function Nav() {
           <span className="text-sm font-semibold tracking-widest text-white">
             NASA<span className="text-space-cyan">MAP</span>
           </span>
+          <span className="hidden sm:inline-flex items-center rounded-full border border-space-amber/40 bg-space-amber/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-space-amber">Space Apps 2026</span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex" role="navigation" aria-label="Main navigation">
           {visibleLinks.map((l) => (

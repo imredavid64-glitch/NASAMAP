@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { JudgeTourProvider } from "@/components/judge-tour-provider";
 import { PWAInstallPrompt } from "@/components/pwa-install";
 import { ConvexProvider } from "@/components/convex-provider";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -116,12 +117,14 @@ export default function RootLayout({
         <ToastProvider>
           <ConvexProvider>
             <JudgeTourProvider>
-              <div className="flex min-h-screen flex-col">
+              <ErrorBoundary>
+                <div className="flex min-h-screen flex-col">
                 <Nav />
                 <main id="main-content" className="flex-1">{children}</main>
                 <Footer />
               </div>
               <PWAInstallPrompt />
+              </ErrorBoundary>
             </JudgeTourProvider>
           </ConvexProvider>
         </ToastProvider>

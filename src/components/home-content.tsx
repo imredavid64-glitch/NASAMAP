@@ -68,7 +68,7 @@ export function HomeContent() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               {[250, 38, 7, 2].map((v, i) => (
-                <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-space-cyan/5 backdrop-blur">
                   <div className="text-space-cyan font-mono text-2xl font-bold">{v}+</div>
                   <div className="mt-1 text-xs text-slate-500">
                     {i === 0 && "tests pass"}
@@ -100,9 +100,15 @@ export function HomeContent() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/play"
-                  className="inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:bg-space-cyan/80 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+                  className="inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:shadow-lg hover:shadow-space-cyan/30 hover:bg-space-cyan/90 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
                 >
                   Start the game <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/mission"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-space-amber/20 to-space-cyan/20 border border-space-amber/40 px-5 py-3 font-semibold text-white transition hover:border-space-amber/60 hover:shadow-lg hover:shadow-space-amber/20 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+                >
+                  <Rocket className="h-4 w-4" /> Judge Tour
                 </Link>
                 <Link
                   href="/commons"

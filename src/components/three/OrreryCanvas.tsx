@@ -312,14 +312,14 @@ export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
   return (
     <div className="relative w-full h-full" role="application" aria-label="Solar system orrery">
       <Canvas
-        dpr={[1, 1.75]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 80, 120], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.2; }}
       >
         <ambientLight intensity={0.2} />
         <pointLight position={[0, 0, 0]} intensity={3} color="#fff3cf" decay={0} distance={0} />
-        <Stars radius={500} depth={100} count={8000} factor={5} saturation={0} fade speed={reduced ? 0 : 0.2} />
+        <Stars radius={500} depth={100} count={6000} factor={4} saturation={0} fade speed={reduced ? 0 : 0.2} />
 
         {/* Sun */}
         <group>
