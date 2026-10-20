@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RetryButton } from "@/components/offline-retry-button";
+import { WifiOff, Rocket } from "lucide-react";
 
 // Force dynamic rendering for offline page
 export const dynamic = 'force-dynamic';
@@ -9,9 +10,7 @@ export default function Offline() {
     <div className="flex min-h-screen items-center justify-center bg-space-950 px-4 text-center">
       <div className="max-w-md space-y-6">
         <div className="flex h-20 w-20 items-center justify-center rounded-full border border-space-cyan/40 bg-space-cyan/10 mx-auto">
-          <svg className="h-10 w-10 text-space-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
+          <WifiOff className="h-10 w-10 text-space-cyan" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white">You're Offline</h1>
@@ -20,14 +19,17 @@ export default function Offline() {
             Live data feeds will show their last known snapshot until connection is restored.
           </p>
         </div>
-        <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/mission"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-space-cyan px-5 py-2.5 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80"
+          >
+            <Rocket className="h-4 w-4" /> Plan a Mission
+          </Link>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-space-cyan px-6 py-3 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
             Go Home
           </Link>
           <RetryButton />
