@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Rocket, Compass, Radio, ArrowRight, Database, Ear, Users, Orbit, Library, Search } from "lucide-react";
+import { Rocket, Compass, Radio, ArrowRight, Database, Ear, Users, Orbit, Library, Search, Globe, Star } from "lucide-react";
 import { SpaceCanvas } from "@/components/space-canvas";
 import { SkyNow } from "@/components/SkyNow";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -50,12 +50,11 @@ export function HomeContent() {
   const [showJudgeTour, setShowJudgeTour] = useState(false);
 
   useEffect(() => {
-    // Auto-activate judge tour on ?judge=1 or Space Apps referrer
     const judgeParam = searchParams.get("judge");
     const tourParam = searchParams.get("tour");
     const referrer = document.referrer;
     const isSpaceAppsReferrer = referrer.includes("spaceapps") || referrer.includes("nasa.gov");
-    
+
     if (judgeParam === "1" || tourParam === "judge" || isSpaceAppsReferrer) {
       setShowJudgeTour(true);
     }
@@ -65,7 +64,24 @@ export function HomeContent() {
     <JudgeTourProvider autoStart={showJudgeTour}>
       <div>
         <section className="relative overflow-hidden">
-          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+          {/* Hero stats band */}
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+              {[250, 38, 7, 2].map((v, i) => (
+                <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="text-space-cyan font-mono text-2xl font-bold">{v}+</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {i === 0 && "tests pass"}
+                    {i === 1 && "static pages"}
+                    {i === 2 && "celestial bodies"}
+                    {i === 3 && "worlds to land on"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
             <div>
               <Badge tone="cyan" className="mb-5">
                 2026 Space Apps · The Next Frontier
@@ -78,19 +94,19 @@ export function HomeContent() {
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-400">
                 Plan, fly and live a real Moon-to-Mars mission. Turn cosmic data into everyday
-                decisions. Open data, open source, no account, no database — everything runs on
-                facts stored in GitHub and physics that is tested.
+                decisions. Open data, open source, no account — everything runs on facts stored
+                in GitHub and physics that is tested.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/play"
-                  className="inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:bg-space-cyan/80"
+                  className="inline-flex items-center gap-2 rounded-lg bg-space-cyan px-5 py-3 font-semibold text-space-950 transition hover:bg-space-cyan/80 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
                 >
                   Start the game <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/commons"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
                 >
                   <Compass className="h-4 w-4" /> See the commons
                 </Link>
@@ -101,7 +117,7 @@ export function HomeContent() {
                 <Badge tone="slate"><Database className="h-3 w-3" /> stored in GitHub</Badge>
               </div>
             </div>
-            <div className="h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-black/30 sm:h-[520px]">
+            <div className="h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-black/30 sm:h-[520px] shadow-2xl shadow-space-cyan/10">
               <SpaceCanvas bodyId="earth" cameraDistance={2.8} />
             </div>
           </div>
@@ -124,10 +140,13 @@ export function HomeContent() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="grid gap-6 md:grid-cols-2">
             {pillars.map((p) => (
-              <Card key={p.title} href={p.href}>
-                <p className="kicker mb-3">{p.kicker}</p>
+              <Card key={p.title} href={p.href} className="group">
+                <div className="flex items-center gap-2 mb-3">
+                  <p.icon className="h-5 w-5 text-space-cyan transition group-hover:scale-110" />
+                  <p className="kicker">{p.kicker}</p>
+                </div>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <p.icon className="h-5 w-5 text-space-cyan" /> {p.title}
+                  {p.title}
                 </CardTitle>
                 <CardBody className="mt-4 leading-relaxed">{p.body}</CardBody>
               </Card>
@@ -138,13 +157,13 @@ export function HomeContent() {
             <span className="text-sm text-slate-500">Also in the app:</span>
             <Link
               href="/library"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
             >
               <Library className="h-4 w-4 text-space-cyan" /> Mission Library
             </Link>
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
             >
               <Search className="h-4 w-4 text-space-cyan" /> Search everything
             </Link>
@@ -152,7 +171,7 @@ export function HomeContent() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-space-900 to-space-950 p-8">
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-space-900 to-space-950 p-8 shadow-2xl shadow-space-cyan/5">
             <p className="kicker mb-3">How it wins</p>
             <h2 className="text-2xl font-semibold text-white">
               Built to be judged: Impact · Creativity · Validity · Relevance · Presentation
@@ -162,7 +181,7 @@ export function HomeContent() {
               unit-tested against NASA/NOAA reference values. The live-data layer is transient —
               the whole app still works offline from GitHub-hosted datasets.
             </p>
-            <Link href="/live" className="mt-6 inline-flex items-center gap-2 font-semibold text-space-cyan hover:underline">
+            <Link href="/live" className="mt-6 inline-flex items-center gap-2 font-semibold text-space-cyan hover:underline focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950">
               <Radio className="h-4 w-4" /> Open the live frontier ribbon
             </Link>
           </div>

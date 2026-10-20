@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { Globe } from "./Globe";
+import { paintGlobeTexture } from "./texture";
 import { Satellite, AlertTriangle } from "lucide-react";
 import { usePrefersReducedMotion } from "@/lib/motion";
 
@@ -188,10 +189,33 @@ function Planet({
       onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }}
       onPointerOut={() => { document.body.style.cursor = "default"; }}
     >
-      <mesh>
-        <sphereGeometry args={[displayRadius, 32, 32]} />
-        <meshStandardMaterial color={planet.color} roughness={0.7} metalness={0.1} />
-      </mesh>
+      {/* Textured globe where available, solid color otherwise */}
+      {["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"].includes(planet.texture) ? (
+        <mesh>
+          <sphereGeometry args={[displayRadius, 40, 40]} />
+          <meshStandardMaterial
+            map={useMemo(() => {
+              const tex = new THREE.CanvasTexture(paintGlobeTexture(planet.texture));
+              tex.colorSpace = THREE.SRGBColorSpace;
+              return tex;
+            }, [planet.texture])}
+            roughness={0.7}
+            metalness={0.1}
+          />
+        </mesh>
+      ) : (
+        <mesh>
+          <sphereGeometry args={[displayRadius, 32, 32]} />
+          <meshStandardMaterial color={planet.color} roughness={0.7} metalness={0.1} />
+        </mesh>
+      )}
+      {/* Saturn rings */}
+      {planet.name === "Saturn" && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[displayRadius * 1.55, displayRadius * 2.25, 64]} />
+          <meshStandardMaterial color="#c8b080" transparent opacity={0.75} side={THREE.DoubleSide} />
+        </mesh>
+      )}
       {planet.name === "Earth" && (
         <group position={[toScene(-0.00257), 0, 0]} scale={0.3}>
           <Globe bodyId="moon" radiusKm={1737} atmosphere={false} />
@@ -305,9 +329,13 @@ export function OrreryCanvas({ initialDate, initialSpeed = 1 }:
           </mesh>
           <mesh>
             <sphereGeometry args={[toScene(0.006), 48, 48]} />
-            <meshBasicMaterial color="#ffb300" transparent opacity={0.15} />
+            <meshBasicMaterial color="#ffb300" transparent opacity={0.18} />
           </mesh>
-          <pointLight position={[0, 0, 0]} intensity={2} color="#fff3cf" decay={2} distance={toScene(40)} />
+          <mesh>
+            <sphereGeometry args={[toScene(0.009), 32, 32]} />
+            <meshBasicMaterial color="#ff8c1a" transparent opacity={0.09} />
+          </mesh>
+          <pointLight position={[0, 0, 0]} intensity={3} color="#fff3cf" decay={1} distance={toScene(60)} />
         </group>
 
         {/* Orbits */}

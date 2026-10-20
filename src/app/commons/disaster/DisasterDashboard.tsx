@@ -67,6 +67,16 @@ interface StormData {
   lightningDensity: number; // strikes/km²/hr
 }
 
+/**
+ * Deterministic pseudo-random in [0,1). Render-time `Math.random()` produces a
+ * different value on the server and the client, which trips React hydration
+ * (error #418). Seeded per index so SSR and hydration agree.
+ */
+function seededUnit(seed: number): number {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 const MOCK_FIRE_DATA: FireData = {
   riskLevel: "high",
   fwi: 38,
@@ -152,13 +162,14 @@ export function DisasterDashboard() {
 
   const nearbyRivers = useMemo(() =>
     floodData.rivers
-      .map(r => ({ ...r, distance: Math.random() * 50 }))
+      .map((r, i) => ({ ...r, distance: 5 + seededUnit(i + 1) * 45 }))
       .slice(0, 5)
-  , [location]);
+  , [floodData]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     await new Promise(r => setTimeout(r, 1000));
+    setDate(startOfDay(new Date()));
     setRefreshing(false);
   };
 
@@ -295,7 +306,7 @@ export function DisasterDashboard() {
                       <tr key={fire.name} className="border-b border-white/5 hover:bg-white/5">
                         <td className="py-2 px-3 font-medium text-white">{fire.name}</td>
                         <td className="py-2 px-3 text-white">{fire.distance.toFixed(1)} km</td>
-                        <td className="py-2 px-3 font-mono text-white">{fire.acres.toLocaleString()}</td>
+                        <td className="py-2 px-3 font-mono text-white">{fire.acres.toLocaleString("en-US")}</td>
                         <td className="py-2 px-3">
                           <div className="w-24 h-2 bg-white/10 rounded-full overflow-hidden">
                             <div className="h-full bg-red-400 transition-all" style={{ width: `${fire.containment}%` }} />
@@ -421,11 +432,11 @@ export function DisasterDashboard() {
               </CardTitle>
               <div className="mt-4 flex gap-2 overflow-x-auto">
                 {Array.from({ length: 7 }).map((_, i) => {
-                  const day = addDays(new Date(), i);
-                  const precip = Math.random() * 0.5;
+                  const day = addDays(date, i);
+                  const precip = seededUnit(i + 7) * 0.5;
                   return (
                     <div key={i} className="flex flex-col items-center gap-1 px-3 py-3 rounded-lg bg-white/5 border border-white/10 min-w-[50px]">
-                      <span className="text-xs text-slate-400">{format(addDays(new Date(), i), "MMM d")}</span>
+                      <span className="text-xs text-slate-400" suppressHydrationWarning>{format(day, "MMM d")}</span>
                       <div className="h-20 w-8 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t" style={{ height: `${Math.max(4, precip * 40)}px` }} />
                       <span className="font-mono text-white">{precip.toFixed(2)} in</span>
                     </div>

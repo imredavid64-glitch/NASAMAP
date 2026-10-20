@@ -61,18 +61,43 @@ export function Globe({
     [markers, radius],
   );
 
+  const airless = bodyId === "moon" || bodyId === "mercury";
+
   return (
-    <group rotation={[THREE.MathUtils.degToRad(0), 0, 0]}>
+    <group>
+      {/* Main globe */}
       <mesh rotation={spin}>
         <sphereGeometry args={[radius, segments, segments]} />
         <meshStandardMaterial map={texture} roughness={0.9} metalness={0.05} />
       </mesh>
-      {atmosphere ? (
-        <mesh scale={1.015}>
-          <sphereGeometry args={[radius, 48, 48]} />
-          <meshBasicMaterial color="#58c8ff" transparent opacity={0.12} side={THREE.BackSide} />
+
+      {/* Atmosphere glow (skips airless bodies) */}
+      {atmosphere && !airless && (
+        <mesh scale={1.05} rotation={spin}>
+          <sphereGeometry args={[radius, segments * 0.75, segments * 0.75]} />
+          <meshBasicMaterial
+            color={bodyId === "sun" ? "#ffd166" : bodyId === "venus" ? "#e6bb62" : "#4a90d9"}
+            transparent
+            opacity={0.16}
+            side={THREE.BackSide}
+          />
         </mesh>
-      ) : null}
+      )}
+
+      {/* Cloud shell for earth/venus */}
+      {(bodyId === "earth" || bodyId === "venus") && atmosphere && (
+        <mesh scale={1.025} rotation={[0, spin[1] * 0.6, 0]}>
+          <sphereGeometry args={[radius, segments, segments]} />
+          <meshStandardMaterial
+            map={texture}
+            alphaMap={texture}
+            transparent
+            opacity={0.55}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      )}
+
       {markerElements.map(({ m, pos }) => (
         <group key={m.id} position={pos}>
           <mesh>

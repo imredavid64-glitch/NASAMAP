@@ -31,6 +31,7 @@ const TRAIL_POINTS = 400;
 function Spacecraft({ state, samples, index }: { state: InterpolatedState; samples: InterpolatedState[]; index: number }) {
   const ref = useRef<THREE.Group>(null);
   const trailRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>>(null);
+  const glowRef = useRef<THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>>(null);
 
   // Update spacecraft position/orientation
   useFrame(() => {
@@ -42,6 +43,12 @@ function Spacecraft({ state, samples, index }: { state: InterpolatedState; sampl
         const dir = new THREE.Vector3(state.velocity.x, state.velocity.y, state.velocity.z).normalize();
         ref.current.lookAt(ref.current.position.clone().add(dir));
       }
+    }
+
+    // Pulse engine glow
+    if (glowRef.current) {
+      const pulse = 0.7 + 0.3 * Math.sin(Date.now() * 0.01);
+      glowRef.current.material.opacity = pulse;
     }
 
     // Update trail
@@ -70,29 +77,40 @@ function Spacecraft({ state, samples, index }: { state: InterpolatedState; sampl
         <pointsMaterial color="#00f0ff" size={0.015} transparent opacity={0.6} sizeAttenuation />
       </points>
 
-      {/* Spacecraft - simple CSM/LM stack */}
-      <group>
+      {/* Spacecraft - CSM/LM stack with solar panels */}
+      <group ref={ref}>
         {/* Service Module */}
         <mesh>
-          <cylinderGeometry args={[0.025, 0.025, 0.12, 12]} />
-          <meshStandardMaterial color="#c0c0c0" roughness={0.3} metalness={0.7} />
+          <cylinderGeometry args={[0.025, 0.025, 0.12, 16]} />
+          <meshStandardMaterial color="#c0c0c0" roughness={0.35} metalness={0.65} />
         </mesh>
         {/* Command Module */}
         <mesh position={[0, 0, -0.07]}>
-          <coneGeometry args={[0.035, 0.06, 12]} />
-          <meshStandardMaterial color="#e8e8e8" roughness={0.4} metalness={0.6} />
+          <coneGeometry args={[0.035, 0.06, 16]} />
+          <meshStandardMaterial color="#e8e8e8" roughness={0.45} metalness={0.55} />
         </mesh>
-        {/* LM (when attached) - simple descent stage */}
+        {/* LM descent stage */}
         {state.met < metToSeconds("100:12:00") && (
           <mesh position={[0, 0, 0.08]}>
-            <cylinderGeometry args={[0.04, 0.05, 0.08, 8]} />
+            <cylinderGeometry args={[0.04, 0.05, 0.08, 12]} />
             <meshStandardMaterial color="#b8a060" roughness={0.5} metalness={0.3} />
           </mesh>
         )}
+        {/* Solar panels */}
+        <group position={[0.055, 0, -0.02]}>
+          <mesh position={[0.09, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <planeGeometry args={[0.14, 0.05]} />
+            <meshStandardMaterial color="#2c3e50" roughness={0.9} metalness={0.1} emissive="#1a252f" emissiveIntensity={0.3} />
+          </mesh>
+          <mesh position={[-0.09, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+            <planeGeometry args={[0.14, 0.05]} />
+            <meshStandardMaterial color="#2c3e50" roughness={0.9} metalness={0.1} emissive="#1a252f" emissiveIntensity={0.3} />
+          </mesh>
+        </group>
         {/* Engine glow */}
-        <mesh position={[0, 0, 0.14]}>
-          <sphereGeometry args={[0.012, 8, 8]} />
-          <meshBasicMaterial color="#ff6600" transparent opacity={0.8} />
+        <mesh ref={glowRef} position={[0, 0, 0.145]}>
+          <sphereGeometry args={[0.012, 12, 12]} />
+          <meshBasicMaterial color="#ff6600" transparent opacity={0.85} />
         </mesh>
       </group>
     </group>
