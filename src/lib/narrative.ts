@@ -20,6 +20,13 @@ export interface NarrativeChoice {
   consequence: string;
   /** Optional: unlocks a new node or sets a flag. */
   unlocks?: string;
+  /**
+   * Optional conditional destinations, evaluated in order before `unlocks`.
+   * The first rule whose flag the player has collected determines the next node,
+   * which lets an earlier decision (e.g. ignoring the anomaly) override the
+   * final branch without duplicating whole choice trees.
+   */
+  unlockRules?: Array<{ flag: string; node: string }>;
   /** Optional: sets a flag for later reference. */
   setsFlag?: string;
 }
@@ -103,11 +110,18 @@ export function evaluateNarrativeState(
 
   const finalScore = Math.min(100, Math.max(0, baseScore + narrativeBonus));
 
-  // Determine stars
+  // Determine stars. Stars are only earned by finishing the story, and a bad
+  // ending caps the reward — otherwise a high-scoring opening design would show
+  // a full three stars before the player has made a single choice.
   let stars: 0 | 1 | 2 | 3 = 0;
-  if (finalScore >= scenario.parScore) stars = 3;
-  else if (finalScore >= scenario.parScore - 15) stars = 2;
-  else if (finalScore >= scenario.parScore - 30) stars = 1;
+  if (isEnding) {
+    if (finalScore >= scenario.parScore) stars = 3;
+    else if (finalScore >= scenario.parScore - 15) stars = 2;
+    else if (finalScore >= scenario.parScore - 30) stars = 1;
+
+    if (endingType === "partial" && stars > 2) stars = 2;
+    if (endingType === "failure" && stars > 1) stars = 1;
+  }
 
   return {
     score: finalScore,
@@ -149,8 +163,10 @@ export function applyNarrativeChoice(
   const newFlags = new Set(state.flags);
   if (choice.setsFlag) newFlags.add(choice.setsFlag);
 
-  // Determine next node
-  let nextNodeId = choice.unlocks ?? scenario.nodes.find((n) => n.requiresFlag === choice.setsFlag)?.id;
+  // Determine next node: flag-conditional rules first, then an explicit
+  // unlock, then the flag/index fallback below.
+  const conditionalUnlock = choice.unlockRules?.find((rule) => newFlags.has(rule.flag))?.node;
+  let nextNodeId = conditionalUnlock ?? choice.unlocks ?? scenario.nodes.find((n) => n.requiresFlag === choice.setsFlag)?.id;
 
   // If no explicit unlock, find next node that doesn't require a flag or whose flag we have
   if (!nextNodeId) {

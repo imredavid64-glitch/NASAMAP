@@ -138,13 +138,18 @@ export function search(query: string, limit = 10): SearchResult[] {
 }
 
 export function getAll(): SearchResult[] {
+  if (docs.length === 0) {
+    docs = buildDocs();
+  }
   return [...docs];
 }
 
 export function getByType(type: SearchResult["type"]): SearchResult[] {
+  if (docs.length === 0) docs = buildDocs();
   return docs.filter((d) => d.type === type);
 }
 
 export function getById(id: string): SearchResult | undefined {
+  if (docs.length === 0) docs = buildDocs();
   return docs.find((d) => d.id === id);
 }

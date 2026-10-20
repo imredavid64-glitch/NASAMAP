@@ -98,7 +98,7 @@ export function CrewHealthDashboard({ design, scorecard }: CrewHealthDashboardPr
       label: "Bone Mineral Density",
       icon: Bone,
       value: `${boneLoss.monthly.toFixed(1)}%/mo`,
-      detail: `Total loss: ${boneLoss.total.toFixed(1)}% over ${totalDays} days`,
+      detail: `Total loss: ${boneLoss.total.toFixed(1)}% over ${totalDays.toFixed(0)} days`,
       threshold: RISK_THRESHOLDS["Bone loss (%/month)"],
       current: boneLoss.monthly,
       trend: "down",
@@ -131,7 +131,7 @@ export function CrewHealthDashboard({ design, scorecard }: CrewHealthDashboardPr
       label: "Radiation Cancer Risk",
       icon: Shield,
       value: `${cancerRisk.toFixed(1)}% excess`,
-      detail: `Total dose: ${radiationMsv} mSv (career limit: 600 mSv)`,
+      detail: `Total dose: ${radiationMsv.toFixed(0)} mSv (career limit: 600 mSv)`,
       threshold: RISK_THRESHOLDS["Radiation cancer risk"],
       current: cancerRisk,
       trend: "up",
@@ -176,7 +176,7 @@ export function CrewHealthDashboard({ design, scorecard }: CrewHealthDashboardPr
         title="Crew Health Risk Dashboard"
       />
       <p className="mt-3 max-w-3xl text-slate-400">
-        Physiological and psychological risk projections for the {totalDays}-day {isMars ? "Mars" : "Moon"} mission.
+        Physiological and psychological risk projections for the {totalDays.toFixed(0)}-day {isMars ? "Mars" : "Moon"} mission.
         Models based on ISS data (bone/muscle), NASA Space Cancer Risk 2020 (radiation), and HRP evidence books.
         <span className="font-mono text-space-cyan ml-1">Click any card to expand →</span>
       </p>

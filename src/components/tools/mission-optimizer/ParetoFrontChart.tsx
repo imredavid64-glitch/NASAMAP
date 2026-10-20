@@ -41,18 +41,22 @@ function GridLines({ count, isHorizontal, width, height }: { count: number; isHo
 
 export function ParetoFrontChart({ data, selectedArchitecture, onSelect }: ParetoFrontChartProps) {
   const [chartSize, setChartSize] = useState({ width: 800, height: 400 });
-  const chartRef = useRef<HTMLDivElement>(null);
+  // Measure the plot box itself (not the outer card) so the SVG axes and the
+  // absolutely-positioned bubbles share one coordinate space.
+  const plotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (chartRef.current) {
-      const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setChartSize({ width: entry.contentRect.width, height: entry.contentRect.height });
-        }
-      });
-      observer.observe(chartRef.current);
-      return () => observer.disconnect();
-    }
+    const el = plotRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) setChartSize({ width, height });
+      }
+    });
+    observer.observe(el);
+    setChartSize({ width: el.clientWidth, height: el.clientHeight });
+    return () => observer.disconnect();
   }, []);
 
   if (!data.length) {
@@ -65,16 +69,25 @@ export function ParetoFrontChart({ data, selectedArchitecture, onSelect }: Paret
     );
   }
 
-  const maxImleo = Math.max(...data.map((d) => d.imleoT)) + 20;
-  const maxPayload = Math.max(...data.map((d) => d.payloadT)) + 10;
+  const imleos = data.map((d) => d.imleoT);
+  const payloads = data.map((d) => d.payloadT);
+  // Pad the domain by 8% so bubbles at the extremes are not clipped by the plot box.
+  const padRange = (min: number, max: number) => {
+    const span = max - min || Math.max(1, Math.abs(max) * 0.1);
+    return { min: Math.max(0, min - span * 0.08), max: max + span * 0.08 };
+  };
+  const xDomain = padRange(Math.min(...imleos), Math.max(...imleos));
+  const yDomain = padRange(Math.min(...payloads), Math.max(...payloads));
   const width = chartSize.width;
   const height = chartSize.height;
 
-  const xScale = (imleo: number) => (imleo / maxImleo) * (width - 100) + 50;
-  const yScale = (payload: number) => height - 50 - (payload / maxPayload) * (height - 100);
+  const xScale = (imleo: number) =>
+    50 + ((imleo - xDomain.min) / (xDomain.max - xDomain.min)) * (width - 100);
+  const yScale = (payload: number) =>
+    height - 50 - ((payload - yDomain.min) / (yDomain.max - yDomain.min)) * (height - 100);
 
   return (
-    <div ref={chartRef} className="h-full">
+    <div className="h-full">
       <Card className="h-full">
         <CardBody>
           <div className="flex items-center justify-between mb-4">
@@ -90,7 +103,7 @@ export function ParetoFrontChart({ data, selectedArchitecture, onSelect }: Paret
           <p className="text-xs text-slate-400 mb-4">
             Each point is a non-dominated architecture. Click to select. Color = Cost ($B), Size = Radiation (mSv)
           </p>
-          <div className="relative h-96 bg-space-950/50 rounded-lg border border-white/10 overflow-hidden">
+          <div ref={plotRef} className="relative h-96 bg-space-950/50 rounded-lg border border-white/10 overflow-hidden">
             {/* SVG Chart */}
             <svg className="absolute inset-0" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
               {/* Axes */}
@@ -107,9 +120,10 @@ export function ParetoFrontChart({ data, selectedArchitecture, onSelect }: Paret
             {/* Data Points */}
             <div className="absolute inset-0 pointer-events-none">
               {data.map((point) => {
-                const cx = xScale(point.imleoT);
-                const cy = yScale(point.payloadT);
                 const size = getRadiationSize(point.radiationMSv);
+                // Keep the whole circle inside the plot box even at the domain edges.
+                const cx = Math.min(Math.max(xScale(point.imleoT), size + 2), width - size - 2);
+                const cy = Math.min(Math.max(yScale(point.payloadT), size + 2), height - size - 2);
                 const color = getCostColor(point.costB);
                 const isSelected = point.vehicle === selectedArchitecture;
 
@@ -125,26 +139,28 @@ export function ParetoFrontChart({ data, selectedArchitecture, onSelect }: Paret
                       pointerEvents: "auto",
                     }}
                   >
-                    <circle
-                      cx={size}
-                      cy={size}
-                      r={size}
-                      fill={color}
-                      stroke={isSelected ? "#22d3ee" : "transparent"}
-                      strokeWidth={isSelected ? 3 : 0}
-                      style={{
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        filter: isSelected ? "drop-shadow(0 0 8px #22d3ee)" : "none",
-                      }}
-                      onClick={() => onSelect(point.vehicle)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.filter = "drop-shadow(0 0 8px #22d3ee)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.filter = isSelected ? "drop-shadow(0 0 8px #22d3ee)" : "none";
-                      }}
-                    />
+                    <svg width={size * 2} height={size * 2}>
+                      <circle
+                        cx={size}
+                        cy={size}
+                        r={size}
+                        fill={color}
+                        stroke={isSelected ? "#22d3ee" : "transparent"}
+                        strokeWidth={isSelected ? 3 : 0}
+                        style={{
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          filter: isSelected ? "drop-shadow(0 0 8px #22d3ee)" : "none",
+                        }}
+                        onClick={() => onSelect(point.vehicle)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.filter = "drop-shadow(0 0 8px #22d3ee)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.filter = isSelected ? "drop-shadow(0 0 8px #22d3ee)" : "none";
+                        }}
+                      />
+                    </svg>
                   </div>
                 );
               })}

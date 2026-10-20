@@ -24,15 +24,14 @@ export function Nav() {
           </span>
           <span className="hidden sm:inline-flex items-center rounded-full border border-space-amber/40 bg-space-amber/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-space-amber">Space Apps 2026</span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex" role="navigation" aria-label="Main navigation">
+        <nav className="hidden items-center gap-0.5 xl:flex" role="navigation" aria-label="Main navigation">
           {visibleLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+              className="flex items-center whitespace-nowrap rounded-lg px-2 py-2 text-[13px] text-slate-300 transition hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
               aria-label={l.label}
             >
-              <l.icon className="h-4 w-4" aria-hidden="true" />
               {l.label}
             </Link>
           ))}
@@ -40,7 +39,7 @@ export function Nav() {
         <div className="flex items-center gap-2">
           <Link
             href="/play"
-            className="hidden rounded-lg bg-space-cyan px-4 py-2 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80 sm:inline-block focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
+            className="hidden whitespace-nowrap rounded-lg bg-space-cyan px-3 py-2 text-sm font-semibold text-space-950 transition hover:bg-space-cyan/80 sm:inline-block focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950"
           >
             Start the game
           </Link>

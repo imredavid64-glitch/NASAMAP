@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { 
   Plus, Minus, Settings, Zap, Package, FlaskConical, 
   ArrowRight, ArrowLeft, Trash2, Copy, Check, AlertTriangle,
@@ -153,7 +153,7 @@ export function ISRUPlantDesigner({ location, crew, missionDurationDays, onPlant
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Initialize positions
-  useMemo(() => {
+  useEffect(() => {
     const newPositions: Record<string, { x: number; y: number }> = {};
     plant.processes.forEach((process, i) => {
       if (!nodePositions[process.id]) {
@@ -163,8 +163,10 @@ export function ISRUPlantDesigner({ location, crew, missionDurationDays, onPlant
         newPositions[process.id] = { x: 20 + col * 280, y: 20 + row * 280 };
       }
     });
-    setNodePositions(prev => ({ ...prev, ...newPositions }));
-  }, [plant.processes.length, nodePositions]);
+    if (Object.keys(newPositions).length > 0) {
+      setNodePositions(prev => ({ ...prev, ...newPositions }));
+    }
+  }, [plant.processes.length]);
 
   // Auto-arrange
   const autoArrange = useCallback(() => {
@@ -255,7 +257,7 @@ const filteredProcesses = useMemo(() => {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl border border-white/10 bg-white/5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -264,12 +266,12 @@ const filteredProcesses = useMemo(() => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search processes..."
-            className="w-48"
+            className="flex-1 min-w-0"
           />
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ISRUProcess["category"] | "all")}
-            className="rounded-lg border border-white/10 bg-space-950/60 px-3 py-2 text-sm text-white outline-none focus:border-space-cyan/60 w-36"
+            className="rounded-lg border border-white/10 bg-space-950/60 px-3 py-2 text-sm text-white outline-none focus:border-space-cyan/60 flex-1"
           >
             <option value="all">All Categories</option>
             <option value="thermal">Thermal</option>
@@ -329,7 +331,7 @@ const filteredProcesses = useMemo(() => {
       )}
 
       {/* Canvas */}
-      <div className="flex-1 relative overflow-auto rounded-xl border border-white/10 bg-gradient-to-br from-space-950 to-space-900">
+      <div className="relative min-h-[420px] flex-1 overflow-auto rounded-xl border border-white/10 bg-gradient-to-br from-space-950 to-space-900">
         <div
           ref={canvasRef}
           className="absolute inset-0"
@@ -403,15 +405,6 @@ const filteredProcesses = useMemo(() => {
           </svg>
         </div>
 
-        {/* Empty state hint */}
-        {plant.processes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center text-slate-500">
-              <Package className="h-16 w-16 mx-auto mb-4 text-slate-700" />
-              <p className="text-lg">Click "Add Process" to start building</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Summary Panel */}

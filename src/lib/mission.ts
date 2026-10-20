@@ -330,7 +330,7 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
     const transitDose = radiationDose(transferDays, transitEnv);
     const surfaceDose = radiationDose(surfaceDays, surfaceEnv);
     radiationMsvTotal = transitDose.mSvTotal + surfaceDose.mSvTotal;
-    radiationNote = `transit ${transitEnv} (${transitDose.benchmarkNote}) + surface ${surfaceEnv} (${surfaceDose.benchmarkNote})`;
+    radiationNote = `${transitDose.benchmarkNote} in transit + ${surfaceDose.benchmarkNote} on the surface`;
     habitationModuleKg = HABITATION_MODULE_KG[opts.destination];
   }
 

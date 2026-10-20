@@ -27,24 +27,21 @@
               "text": "Potatoes — high calories, proven on ISS (Veggie), tolerates low light",
               "designDelta": { "surfaceDays": 180 },
               "consequence": "Potatoes selected. They'll need 120 sols to mature. Water budget: 400L per sol for the crop. The crew will eat well — if the water holds.",
-              "setsFlag": "crop_potatoes",
-              "unlocks": "water_crisis"
+              "setsFlag": "crop_potatoes"
             },
             {
               "id": "soybeans",
               "text": "Soybeans — complete protein, nitrogen-fixing, but longer growth cycle",
               "designDelta": { "surfaceDays": 210 },
               "consequence": "Soybeans selected. 150 sols to maturity. Higher protein yield but extends surface stay by 30 sols. Radiation dose increases. Water budget: 350L/sol.",
-              "setsFlag": "crop_soybeans",
-              "unlocks": "water_crisis"
+              "setsFlag": "crop_soybeans"
             },
             {
               "id": "mixed",
               "text": "Mixed crop rotation — potatoes, soybeans, and leafy greens for morale",
               "designDelta": { "surfaceDays": 240 },
               "consequence": "Diverse rotation selected. 180 sols for full cycle. Best nutrition and crew morale, but extends stay to 240 sols. Radiation risk climbs. Water budget: 500L/sol.",
-              "setsFlag": "crop_mixed",
-              "unlocks": "water_crisis"
+              "setsFlag": "crop_mixed"
             }
           ]
         },
@@ -59,21 +56,24 @@
               "text": "Divert crew to repair the WPA — 3 sols downtime, restores 95% efficiency",
               "designDelta": { "surfaceDays": 183 },
               "consequence": "WPA repaired. Efficiency restored to 95%. Water crisis averted. Crew loses 3 sols of crop tending. Potatoes on track.",
-              "setsFlag": "wpa_repaired"
+              "setsFlag": "wpa_repaired",
+              "unlocks": "harvest"
             },
             {
               "id": "reduce_crop",
               "text": "Reduce potato plot by 30% — saves 120L/sol, but cuts calorie yield",
               "designDelta": {},
               "consequence": "Crop reduced. Water budget balanced. But crew daily calories drop from 2800 to 2200. Morale suffers. Long-term health risk.",
-              "setsFlag": "crop_reduced"
+              "setsFlag": "crop_reduced",
+              "unlocks": "harvest"
             },
             {
               "id": "mine_ice",
               "text": "Send rover to mine subsurface ice — 10 sols, yields 5000L if successful",
               "designDelta": { "surfaceDays": 190 },
               "consequence": "Ice mining mission launched. 10 sols round trip. 60% chance of success based on orbital radar. High risk, high reward.",
-              "setsFlag": "ice_mining"
+              "setsFlag": "ice_mining",
+              "unlocks": "harvest"
             }
           ]
         },
@@ -88,14 +88,16 @@
               "text": "Repair WPA — 3 sols, restores 95% efficiency",
               "designDelta": { "surfaceDays": 213 },
               "consequence": "WPA fixed. Soybeans on track for 150-sol maturity. Extended stay to 213 sols total. Radiation dose increases slightly.",
-              "setsFlag": "wpa_repaired"
+              "setsFlag": "wpa_repaired",
+              "unlocks": "harvest"
             },
             {
               "id": "stagger_planting",
               "text": "Stagger planting — harvest half early, replant. Reduces peak water by 20%",
               "designDelta": { "surfaceDays": 225 },
               "consequence": "Staggered planting works. Peak water demand reduced. But adds 15 sols to total cycle. Surface stay now 225 sols. Crew fatigue a concern.",
-              "setsFlag": "staggered"
+              "setsFlag": "staggered",
+              "unlocks": "harvest"
             }
           ]
         },
@@ -110,14 +112,16 @@
               "text": "Cut leafy greens — saves 150L/sol, morale drops 15%",
               "designDelta": {},
               "consequence": "Greens removed. Water budget closes. Crew morale declines. Psych scores drop. Long-duration risk increases.",
-              "setsFlag": "greens_cut"
+              "setsFlag": "greens_cut",
+              "unlocks": "harvest"
             },
             {
               "id": "ice_mining_mixed",
               "text": "Mine ice — 10 sols, 5000L potential, keeps full rotation",
               "designDelta": { "surfaceDays": 250 },
               "consequence": "Ice mining launched. Full crop rotation preserved. Surface stay extends to 250 sols. Radiation dose climbs. High stakes.",
-              "setsFlag": "ice_mining"
+              "setsFlag": "ice_mining",
+              "unlocks": "harvest"
             }
           ]
         },
@@ -157,7 +161,7 @@
           "isEnding": true,
           "endingType": "success",
           "speaker": "Mission Control",
-          "narrative": "The first farmer on Mars has proven it: we can grow food on the Red Planet. Your harvest feeds the crew, seeds the next rotation, and writes the playbook for every settlement that follows. The Starship returns heavy with data, seeds, and hope. History records this sol as the day humanity became a two-planet species — starting with a potato.",
+          "narrative": "The first farmer on Mars has proven it: we can grow food on the Red Planet. Your harvest feeds the crew, seeds the next rotation, and writes the playbook for every settlement that follows. The Starship returns heavy with data, seeds, and hope. History records this sol as the day humanity became a two-planet species — starting with a seed.",
           "choices": []
         },
         {
@@ -204,21 +208,24 @@
               "text": "Long traverse along crater rim — sample ejecta from multiple impacts",
               "designDelta": { "surfaceDays": 6 },
               "consequence": "Rim traverse planned. 18km round trip. Samples from 3 different basin ejecta blankets. High science return. Uses 2 of 4 EVAs. Leaves 2 EVAs for contingency.",
-              "setsFlag": "rim_done"
+              "setsFlag": "rim_done",
+              "unlocks": "evas"
             },
             {
               "id": "shadow_probe",
               "text": "Descend into permanent shadow — direct ice sampling with drill",
               "designDelta": { "surfaceDays": 6 },
               "consequence": "Shadow descent planned. High risk — thermal extremes, navigation in darkness. But direct ice core sample is the holy grail. Uses 2 EVAs. Requires special lighting and thermal management.",
-              "setsFlag": "shadow_done"
+              "setsFlag": "shadow_done",
+              "unlocks": "evas"
             },
             {
               "id": "volcanic_hunt",
               "text": "Hunt for young volcanic vents — test recent lunar activity theories",
               "designDelta": { "surfaceDays": 6 },
               "consequence": "Volcanic hunt planned. Targeting irregular mare patches. Could rewrite lunar thermal history. Moderate risk. Uses 2 EVAs. High science impact if vents found.",
-              "setsFlag": "volcanic_done"
+              "setsFlag": "volcanic_done",
+              "unlocks": "evas"
             }
           ]
         },
@@ -232,21 +239,24 @@
               "text": "Investigate thorium anomaly — could indicate KREEP terrain, deep mantle material",
               "designDelta": {},
               "consequence": "Anomaly investigated. Thorium confirmed — you've found KREEP basalt. Sample return will revolutionize lunar formation models. But primary traverse samples reduced.",
-              "setsFlag": "anomaly_investigated"
+              "setsFlag": "anomaly_investigated",
+              "unlocks": "launch_prep"
             },
             {
               "id": "stick_to_plan",
               "text": "Stick to plan — primary traverse samples are the mission requirement",
               "designDelta": {},
               "consequence": "Primary samples secured. Thorium anomaly left for next mission. Safe, conservative. Meets all mission requirements. Science return solid but not revolutionary.",
-              "setsFlag": "plan_followed"
+              "setsFlag": "plan_followed",
+              "unlocks": "launch_prep"
             },
             {
               "id": "split_difference",
               "text": "Quick anomaly sample (30 min), then finish traverse — compromise",
               "designDelta": {},
               "consequence": "Compromise achieved. Anomaly sampled (small piece). Primary traverse mostly complete. Both objectives partially met. Good balance.",
-              "setsFlag": "compromise"
+              "setsFlag": "compromise",
+              "unlocks": "launch_prep"
             }
           ]
         },
@@ -260,21 +270,27 @@
               "text": "Prioritize ice core — unique volatile record, highest science value",
               "designDelta": {},
               "consequence": "Ice core kept. Volatile science secured. Some basalt samples left behind. Water ice provenance confirmed.",
-              "setsFlag": "ice_priority"
+              "setsFlag": "ice_priority",
+              "unlockRules": [{ "flag": "plan_followed", "node": "ending_conservative" }],
+              "unlocks": "ending_solid"
             },
             {
               "id": "keep_kreep",
               "text": "Prioritize KREEP/thorium samples — mantle process record",
               "designDelta": {},
               "consequence": "KREEP samples kept. Deep mantle process record secured. Ice core left. Volatile science deferred.",
-              "setsFlag": "kreep_priority"
+              "setsFlag": "kreep_priority",
+              "unlockRules": [{ "flag": "plan_followed", "node": "ending_conservative" }],
+              "unlocks": "ending_science_star"
             },
             {
               "id": "balanced",
               "text": "Balanced suite — representative of all sites visited",
               "designDelta": {},
               "consequence": "Balanced collection. All sites represented. No single story complete, but all stories started. Good for broad science.",
-              "setsFlag": "balanced_suite"
+              "setsFlag": "balanced_suite",
+              "unlockRules": [{ "flag": "plan_followed", "node": "ending_conservative" }],
+              "unlocks": "ending_solid"
             }
           ]
         },
@@ -330,21 +346,24 @@
               "text": "PPE first — power and propulsion before anything else",
               "designDelta": {},
               "consequence": "PPE launches on Falcon Heavy. Solar arrays deploy. Ion thrusters fire. NRHO achieved. But HALO delayed 60 days. No crew habitat until Month 8.",
-              "setsFlag": "ppe_first"
+              "setsFlag": "ppe_first",
+              "unlocks": "integration_crisis"
             },
             {
               "id": "halo_first",
               "text": "HALO first — crew habitat ready when PPE arrives",
               "designDelta": {},
               "consequence": "HALO launches on SLS Block 1. Habitat ready. But PPE on Falcon Heavy slips 90 days (fairing issue). Station unpowered for 3 months. Thermal cycling risks systems.",
-              "setsFlag": "halo_first"
+              "setsFlag": "halo_first",
+              "unlocks": "integration_crisis"
             },
             {
               "id": "dual_manifest",
               "text": "Dual manifest — PPE + HALO on same SLS Block 1B (if ready)",
               "designDelta": {},
               "consequence": "SLS Block 1B not certified. 50% chance it flies in window. If it works, perfect integration. If not, both delay 120 days. High risk, high reward.",
-              "setsFlag": "dual_manifest"
+              "setsFlag": "dual_manifest",
+              "unlocks": "integration_crisis"
             }
           ]
         },
@@ -358,21 +377,24 @@
               "text": "Wait for ESA software patch — 60 days, correct fix",
               "designDelta": {},
               "consequence": "ESA patch delivered. Correct, tested, certified. But 60-day slip pushes first crew to Month 13. Political pressure mounts.",
-              "setsFlag": "esa_patch"
+              "setsFlag": "esa_patch",
+              "unlocks": "life_support_test"
             },
             {
               "id": "csa_adapter",
               "text": "Build CSA mechanical adapter — 45 days, hardware workaround",
               "designDelta": {},
               "consequence": "Adapter built. Works mechanically. But software telemetry limited. EVA required for final mate. 45 days. Crewed demo delayed to Month 11.",
-              "setsFlag": "csa_adapter"
+              "setsFlag": "csa_adapter",
+              "unlocks": "life_support_test"
             },
             {
               "id": "nasa_patch",
               "text": "NASA crash patch — 30 days, high risk, untested",
               "designDelta": {},
               "consequence": "NASA patch deployed. 30 days saved. But untested in orbit. First mating attempt... 30% chance of hard dock failure. If it works, crew by Month 10. If not, total loss of I-HAB.",
-              "setsFlag": "nasa_patch"
+              "setsFlag": "nasa_patch",
+              "unlocks": "life_support_test"
             }
           ]
         },
@@ -386,21 +408,24 @@
               "text": "Upload brine processor upgrade — adds 5% water recovery, 14 days",
               "designDelta": {},
               "consequence": "Brine processor code uploaded. Water recovery reaches 93%. CO2 scrubber still cycling irregularly. Crew health risk: manageable.",
-              "setsFlag": "water_upgraded"
+              "setsFlag": "water_upgraded",
+              "unlocks": "first_crew"
             },
             {
               "id": "fix_co2",
               "text": "Patch CO2 scrubber logic — stabilizes cycles, 10 days",
               "designDelta": {},
               "consequence": "CO2 scrubber stabilized. Air quality solid. Water recovery stays at 88%. Crew needs 12% more water resupply. Budget impact: $40M.",
-              "setsFlag": "co2_fixed"
+              "setsFlag": "co2_fixed",
+              "unlocks": "first_crew"
             },
             {
               "id": "both_minimal",
               "text": "Minimal fixes for both — 21 days, gets to 90% water, stable CO2",
               "designDelta": {},
               "consequence": "Both patched minimally. Water 90.5%. CO2 stable. Just barely meets spec. No margin. Any degradation = crisis.",
-              "setsFlag": "both_minimal"
+              "setsFlag": "both_minimal",
+              "unlocks": "first_crew"
             }
           ]
         },
@@ -414,21 +439,27 @@
               "text": "Deploy external payloads — heliophysics, radiation, lunar science",
               "designDelta": {},
               "consequence": "Science payloads deployed. Data flowing. Gateway proves its worth as science platform. Crew morale high. But maintenance backlog grows.",
-              "setsFlag": "science_first"
+              "setsFlag": "science_first",
+              "unlockRules": [{ "flag": "nasa_patch", "node": "ending_gateway_delayed" }],
+              "unlocks": "ending_gateway_fragile"
             },
             {
               "id": "maintenance_first",
               "text": "Burn down maintenance backlog — ECLSS, comms, thermal, robotics",
               "designDelta": {},
               "consequence": "Maintenance caught up. Station healthy. Science delayed 2 weeks. International partners annoyed but station survives.",
-              "setsFlag": "maintenance_first"
+              "setsFlag": "maintenance_first",
+              "unlockRules": [{ "flag": "nasa_patch", "node": "ending_gateway_delayed" }],
+              "unlocks": "ending_gateway_operational"
             },
             {
               "id": "esprit_demo",
               "text": "Prioritize ESPRIT refueling demo — proves Gateway as logistics hub",
               "designDelta": {},
               "consequence": "Refueling demo succeeds. Gateway validated as fuel depot. Critical for Mars architecture. ESA thrilled. Other systems wait.",
-              "setsFlag": "esprit_demo"
+              "setsFlag": "esprit_demo",
+              "unlockRules": [{ "flag": "nasa_patch", "node": "ending_gateway_delayed" }],
+              "unlocks": "ending_gateway_operational"
             }
           ]
         },

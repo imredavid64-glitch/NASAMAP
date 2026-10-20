@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
-import { SectionHeading } from "@/components/ui/section-heading";
 import { groundTrackKml, downloadFile, type KmlTrackPoint } from "@/lib/export";
 import { CardSkeleton, ListSkeleton } from "@/components/ui/skeleton";
 import { ErrorState, LoadingState, StaleDataBanner } from "@/components/ui/empty-state";
@@ -131,7 +130,7 @@ export function LiveRibbon() {
     <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <SectionHeading kicker="Live frontier ribbon" title="What's happening in space, right now." />
+          <h2 className="text-sm font-semibold uppercase tracking-widest text-space-cyan">Live feeds</h2>
           <p className="mt-3 max-w-2xl text-slate-400">
             Every card tries the live NASA / NOAA / CelesTrak feed and falls back to a real, dated snapshot. The badge
             always tells you which one you are looking at.
