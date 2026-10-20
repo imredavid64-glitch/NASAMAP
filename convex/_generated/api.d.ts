@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as agent from "../agent.js";
+import type * as agentFunctions from "../agentFunctions.js";
 import type * as auth from "../auth.js";
 import type * as missions from "../missions.js";
 
@@ -18,6 +20,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agent: typeof agent;
+  agentFunctions: typeof agentFunctions;
   auth: typeof auth;
   missions: typeof missions;
 }>;
@@ -48,4 +52,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
+};

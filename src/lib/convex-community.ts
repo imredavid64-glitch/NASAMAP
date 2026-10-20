@@ -139,15 +139,28 @@ export function useAuthor() {
 
 // Collaborative presence hooks
 export function useMissionPresence(missionId: string) {
-  return useQuery(api.missions.getPresence as any, { missionId });
+  try {
+    const result = useQuery(api.missions.getPresence as any, { missionId });
+    return result;
+  } catch {
+    return [];
+  }
 }
 
 export function useUpsertPresence() {
-  return useMutation(api.missions.upsertPresence as any);
+  try {
+    return useMutation(api.missions.upsertPresence as any);
+  } catch {
+    return async () => {};
+  }
 }
 
 export function useRemovePresence() {
-  return useMutation(api.missions.removePresence as any);
+  try {
+    return useMutation(api.missions.removePresence as any);
+  } catch {
+    return async () => {};
+  }
 }
 
 export function useUserColor(): string {
