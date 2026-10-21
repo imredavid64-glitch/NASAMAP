@@ -59,3 +59,13 @@ callback, which is paused in hidden/occluded tabs and headless browsers. The roo
   the client component and use `useRouter()` for navigation.
 - SVG must be wrapped in `<svg>`; bare SVG children (e.g. `<circle>`) are invalid DOM.
 - Dark space theme; reuse the `src/components/ui/*` primitives rather than ad-hoc markup.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
