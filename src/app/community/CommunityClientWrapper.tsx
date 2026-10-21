@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ConvexAnonProvider } from "@/components/convex-anon-provider";
 import { CommunityClient } from "./CommunityClient";
 
 export function CommunityClientWrapper() {
@@ -20,9 +19,5 @@ export function CommunityClientWrapper() {
     return null;
   }
 
-  return (
-    <ConvexAnonProvider>
-      <CommunityClient />
-    </ConvexAnonProvider>
-  );
+  return <CommunityClient />;
 }

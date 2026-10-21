@@ -7,7 +7,7 @@ import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { useCommunityMissions } from "@/lib/convex-community";
+import { useCommunityMissions } from "@/lib/community";
 import { format } from "date-fns";
 
 const DESTINATION_OPTIONS = ["all", "moon", "mars"] as const;
@@ -31,7 +31,7 @@ export function CommunityClient() {
     pageSize * 3 // Fetch more for client-side filtering
   );
 
-  // Handle case where Convex client isn't ready (during SSR/prerendering)
+  // Data has not been hydrated from storage yet (first paint / SSR prerender)
   if (missions === undefined && !isLoading) {
     return (
       <div className="pt-28 mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -195,7 +195,7 @@ function MissionCard({ mission }: { mission: any }) {
   };
 
   return (
-    <Link href={`/community/${mission._id}`} className="group">
+    <Link href={`/community/${encodeURIComponent(mission._id)}`} className="group">
       <Card className="h-full transition hover:border-space-cyan/40 hover:bg-white/[0.03]">
         <CardBody className="p-4">
           <div className="flex items-start justify-between gap-2 mb-3">

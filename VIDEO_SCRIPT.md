@@ -70,7 +70,7 @@
 Add these beats after 0:30:
 - **0:30–0:38**: Surface Ops 3D view — "One Martian sol: solar array and battery earning their place"
 - **0:38–0:45**: Commons/Library — "Curated articles, persona advice cards, full-text search"
-- **0:45–0:52**: Engineering honesty — "Every number tagged: documented, derived, or estimate. 250 tests. Zero secrets."
+- **0:45-0:52**: Engineering honesty - "Every number tagged: documented, derived, or estimate. 272 tests. Zero secrets."
 - **0:52–1:00**: Team + call to action — "Built solo. Open source. GitHub link in description. Every human has a seat at the frontier."
 
 ---
@@ -103,11 +103,11 @@ Add these beats after 0:30:
 | Feature | File | Talking Point |
 |---------|------|---------------|
 | Rocket Builder | `src/app/tools/rocket-builder/` | 12 real engines, 15 tanks, live Δv/TWR/payload, Mission Lab export |
-| Community Gallery | `src/app/community/` | Browse shared missions, filter by grade/destination, deep-link to Fly |
+| Community Gallery | `src/app/community/` | Browse shared missions, filter by grade/destination, open the exact design in the Mission Lab |
 | Mission Optimizer | `src/app/tools/mission-optimizer/` | NSGA-II Pareto fronts for Mars 2028/2031, interactive IMLEO/payload/radiation/cost |
 | Enhanced Radiation | `src/lib/life.ts` | Badhwar-O'Neill 2010 GCR (φ), King 1974 SPE, storm shelter factor, ICRP 103 organ doses |
 | Parametric Habitat | `src/lib/mission.ts` | TransHab/BA-330 heritage: volume/crew, vessel/ECLSS/shielding/outfitting/margin |
-| Opt-in Enhanced Models | `src/lib/mission.ts` | `useEnhancedModels` flag defaults false — backward compatible, 250 tests pass |
+| Opt-in Enhanced Models | `src/lib/mission.ts` | `useEnhancedModels` flag defaults false - backward compatible, 272 tests pass |
 
 ---
 

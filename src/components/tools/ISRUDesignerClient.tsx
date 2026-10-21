@@ -23,17 +23,17 @@ export function ISRUDesignerClient() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          {/* Sidebar */}
-          <div className="lg:sticky lg:top-28 h-fit">
+        <div className="space-y-10">
+          {/* Designer canvas — needs the full width; it brings its own toolbar, palette and metrics. */}
+          <div className="min-h-[640px]">
             <Suspense fallback={<ISRUPlantDesignerSkeleton />}>
               <ISRUPlantDesigner location="mars" crew={4} missionDurationDays={180} />
             </Suspense>
           </div>
 
-          {/* Main content */}
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          {/* Supporting documentation */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 lg:col-span-2">
               <h2 className="text-xl font-semibold text-white mb-4">About ISRU Plant Design</h2>
               <div className="space-y-4 text-slate-300">
                 <p>
@@ -70,6 +70,7 @@ export function ISRUDesignerClient() {
               </div>
             </div>
 
+            <div className="space-y-6">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <h2 className="text-xl font-semibold text-white mb-4">Key Design Principles</h2>
               <ul className="space-y-3 text-slate-300">
@@ -124,6 +125,7 @@ export function ISRUDesignerClient() {
                   <span>MOXIE/SOCE technology (TRL 5)</span>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import { type DesignInput } from "@/lib/design-link";
 import { designMission } from "@/lib/mission";
 import { scoreMission, type Scorecard } from "@/lib/score";
 import { type MissionDesign } from "@/lib/mission";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
 
 interface NarrativePlayerProps {
@@ -183,6 +184,8 @@ function FlagDisplay({ flags }: { flags: Set<string> }) {
 }
 
 export function NarrativePlayer({ scenario, onBack }: NarrativePlayerProps) {
+  const router = useRouter();
+  const handleBack = onBack ?? (() => router.back());
   const [state, setState] = useState<NarrativeState>(() => createInitialNarrativeState(scenario));
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -215,8 +218,8 @@ export function NarrativePlayer({ scenario, onBack }: NarrativePlayerProps) {
   return (
     <div className="pt-28 pb-16">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        {onBack && (
-          <Button variant="ghost" className="mb-6" onClick={onBack}>
+        {handleBack && (
+          <Button variant="ghost" className="mb-6" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Missions
           </Button>
         )}
@@ -272,7 +275,7 @@ export function NarrativePlayer({ scenario, onBack }: NarrativePlayerProps) {
                 <Button onClick={handleRestart} variant="outline">
                   <ChevronRight className="h-4 w-4 mr-2" /> Play Again
                 </Button>
-                <Button onClick={onBack} variant="ghost">
+                <Button onClick={handleBack} variant="ghost">
                   <ArrowLeft className="h-4 w-4 mr-2" /> Back to Missions
                 </Button>
               </div>

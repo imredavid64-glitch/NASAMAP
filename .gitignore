@@ -24,3 +24,7 @@ next-env.d.ts
 # testing
 /coverage
 .vercel
+/freebuff-sites-build/
+/.open-next/
+/.wrangler/
+/.freebuff/

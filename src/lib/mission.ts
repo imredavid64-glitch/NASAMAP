@@ -18,6 +18,11 @@ export interface MissionDesignOptions {
   vehicleId: string;
   crew: number;
   surfaceDays: number;
+  /**
+   * Optional user-designed launch vehicle (from the Rocket Builder). When present it
+   * replaces the published catalogue entry looked up by `vehicleId`.
+   */
+  customVehicle?: CustomVehicleSpec;
   /** Optional: use enhanced radiation + parametric habitat models (default: false for backward compat) */
   useEnhancedModels?: boolean;
   /** Optional: areal density of storm shelter (g/cm²) */
@@ -66,6 +71,51 @@ export interface LaunchVehicleLite {
 }
 
 const VEHICLES = launchVehicles as unknown as LaunchVehicleLite[];
+
+/**
+ * A launch vehicle designed in the Rocket Builder rather than published in
+ * `launch-vehicles.json`. Only the numbers the mission engine actually consumes
+ * are carried: payload capacity (the launch gate), engine efficiency and cost.
+ */
+export interface CustomVehicleSpec {
+  /** Display name, e.g. "Falcon-Heavy-ish". */
+  name: string;
+  /** Payload to low Earth orbit, kg. */
+  payloadLEOKg: number;
+  /** Payload to translunar injection, kg. 0 = undocumented (falls back to LEO). */
+  payloadTLIKg: number;
+  /** Vacuum specific impulse of the upper stage, seconds. */
+  ispVacuumS: number;
+  /** Number of stages. */
+  stages: number;
+  /** Estimated cost per launch, USD. */
+  costPerLaunchUsd: number;
+}
+
+/** Canonical id used for user-designed vehicles in links and slugs. */
+export const CUSTOM_VEHICLE_ID = "custom";
+
+/**
+ * Turn a {@link CustomVehicleSpec} into the same shape the published catalogue uses,
+ * so every downstream consumer (launch gate, cost rubric, scorecard) works unchanged.
+ * Cost is always tagged `estimate` because it is modelled, not quoted.
+ */
+export function materializeCustomVehicle(spec: CustomVehicleSpec): LaunchVehicleLite {
+  return {
+    id: CUSTOM_VEHICLE_ID,
+    name: spec.name || "Custom Rocket",
+    operator: "You (Rocket Builder)",
+    payloadLEOKg: Math.max(0, spec.payloadLEOKg),
+    payloadTLIKg: Math.max(0, spec.payloadTLIKg),
+    payloadGTOKg: 0,
+    ispVacuumS: Math.max(0, spec.ispVacuumS),
+    stages: Math.max(1, Math.round(spec.stages)),
+    description: `User-designed launch vehicle "${spec.name || "Custom Rocket"}" built in the Rocket Builder.`,
+    costPerLaunchUsd: Math.max(0, spec.costPerLaunchUsd),
+    costConfidence: "estimate",
+    costNote: "Modelled from the Rocket Builder's component costs; not a published price.",
+  };
+}
 
 /** Documented Apollo-class translunar coast (launch to lunar orbit insertion). NASA. */
 export const MOON_TRANSFER_DAYS = 3.17;
@@ -178,7 +228,8 @@ export interface MissionDesign {
   };
 }
 
-function findVehicle(vehicleId: string): LaunchVehicleLite {
+function findVehicle(vehicleId: string, customVehicle?: CustomVehicleSpec): LaunchVehicleLite {
+  if (customVehicle) return materializeCustomVehicle(customVehicle);
   const v = VEHICLES.find((x) => x.id === vehicleId);
   if (!v) throw new Error(`Unknown launch vehicle: ${vehicleId}`);
   return v;
@@ -193,7 +244,7 @@ const TRANSIT_MARS: RadiationEnv = "transit-mars";
 const INTERSTELLAR_ENV: RadiationEnv = "transit-mars";
 
 export function designMission(opts: MissionDesignOptions): MissionDesign {
-  const vehicle = findVehicle(opts.vehicleId);
+  const vehicle = findVehicle(opts.vehicleId, opts.customVehicle);
   const crew = Math.max(1, Math.min(6, opts.crew));
   const surfaceDays = Math.max(0, opts.surfaceDays);
   const notes: string[] = [];
@@ -351,6 +402,12 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
         : null
       : vehicle.payloadLEOKg;
 
+  // Published vehicles carry a documented payload; Rocket Builder vehicles carry a
+  // modelled one. Never label an estimate as documentation.
+  const vehicleLabel = opts.customVehicle
+    ? `${vehicle.name}'s modelled`
+    : `${vehicle.name}'s documented`;
+
   let launchGate: MissionDesign["launchGate"];
   if (opts.destination === "exoplanet") {
     launchGate = "unknown";
@@ -361,12 +418,12 @@ export function designMission(opts: MissionDesignOptions): MissionDesign {
   } else if (payloadCapacityKg >= finalRequiredMassKg) {
     launchGate = "pass";
     notes.push(
-      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t fits within ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload.`,
+      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t fits within ${vehicleLabel} ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload.`,
     );
   } else {
     launchGate = "fail";
     notes.push(
-      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t exceeds ${vehicle.name}'s documented ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload — stack won't leave the pad.`,
+      `Mass budget ${(finalRequiredMassKg / 1000).toFixed(1)} t exceeds ${vehicleLabel} ${(payloadCapacityKg / 1000).toFixed(0)} t ${opts.destination === "moon" ? "TLI" : "LEO"} payload — stack won't leave the pad.`,
     );
   }
 

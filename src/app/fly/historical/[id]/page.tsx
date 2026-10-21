@@ -56,10 +56,8 @@ function HistoricalMissionContent({ mission }: { mission: HistoricalMission | un
   );
 }
 
-// During static generation, params is already resolved, so we can use it synchronously
-export default function HistoricalMissionPage({ params }: HistoricalMissionPageProps) {
-  // Type assertion: during static generation, params is already resolved
-  const { id } = params as unknown as { id: string };
+export default async function HistoricalMissionPage({ params }: HistoricalMissionPageProps) {
+  const { id } = await params;
   const mission = getHistoricalMission(id);
   
   return (

@@ -7,7 +7,7 @@
  * ECLSS, Apollo-class Δv). Pure and unit-tested in tests/score.test.ts.
  */
 
-import { type MissionDesign } from "@/lib/mission";
+import { type MissionDesign, CUSTOM_VEHICLE_ID } from "@/lib/mission";
 import { opsBudget } from "@/lib/life";
 import { estimateMissionCost, formatUsd } from "@/lib/cost";
 
@@ -112,7 +112,7 @@ const OBJECTIVES: Objective[] = [
       return {
         status: ops.savedPct >= 0.5 ? "pass" : ops.savedPct >= 0.35 ? "warn" : "fail",
         actual: `${(ops.savedPct * 100).toFixed(0)}% recycled`,
-        target: "â‰Ą 50% of consumables",
+        target: "≥ 50% of consumables",
       };
     },
   },
@@ -154,7 +154,7 @@ const OBJECTIVES: Objective[] = [
       return {
         status: d.surfaceDays >= min ? "pass" : d.surfaceDays > 0 ? "warn" : "fail",
         actual: `${d.surfaceDays.toFixed(0)} days`,
-        target: `â‰Ą ${min} days`,
+        target: `≥ ${min} days`,
       };
     },
   },
@@ -243,14 +243,22 @@ const VERDICTS_BEGINNER: Record<Scorecard["grade"], string> = {
 
 export function scoreMission(design: MissionDesign, opts: { mode?: PlayMode } = {}): Scorecard {
   const mode = opts.mode ?? "expert";
+  // A Rocket Builder vehicle carries a modelled payload, not a published one.
+  // Never call an estimate documented.
+  const isCustomVehicle = design.vehicle.id === CUSTOM_VEHICLE_ID;
   const objectives: ObjectiveResult[] = OBJECTIVES.map((o) => {
     const { status, actual, target } = o.judge(design);
     const earned = status === "pass" ? o.weight : status === "warn" ? o.weight / 2 : 0;
+    const isLiftStack = o.id === "lift-stack";
     return {
       id: o.id,
       label: o.label,
-      detail: o.detail,
-      reference: o.reference,
+      detail: isLiftStack && isCustomVehicle
+        ? "The chosen vehicle's modelled payload must cover the whole mass budget."
+        : o.detail,
+      reference: isLiftStack && isCustomVehicle
+        ? "Rocket Builder component model"
+        : o.reference,
       status,
       weight: o.weight,
       earned,
@@ -271,7 +279,11 @@ export function scoreMission(design: MissionDesign, opts: { mode?: PlayMode } = 
   let grade = gradeFor(score, mode);
   if (lift === "fail") {
     grade = capGrade(grade, "D");
-    caps.push("the stack exceeds the vehicle's documented payload");
+    caps.push(
+      isCustomVehicle
+        ? "the stack exceeds the vehicle's modelled payload"
+        : "the stack exceeds the vehicle's documented payload",
+    );
   } else if (lift === "warn") {
     grade = capGrade(grade, "B");
     caps.push("translunar capability is undocumented for this vehicle");

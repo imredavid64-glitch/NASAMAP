@@ -12,6 +12,7 @@ import { RocketTemplates } from "./RocketTemplates";
 import { ExportActions } from "./ExportActions";
 import { validateRocket, calculateRocketPerformance, type RocketDesign, ENGINES, TANKS } from "@/lib/rocket-builder";
 import { encodeDesignQuery, DEFAULT_DESIGN } from "@/lib/design-link";
+import { CUSTOM_VEHICLE_ID, type CustomVehicleSpec } from "@/lib/mission";
 import { useToast, successToast } from "@/components/ui/toast";
 
 const TEMPLATES: RocketDesign[] = [
@@ -250,14 +251,33 @@ export function RocketBuilder() {
     toast({ type: "success", title: "Design exported" });
   };
 
+  /**
+   * Package this rocket as a Mission Lab vehicle. The Mission Lab's launch gate
+   * only ever looks at payload capacity, so the link carries the numbers the
+   * engine actually consumes: LEO/TLI payload, upper-stage Isp, stage count and cost.
+   */
+  const buildCustomVehicle = (): CustomVehicleSpec | null => {
+    if (!performance) return null;
+    const payloadLEOKg = performance.payloadLEOKg ?? 0;
+    if (!payloadLEOKg || payloadLEOKg <= 0) return null;
+    const upper = performance.stages[performance.stages.length - 1];
+    return {
+      name: design.name || "Custom Rocket",
+      payloadLEOKg,
+      payloadTLIKg: performance.payloadTLIKg ?? 0,
+      ispVacuumS: upper?.ispVacuumS ?? 311,
+      stages: performance.stages.length,
+      costPerLaunchUsd: performance.totalCostUsd,
+    };
+  };
+
   const handleCopyMissionLink = () => {
-    // Use the first stage's performance as a proxy for a "custom vehicle" in Mission Lab
-    if (!performance) return;
-    const payloadLEO = performance.payloadLEOKg ?? 0;
-    const vehicleId = `custom-${design.id}`;
+    const customVehicle = buildCustomVehicle();
+    if (!customVehicle) return;
     const query = encodeDesignQuery({
       ...DEFAULT_DESIGN,
-      vehicleId,
+      vehicleId: CUSTOM_VEHICLE_ID,
+      customVehicle,
     });
     const url = `${window.location.origin}/mission?${query}`;
     navigator.clipboard.writeText(url);
@@ -267,10 +287,12 @@ export function RocketBuilder() {
   };
 
   const handleUseInMissionLab = () => {
-    if (!performance) return;
+    const customVehicle = buildCustomVehicle();
+    if (!customVehicle) return;
     const query = encodeDesignQuery({
       ...DEFAULT_DESIGN,
-      vehicleId: `custom-${design.id}`,
+      vehicleId: CUSTOM_VEHICLE_ID,
+      customVehicle,
     });
     window.location.href = `/mission?${query}`;
   };

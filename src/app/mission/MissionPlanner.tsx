@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Rocket, Radio, ShieldAlert, Package, AlertTriangle, CheckCircle2, MinusCircle, Orbit, Link2, Check, RotateCcw, Medal, Users, Send, Download } from "lucide-react";
-import { designMission, MARS_SYNODIC_DAYS } from "@/lib/mission";
-import { DEFAULT_DESIGN, encodeDesignQuery, isCustomDesign, type DesignInput } from "@/lib/design-link";
+import { designMission, MARS_SYNODIC_DAYS, CUSTOM_VEHICLE_ID, type CustomVehicleSpec } from "@/lib/mission";
+import { DEFAULT_DESIGN, encodeDesignQuery, encodeDesignSlug, isCustomDesign, type DesignInput } from "@/lib/design-link";
 import { scoreMission, RADIATION_LIMIT_MSV, type PlayMode } from "@/lib/score";
 import { isBetter, readBest, writeBest, type BestRecord } from "@/lib/best-score";
 import { clampDesignToScenario, applyScenarioDefaults, type Scenario } from "@/lib/scenarios";
@@ -29,7 +29,7 @@ import { useToast, successToast } from "@/components/ui/toast";
 import { ShowYourWorkPanel } from "@/components/mission/show-your-work";
 import { CrewHealthDashboard } from "@/components/mission/crew-health";
 import { EarthImpact } from "@/components/mission/earth-impact";
-import { useSubmitMission, useAuthor, useAutoPresence, useActiveCollaborators, useUserColor } from "@/lib/convex-community";
+import { useSubmitMission, useAuthor, useAutoPresence, useActiveCollaborators, useUserColor } from "@/lib/community";
 import { AdvisorChat } from "./AdvisorChat";
 import { HistoricalValidationTab } from "@/components/mission/historical-validation";
 
@@ -86,6 +86,7 @@ export function MissionPlanner({
   const [vehicleId, setVehicleId] = useState<string>(seed.vehicleId);
   const [crew, setCrew] = useState(seed.crew);
   const [surfaceDays, setSurfaceDays] = useState(seed.surfaceDays);
+  const [customVehicle, setCustomVehicle] = useState<CustomVehicleSpec | undefined>(seed.customVehicle);
   const [mode, setMode] = useState<PlayMode | null>(null);
   const { toast } = useToast();
 
@@ -101,9 +102,23 @@ export function MissionPlanner({
     setTimeout(() => window.localStorage.setItem("nasamap.mode", next), 0);
   };
 
-  const vehicleOptions = scenario
-    ? VEHICLES.filter((v) => scenario.constraints.allowedVehicleIds.includes(v.id))
-    : VEHICLES;
+  // The Rocket Builder hands over a user-designed vehicle; keep it in the picker so
+  // the planner never silently swaps it back for a published launch vehicle.
+  const vehicleOptions = useMemo(() => {
+    const base = scenario
+      ? VEHICLES.filter((v) => scenario.constraints.allowedVehicleIds.includes(v.id))
+      : VEHICLES;
+    if (!customVehicle) return base;
+    return [
+      ...base,
+      {
+        id: CUSTOM_VEHICLE_ID,
+        name: customVehicle.name,
+        operator: "You (Rocket Builder)",
+        payloadLEOKg: customVehicle.payloadLEOKg,
+      },
+    ];
+  }, [scenario, customVehicle]);
 
   const crewMin = scenario ? scenario.constraints.crew.min : 1;
   const crewMax = scenario ? scenario.constraints.crew.max : 6;
@@ -111,8 +126,8 @@ export function MissionPlanner({
   const surfMax = scenario ? scenario.constraints.surfaceDays.max : 365;
 
   const design = useMemo(
-    () => designMission({ destination, vehicleId, crew, surfaceDays }),
-    [destination, vehicleId, crew, surfaceDays],
+    () => designMission({ destination, vehicleId, crew, surfaceDays, customVehicle }),
+    [destination, vehicleId, crew, surfaceDays, customVehicle],
   );
 
   const scorecard = useMemo(() => scoreMission(design, { mode: respMode }), [design, respMode]);
@@ -120,7 +135,7 @@ export function MissionPlanner({
   const [newBest, setNewBest] = useState(false);
 
   // Collaborative presence
-  const missionId = encodeDesignQuery({ destination, vehicleId, crew, surfaceDays });
+  const missionId = encodeDesignSlug({ destination, vehicleId, crew, surfaceDays, customVehicle });
   useAutoPresence(missionId, { section: "mission-planner" });
   const collaborators = useActiveCollaborators(missionId);
   const userColor = useUserColor();
@@ -134,13 +149,16 @@ export function MissionPlanner({
     if (submittingCommunity) return;
     setSubmittingCommunity(true);
     try {
-      const missionName = destination === "mars" ? "Mars Surface Mission" : "Artemis Lunar Mission";
+      // The community gallery only supports crewed Moon/Mars missions; the
+      // planner never offers an exoplanet destination, but keep the write typed.
+      const communityDestination = destination === "mars" ? "mars" : "moon";
+      const missionName = communityDestination === "mars" ? "Mars Surface Mission" : "Artemis Lunar Mission";
       await submitMission({
         design,
         scorecard,
-        missionId: encodeDesignQuery({ destination, vehicleId, crew, surfaceDays }),
+        missionId: encodeDesignSlug({ destination, vehicleId, crew, surfaceDays, customVehicle }),
         missionName,
-        destination,
+        destination: communityDestination,
         vehicleName: design.vehicle.name,
         crew,
         surfaceDays,
@@ -149,7 +167,7 @@ export function MissionPlanner({
         authorId,
         authorName,
       });
-      const missionLink = `/community/${encodeDesignQuery({ destination, vehicleId, crew, surfaceDays })}`;
+      const missionLink = `/community/${encodeDesignSlug({ destination, vehicleId, crew, surfaceDays, customVehicle })}`;
       toast({
         type: "success",
         title: "Mission shared to community!",
@@ -184,12 +202,13 @@ export function MissionPlanner({
   }, [destination, scorecard]);
 
   useEffect(() => {
-    const next: DesignInput = { destination, vehicleId, crew, surfaceDays };
+    const next: DesignInput = { destination, vehicleId, crew, surfaceDays, customVehicle };
     const query = isCustomDesign(next) ? `?${encodeDesignQuery(next)}` : "";
     window.history.replaceState(null, "", `${basePath ?? "/mission"}${query}`);
-  }, [destination, vehicleId, crew, surfaceDays, basePath]);
+  }, [destination, vehicleId, crew, surfaceDays, customVehicle, basePath]);
 
   const resetDesign = () => {
+    setCustomVehicle(undefined);
     if (scenario) {
       const d = applyScenarioDefaults(scenario);
       setDestination(d.destination);
@@ -398,7 +417,12 @@ export function MissionPlanner({
                 </label>
                 <select
                   value={vehicleId}
-                  onChange={(e) => setVehicleId(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setVehicleId(next);
+                    // Picking a published vehicle retires the Rocket Builder design.
+                    if (next !== CUSTOM_VEHICLE_ID) setCustomVehicle(undefined);
+                  }}
                   className="w-full rounded-xl border border-white/10 bg-space-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-space-cyan/60"
                 >
                   {vehicleOptions.map((v) => (
@@ -631,7 +655,10 @@ export function MissionPlanner({
               }}
               onApplyDesignChange={(updates) => {
                 if (updates.destination) setDestination(updates.destination);
-                if (updates.vehicleId) setVehicleId(updates.vehicleId);
+                if (updates.vehicleId) {
+                  setVehicleId(updates.vehicleId);
+                  if (updates.vehicleId !== CUSTOM_VEHICLE_ID) setCustomVehicle(undefined);
+                }
                 if (updates.crew) setCrew(updates.crew);
                 if (updates.surfaceDays) setSurfaceDays(updates.surfaceDays);
               }}

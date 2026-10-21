@@ -82,7 +82,7 @@
 
 ### 🏁 **Closing (2:05–2:15)**
 
-**Visual**: Split screen — code on left (249 tests, pure engine), running app on right
+**Visual**: Split screen - code on left (272 tests, pure engine), running app on right
 
 **Voiceover**:
 > "249 unit tests pin every number to a published reference. No database, no secrets, no network required to demo. Deployed on Vercel, CI gates every push. NASAMAP — the mission design platform that doesn't lie to you."
@@ -122,7 +122,7 @@ Tests: 249 passing | Build: passing | Honesty: guaranteed
 - [ ] Verify all 4 acts load without errors
 - [ ] Test report card SVG download opens correctly
 - [ ] Test KML export downloads (don't need to open Google Earth)
-- [ ] Confirm Convex community page loads (if deployed)
+- [ ] Confirm the community gallery page loads (localStorage, no server)
 - [ ] Record in one take or segment by act, edit together
 - [ ] Add captions for accessibility
 - [ ] Upload to YouTube (unlisted) + link in SUBMISSION.md
@@ -155,5 +155,5 @@ Tests: 249 passing | Build: passing | Honesty: guaranteed
 2. **"Offline-first"** — No DB, no API keys, snapshots committed, works on airplane mode
 3. **"Shareable by design"** — URL encodes entire mission state; report card SVG carries permalink
 4. **"Challenge-aligned"** — 43% of 2026 challenges served, each with deep link to evidence
-5. **"Tested"** — 249 tests, CI gates: lint → typecheck → validate → test → build
+5. **"Tested"** - 272 tests, CI gates: lint → typecheck → validate → test → build
 6. **"Extensible"** — Pure engine (`src/lib/*`) decoupled from UI; new scenarios = JSON only

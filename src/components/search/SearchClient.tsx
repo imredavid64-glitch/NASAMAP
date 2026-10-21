@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Search, X, Loader2, BookOpen, User, Rocket, Star, Sprout, Globe } from "lucide-react";
 import { search, getAll, SearchResult } from "@/lib/search";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +132,8 @@ export function SearchClient() {
         {results.length > 0 && (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {results.map((r) => (
-              <Card key={r.id} className="group">
+              <Link key={r.id} href={r.url} className="block rounded-2xl focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950">
+              <Card className="group h-full transition hover:border-space-cyan/40">
                 <CardBody>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -153,6 +155,7 @@ export function SearchClient() {
                   </div>
                 </CardBody>
               </Card>
+              </Link>
             ))}
           </div>
         )}
@@ -162,7 +165,8 @@ export function SearchClient() {
             <p className="text-center text-slate-500 mb-6">Popular starting points</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {getAll().slice(0, 9).map((r) => (
-                <Card key={r.id} className="group">
+                <Link key={r.id} href={r.url} className="block rounded-2xl focus-visible:ring-2 focus-visible:ring-space-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-space-950">
+                <Card className="group h-full transition hover:border-space-cyan/40">
                   <CardBody>
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center justify-center rounded-lg bg-white/5 p-1.5 text-space-cyan">
@@ -173,6 +177,7 @@ export function SearchClient() {
                     <Badge tone="slate">{typeLabels[r.type]}</Badge>
                   </CardBody>
                 </Card>
+                </Link>
               ))}
             </div>
           </div>

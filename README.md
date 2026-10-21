@@ -36,7 +36,7 @@ published reference.
   physics-driven transfer diagram, and a live/snapshot data model that stays honest when the network is not.
 - **Technical depth** — Kepler solvers, SGP4 orbit propagation (`satellite.js`), a Hohmann patched-conic
   solver, ECLSS consumable & power budgeting, and an SVG artifact generator — all pure and unit-tested
-  (**249 tests**, `vitest`).
+  (**272 tests**, `vitest`).
 - **Usability** — responsive dark-mode UI, mobile navigation, focus states, print styles, and a
   3D view that degrades gracefully (`ssr:false` client wrappers).
 - **Reliability** — typed JSON datasets validated in CI-style scripts; every live feed falls back to a dated,
@@ -50,6 +50,7 @@ published reference.
 | --- | --- | --- |
 | `src/lib/astro.ts` | Orbits, Kepler, body geometry | CODATA 2018 / IAU 2015 / NASA Planetary Fact Sheet (`src/data/constants.json`) |
 | `src/lib/rocket.ts` | Rocket equation, Hohmann transfers, Δv | Tsiolkovsky; documented vehicle specs (`launch-vehicles.json`) |
+| `src/lib/rocket-builder.ts` | Multi-stage design: staged Δv, TWR, LEO/TLI/GTO payload, component cost | 12 engines, 15 tanks, Tsiolkovsky |
 | `src/lib/comm.ts` | Light-time, DSN-class link budgets | Speed of light (CODATA), mean Earth–Mars distance |
 | `src/lib/life.ts` | Consumables, radiation dose, **closed-loop ECLSS budget** | NASA ISS ECLSS fact sheets, MSL RAD, NASA OGS draw |
 | `src/lib/surface.ts` | **Surface ops** — Mars solar geometry, array output, battery state over a sol | Standard solar-elevation formula, Mars obliquity 25.19° |
@@ -62,7 +63,8 @@ published reference.
 | `src/lib/orbit.ts` | SGP4 satellite propagation, pass prediction | `satellite.js` |
 | `src/lib/trajectory.ts` | Apollo 11 interpolation, patched-conic Moon transfer, Sun-centred Earth→Mars Kepler solve | Committed historical timeline |
 | `src/lib/export.ts` | CSV serialisation of trajectories (Earth-Moon scene units / Mars au) and KML of the ISS ground track | RFC-4180 quoting, OGC KML 2.2 |
-| `src/lib/design-link.ts` | Validated encode/decode of a mission design into a permalink | Enum + range validation |
+| `src/lib/design-link.ts` | Validated encode/decode of a mission design into a permalink and a path-safe slug | Enum + range validation |
+| `src/lib/community.ts` | Shared missions, upvotes and comments — localStorage, no server | Pure store-agnostic hooks |
 | `src/lib/passport.ts` · `src/lib/patch.ts` | Deterministic SVG artifacts | Everything drawn from the shared engine |
 | `src/lib/commons.ts` · `src/lib/search.ts` | Persona advice + MiniSearch index | Curated datasets |
 
@@ -89,7 +91,7 @@ No `.env`, database, or API keys required — live feeds are public and every on
 ### Quality gates
 
 ```bash
-npm test             # vitest — 249 tests
+npm test             # vitest — 272 tests
 npm run lint         # eslint
 npm run typecheck    # tsc --noEmit
 npm run validate:data
@@ -99,12 +101,21 @@ npm run build
 Runtime smoke test (after `npm run build && npm start`): `/`, `/mission`, `/fly`, `/fly?mode=hohmann`,
 `/live`, `/library`, `/library/apollo-11-replay`, `/search`, `/commons`, `/challenges`, `/play`, and every `/api/live/*` route.
 
+> `build` and `dev` run with `--webpack` on purpose: `next-pwa` (the offline service worker) and the
+> OpenNext/Cloudflare pipeline both require the webpack builder. Next 16 defaults to Turbopack, which
+> rejects a `webpack` config outright.
+
 ### Deploy & CI
 
 Pushing to `main` runs the full gate pipeline in GitHub Actions (`.github/workflows/ci.yml`): lint → typecheck →
-dataset validation → 249 tests → production build. Live now at **https://nasamap.vercel.app** (standard Next.js
+dataset validation → 272 tests → production build. Live now at **https://nasamap.vercel.app** (standard Next.js
 project, zero server env). Optional: set `NEXT_PUBLIC_SITE_URL` to the production URL so `sitemap.xml` / `robots.txt`
 point at the real host.
+
+A **Cloudflare Workers** target is also configured (`freebuff.open-next.config.ts` + `freebuff.wrangler.jsonc`):
+`npx opennextjs-cloudflare build --openNextConfigPath freebuff.open-next.config.ts --config freebuff.wrangler.jsonc`.
+OpenNext shells out to `npm run build`, so the webpack builder — and therefore the regenerated service
+worker — is used there too.
 
 The judges' brief lives in **[`SUBMISSION.md`](SUBMISSION.md)** — narrative, a 5-minute tour, an evidence map from
 route to source file, and the engineering-honesty notes.
@@ -113,7 +124,7 @@ route to source file, and the engineering-honesty notes.
 
 ## Architecture
 
-- **Next.js 15** App Router · React 18 · TypeScript
+- **Next.js 16** App Router · React 19 · TypeScript
 - **three.js** + `@react-three/fiber` + `drei` for 3D (always behind an `ssr:false` client wrapper)
 - **Tailwind CSS** dark space theme
 - **MiniSearch** for the client-side search index
@@ -129,6 +140,14 @@ src/
 tests/        # vitest suites, one per engine module
 scripts/      # validate-data, check-challenges
 ```
+
+### Streamed boundaries without the animation frame
+
+React's Fizz runtime finishes a streamed `<Suspense>` boundary from a `requestAnimationFrame` callback.
+A hidden, occluded or headless tab pauses `rAF`, which would leave every streamed page stuck on its
+loading fallback. The root layout seeds React's scheduler (`$RT`) before the runtime loads, so the
+completion is scheduled with `setTimeout` instead and the first paint never depends on an animation
+frame.
 
 ---
 
@@ -146,9 +165,9 @@ The result is a live `/challenges` page — **43 of 86 challenges (50%)** are se
 each badge deep-linking to the feature that does the work. The lanes NASAMAP is purpose-built for include:
 
 - **Space Mission Design Game** — a real game layer at `/play`: six mission briefs with constraints, objectives, 0–3 star grading and local progress, built on the **S–D mission rating**, Δv, mass budget and GO / NO-GO gate (`/mission`)
-- **Rocket Builder & Launch Vehicle Design** — design custom rockets from 12 real engines and 15 tanks. Live Δv, TWR, payload (LEO/TLI/GTO), cost. Export to Mission Lab (`/tools/rocket-builder`)
+- **Rocket Builder & Launch Vehicle Design** — design custom rockets from 12 real engines and 15 tanks. Live Δv, TWR, payload (LEO/TLI/GTO), cost. **Export to Mission Lab** hands the rocket over as a real custom vehicle: its payload, Isp, stage count and cost travel in the link and the launch gate is scored against them (`/tools/rocket-builder`)
 - **Mission Optimizer & Pareto Fronts** — pre-computed Pareto-optimal Mars architectures (2028/2031). Multi-objective: minimize IMLEO, maximize payload, minimize radiation. NSGA-II + gradient refinement (`/tools/mission-optimizer`)
-- **Collaborative Mission Design** — browse shared missions with filters, view full scorecards, deep-link to Fly, upvote & comment (`/community`)
+- **Collaborative Mission Design** — browse shared missions with filters, view full scorecards, open the exact design in the Mission Lab, upvote & comment (`/community`)
 - **Interplanetary Survival Guide: Martian Map** — radiation, consumables, ECLSS, transfer geometry (`/mission#ops`)
 - **SpaceTrash Hack: Revolutionizing Recycling on Mars** — closed-loop recycling and array sizing (`/mission#ops`)
 - **Your Home in Space: The Habitat Layout Creator** — habitat mass budgets and surface stay (`/mission`)

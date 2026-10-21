@@ -61,8 +61,8 @@ export function ExportActions({ design, performance, canUseInMissionLab, onExpor
           <p className="text-xs text-slate-400">Mission Lab Integration Preview</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Vehicle ID</span>
-              <code className="font-mono text-white bg-space-950 px-2 py-0.5 rounded">{`custom-${design.id}`}</code>
+              <span className="text-slate-400">Vehicle</span>
+              <code className="font-mono text-white bg-space-950 px-2 py-0.5 rounded">{design.name || "Custom Rocket"}</code>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">LEO Payload</span>

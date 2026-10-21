@@ -77,27 +77,14 @@ function ScenarioCard({ scenario }: { scenario: NarrativeScenario }) {
           </div>
 
           <div className="mt-auto pt-4 border-t border-white/10">
-            <Button className="w-full justify-center gap-2">
+            {/* The whole card is the link, so this is a label rather than a nested button. */}
+            <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-space-cyan px-4 py-2.5 text-sm font-semibold text-space-950 transition group-hover:bg-space-cyan/90">
               <Star className="h-4 w-4" /> Begin Narrative
-            </Button>
+            </span>
           </div>
         </CardBody>
       </Card>
     </Link>
-  );
-}
-
-function Button({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <button
-      className={`
-        inline-flex items-center justify-center rounded-xl bg-space-cyan px-4 py-2.5 text-sm font-semibold text-space-950
-        transition hover:bg-space-cyan/90 focus-visible:ring-2 focus-visible:ring-space-cyan
-        focus-visible:ring-offset-2 focus-visible:ring-offset-space-950 ${className}
-      `}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -170,7 +157,7 @@ export default async function NarrativePage({ params }: NarrativePageProps) {
   return (
     <div className="pt-28 pb-16">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <NarrativePlayer scenario={scenario} onBack={() => window.history.back()} />
+        <NarrativePlayer scenario={scenario} />
       </div>
     </div>
   );

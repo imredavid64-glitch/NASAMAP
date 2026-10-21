@@ -22,9 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: article ? `${article.title} — Library` : "Article not found" };
 }
 
-// During static generation, params is already resolved
-export default function ArticlePage({ params }: Props) {
-  const { slug } = params as unknown as { slug: string };
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
   const article = articles.find((a) => a.slug === slug);
   if (!article) notFound();
 

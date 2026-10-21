@@ -184,11 +184,18 @@ export function applyScenarioDefaults(scenario: Scenario): DesignInput {
 /** Keep a design inside a scenario's hard constraints (used as the player edits). */
 export function clampDesignToScenario(scenario: Scenario, design: DesignInput): DesignInput {
   const c = scenario.constraints;
+  const vehicleId = c.allowedVehicleIds.includes(design.vehicleId)
+    ? design.vehicleId
+    : c.allowedVehicleIds[0];
+  // A Rocket Builder vehicle is never in a scenario's allow-list, so it is
+  // replaced here; drop the spec so it cannot shadow the replacement.
+  const customVehicle = vehicleId === design.vehicleId ? design.customVehicle : undefined;
   return {
     destination: scenario.destination,
-    vehicleId: c.allowedVehicleIds.includes(design.vehicleId) ? design.vehicleId : c.allowedVehicleIds[0],
+    vehicleId,
     crew: clamp(design.crew, c.crew.min, c.crew.max),
     surfaceDays: clamp(design.surfaceDays, c.surfaceDays.min, c.surfaceDays.max),
+    ...(customVehicle ? { customVehicle } : {}),
   };
 }
 

@@ -38,10 +38,10 @@ NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven l
 ### Act IV — Share (`/library`, `/commons`, `/challenges`, `/tools/*`)
 - **Library**: Curated articles (transfer windows, radiation, ISRU, cost, ECLSS, scoring)
 - **Commons**: Persona advice cards (Farmer on Mars, Habitat Architect, etc.), MiniSearch full-text index
-- **Challenge Aligner**: **42 of 86 official 2026 challenges** mapped to shipped capabilities with deep-links
-- **Rocket Builder** (`/tools/rocket-builder`): 12 real engines, 15 tanks, live Δv/TWR/payload/cost, export to Mission Lab
+- **Challenge Aligner**: **43 of 86 official 2026 challenges** mapped to shipped capabilities with deep-links
+- **Rocket Builder** (`/tools/rocket-builder`): 12 real engines, 15 tanks, live Δv/TWR/payload/cost, hand the rocket to the Mission Lab as a real custom vehicle
 - **Mission Optimizer** (`/tools/mission-optimizer`): Pre-computed Pareto fronts for Mars 2028/2031, NSGA-II + gradient refinement
-- **Community** (`/community`): Browse shared missions, filter by grade/destination, deep-link to Fly, upvote/comment
+- **Community** (`/community`): Browse shared missions, filter by grade/destination, open the exact design in the Mission Lab, upvote/comment
 
 ## Technical Depth (Judging Criteria Evidence)
 
@@ -49,7 +49,7 @@ NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven l
 |-----------|------------------|
 | **Impact** | One engine answers real mission planner questions: can it lift, will crew survive, can we keep them alive, can we talk? Persona cards turn this into career/outreach advice. |
 | **Creativity** | Mission Passport + Patch generated live from design, physics-driven transfer diagram, live/snapshot data model that stays honest offline. |
-| **Technical Depth** | Kepler solvers, SGP4 orbit propagation, Hohmann patched-conic, ECLSS consumable/power budgeting, SVG artifact generator — all pure TypeScript, **250 unit tests** (vitest). |
+| **Technical Depth** | Kepler solvers, SGP4 orbit propagation, Hohmann patched-conic, ECLSS consumable/power budgeting, SVG artifact generator — all pure TypeScript, **272 unit tests** (vitest). |
 | **Usability** | Responsive dark mode, mobile nav, focus states, print styles, 3D degrades gracefully (`ssr:false` client wrappers). |
 | **Reliability** | Typed JSON datasets validated in CI; every live feed falls back to committed snapshot; labels itself `live` vs `snapshot`. No database, no secrets, no network required to demo. |
 
@@ -73,11 +73,11 @@ NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven l
 ## Enhanced Models (Opt-in, Backward Compatible)
 - **Radiation**: Badhwar-O'Neill 2010 GCR (solar modulation φ) + King 1974 SPE + storm shelter factor + ICRP 103 organ doses
 - **Habitat Mass**: Parametric (TransHab/BA-330 heritage) — volume/crew, vessel/ECLSS/shielding/outfitting/margin
-- **Flag**: `useEnhancedModels` defaults `false` — all 250 tests pass unchanged
+- **Flag**: `useEnhancedModels` defaults `false` — all 272 tests pass unchanged
 
 ## Challenge Alignment
 - **Official 2026 catalogue extracted via GraphQL** (not typed in)
-- **42/86 challenges (49%)** served by shipped capabilities
+- **43/86 challenges (50%)** served by shipped capabilities
 - Each badge deep-links to the feature that does the work
 - Lanes covered: Space Mission Design Game, Rocket Builder, Mission Optimizer, Collaborative Mission Design, Interplanetary Survival Guide, SpaceTrash Hack, Habitat Layout Creator, NEO Orrery, ISS 25th Anniversary
 
@@ -85,21 +85,22 @@ NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven l
 - Every number tagged **documented** / **derived** / **estimate**
 - Live data labeled **live** or **snapshot** with date
 - Estimated vehicle capabilities tagged with `costConfidence` + provenance
+- Rocket Builder vehicles are labeled **modelled**, never documented
 - Enhanced models opt-in only — legacy fixed values preserved for all tests
-- 250 automated tests + `validate:data` schema-checks every JSON dataset in CI
+- 272 automated tests + `validate:data` schema-checks every JSON dataset in CI
 - Fonts self-hosted; zero external network calls at runtime except documented live endpoints
 
 ## Architecture
-- **Next.js 15** App Router · React 18 · TypeScript
+- **Next.js 16** App Router · React 19 · TypeScript
 - **three.js** + `@react-three/fiber` + `drei` for 3D (client-only wrappers)
 - **Tailwind CSS** dark space theme
 - **MiniSearch** client-side search index
 - **satellite.js** for SGP4
 - **Git-as-database** — all curated data in `src/data/*.json`, validated by `scripts/validate-data.ts`
-- **Convex** for community features (missions, comments, upvotes, presence)
+- **No database, no server** — community missions, comments and upvotes live in the browser's localStorage
 
 ## CI/CD Pipeline (`.github/workflows/ci.yml`)
-`lint → typecheck → validate:data → 250 tests → production build` on every push to main.
+`lint → typecheck → validate:data → 272 tests → production build` on every push to main.
 
 ## Key Soundbites for Script
 
@@ -139,4 +140,4 @@ npm run validate:data # all datasets valid
 
 ---
 
-**For the AI writing the script**: Use `VIDEO_SCRIPT.md` for the 30s frame-by-frame, `DEMO_SCRIPT.md` for the 2-min extended cut. Emphasize the **physics-honest engine**, **7 weighted objectives with feasibility caps**, **printable artifacts from engine data**, **42/86 challenge coverage with deep links**, and **250 tests + zero-secrets offline capability**. These are the differentiators judges look for.
+**For the AI writing the script**: Use `VIDEO_SCRIPT.md` for the 30s frame-by-frame, `DEMO_SCRIPT.md` for the 2-min extended cut. Emphasize the **physics-honest engine**, **7 weighted objectives with feasibility caps**, **printable artifacts from engine data**, **43/86 challenge coverage with deep links**, and **272 tests + zero-secrets offline capability**. These are the differentiators judges look for.

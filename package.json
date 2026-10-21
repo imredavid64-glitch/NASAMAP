@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -13,25 +13,23 @@
     "validate:data": "tsx scripts/validate-data.ts"
   },
   "dependencies": {
-    "@convex-dev/agent": "^0.7.4",
-    "@convex-dev/ai-sdk-provider": "^0.2.1",
-    "@react-three/drei": "^10.7.8",
-    "@react-three/fiber": "^9.7.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
     "@types/three": "^0.174.0",
     "clsx": "^2.1.1",
-    "convex": "^1.46.0",
     "date-fns": "^4.4.0",
     "lucide-react": "^0.479.0",
     "minisearch": "^7.2.0",
-    "next": "^15.1.0",
+    "next": "16.4.2",
     "next-pwa": "^5.6.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "satellite.js": "^5.0.0",
     "tailwind-merge": "^3.0.2",
     "three": "^0.174.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.12",
     "@types/next-pwa": "^5.6.9",
     "@types/node": "^22.13.10",
     "@types/react": "19.2.0",
@@ -45,6 +43,7 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.23.13",
     "typescript": "^5.8.2",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.1",
+    "wrangler": "4.148.0"
   }
 }

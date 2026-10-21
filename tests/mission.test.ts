@@ -1,7 +1,68 @@
 import { describe, it, expect } from "vitest";
-import { designMission, MOON_TRANSFER_DAYS, HABITATION_MODULE_KG } from "@/lib/mission";
+import { designMission, materializeCustomVehicle, MOON_TRANSFER_DAYS, HABITATION_MODULE_KG } from "@/lib/mission";
 import { hohmannTransfer } from "@/lib/rocket";
 import constants from "@/data/constants.json";
+
+describe("mission design: Rocket Builder vehicle", () => {
+  const heavy = {
+    name: "Heavy Lifter",
+    payloadLEOKg: 42_000,
+    payloadTLIKg: 12_500,
+    ispVacuumS: 452,
+    stages: 2,
+    costPerLaunchUsd: 68_000_000,
+  };
+
+  it("uses the custom vehicle instead of the catalogue entry", () => {
+    const d = designMission({
+      destination: "mars",
+      vehicleId: "custom",
+      crew: 4,
+      surfaceDays: 90,
+      customVehicle: heavy,
+    });
+    expect(d.vehicle.id).toBe("custom");
+    expect(d.vehicle.name).toBe("Heavy Lifter");
+    expect(d.vehicle.payloadLEOKg).toBe(42_000);
+  });
+
+  it("tags the modelled cost as an estimate, never as documented", () => {
+    const v = materializeCustomVehicle(heavy);
+    expect(v.costConfidence).toBe("estimate");
+    expect(v.costNote).toMatch(/not a published price/i);
+  });
+
+  it("gates the launch on the custom vehicle's payload capacity", () => {
+    const roomy = designMission({
+      destination: "mars",
+      vehicleId: "custom",
+      crew: 4,
+      surfaceDays: 90,
+      customVehicle: { ...heavy, payloadLEOKg: 200_000 },
+    });
+    const tiny = designMission({
+      destination: "mars",
+      vehicleId: "custom",
+      crew: 4,
+      surfaceDays: 90,
+      customVehicle: { ...heavy, payloadLEOKg: 10 },
+    });
+    expect(roomy.launchGate).toBe("pass");
+    expect(tiny.launchGate).toBe("fail");
+  });
+
+  it("never labels a modelled payload as documented", () => {
+    const d = designMission({
+      destination: "mars",
+      vehicleId: "custom",
+      crew: 4,
+      surfaceDays: 90,
+      customVehicle: heavy,
+    });
+    expect(d.notes.some((n) => n.includes("documented"))).toBe(false);
+    expect(d.notes.some((n) => n.includes("modelled"))).toBe(true);
+  });
+});
 
 describe("mission design: Earth → Moon", () => {
   const d = designMission({ destination: "moon", vehicleId: "saturn-v", crew: 3, surfaceDays: 30 });
