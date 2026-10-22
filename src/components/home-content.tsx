@@ -67,7 +67,7 @@ export function HomeContent() {
           {/* Hero stats band */}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-              {[250, 38, 7, 2].map((v, i) => (
+              {[272, 38, 7, 2].map((v, i) => (
                 <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-space-cyan/5 backdrop-blur">
                   <div className="text-space-cyan font-mono text-2xl font-bold">{v}+</div>
                   <div className="mt-1 text-xs text-slate-500">

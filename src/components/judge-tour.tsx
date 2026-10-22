@@ -117,7 +117,7 @@ const JUDGE_STEPS = [
     title: "Engineering Evidence",
     icon: Code,
     href: "#evidence",
-    description: "250 tests, honesty tags, Git-as-database, CI pipeline, zero secrets",
+    description: "272 tests, honesty tags, Git-as-database, CI pipeline, zero secrets",
     time: "1 min",
     isAnchor: true,
   },
@@ -131,9 +131,9 @@ const EVIDENCE_ITEMS = [
     icon: TestTube2,
   },
   {
-    title: "250 Automated Tests",
+    title: "272 Automated Tests",
     detail: "vitest suites cover every module: astro, rocket, comm, life, surface, mission, score, scenarios, trajectory, export, orbit, passport, patch, design-link, challenges",
-    badge: "250 passing",
+    badge: "272 passing",
     icon: CheckCircle2,
   },
   {
@@ -150,7 +150,7 @@ const EVIDENCE_ITEMS = [
   },
   {
     title: "CI/CD Pipeline",
-    detail: "GitHub Actions: lint → typecheck → validate:data → 250 tests → production build on every push to main",
+    detail: "GitHub Actions: lint → typecheck → validate:data → 272 tests → production build on every push to main",
     badge: "Automated",
     icon: Zap,
   },
@@ -179,7 +179,7 @@ const HONESTY_NOTES = [
   "Snapshots are checked into Git so the demo never fails on stage — each card shows a **live** or **snapshot** badge with date",
   "Vehicle capabilities (payload TLI, cost) tagged with `costConfidence: documented | estimate` and provenance note",
   "Enhanced radiation (Badhwar-O'Neill GCR, King SPE) and parametric habitat mass are opt-in via `useEnhancedModels` flag (defaults false)",
-  "All 250 tests pass with legacy fixed values — enhanced models are additive, not breaking",
+  "All 272 tests pass with legacy fixed values — enhanced models are additive, not breaking",
   "Fonts self-hosted; zero external network calls at runtime except documented live-data endpoints",
 ];
 
@@ -232,7 +232,7 @@ export function JudgeTourContent() {
                 Space Apps 2026
               </Badge>
               <Badge tone="emerald" className="text-xs">
-                250 Tests ✓
+                272 Tests ✓
               </Badge>
               <Button variant="ghost" size="sm" onClick={() => window.open("https://github.com/imredavid64-glitch/NASAMAP", "_blank")}>
                 <ExternalLink className="h-4 w-4" /> Source
@@ -458,7 +458,7 @@ export function JudgeTourContent() {
               ))}
               <div className="rounded-lg border border-amber/30 bg-amber/5 p-4">
                 <p className="text-sm text-amber-300">
-                  <strong>Verify yourself:</strong> Run <code className="bg-white/5 px-1 rounded font-mono">npm test</code> (250 tests),
+                  <strong>Verify yourself:</strong> Run <code className="bg-white/5 px-1 rounded font-mono">npm test</code> (272 tests),
                   <code className="bg-white/5 px-1 rounded font-mono">npm run validate:data</code> (all datasets),
                   <code className="bg-white/5 px-1 rounded font-mono">npm run build</code> (production build).
                   Zero secrets, zero external deps at runtime.

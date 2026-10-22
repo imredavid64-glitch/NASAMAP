@@ -130,7 +130,7 @@ NASAMAP turns real Moon-to-Mars mission design into a playable, physics-driven l
 ## Quick Test Commands
 ```bash
 npm run build        # passes
-npm test             # 250/250 pass
+npm test             # 272/272 pass
 npm run lint         # 0 errors
 npm run validate:data # all datasets valid
 ```
